@@ -1,0 +1,69 @@
+body { max-width:640px; margin:0 auto; font-family:sans-serif; }
+
+/* navigation bars */
+nav { font-size:x-large; }
+nav>table { table-layout:fixed; margin:0 auto; }
+nav td { text-align:center; padding:5px; }
+nav td:nth-child(3) { min-width:4em; }
+
+/* stories */
+h3 { margin:0; }
+h4 { font-size:large; margin:0; }
+article { margin-bottom:4em; }
+article img { display:block; margin:0 auto !important; max-width:100%; }
+article audio { width:100%; margin:0; }
+article>p { cursor:default; }
+
+/* rubies */
+ruby>rt { color:white; transition:color .5s ease-out 2s; }
+ruby:hover>rt { color:inherit; transition:color 0s ease-in 0s; }
+body.ruby_never ruby:hover>rt { color:white; }
+body.ruby_always ruby>rt { color:inherit; }
+
+/* asides */
+#menu label>input[name=ruby_toggle] { display:none; }
+#menu label>img { display:inline-block; height:40px; width:40px; padding:5px; }
+#menu :checked + img { border:1px solid black; padding:4px; }
+#menu p { font-size:medium; }
+
+/* responsiveness
+ * main content is up to 640px wide
+ * -  860px and up: enough margin to fit one 200px column with 10px margins
+ * - 1080px and up: enough margin to fit two 200px columns with 10px margins
+ * - 1600px and up: columns can take up to 400px with 40px margin
+ * Rikai is put in the left column, or in the right column when enough vertical
+ * space is available; otherwise, atop the content.
+ * Menu is put in the right column; otherwise, atop the content.
+ */
+@media (max-width:859px) {
+    /* main column with no side-columns */
+    #menu { width:100%; }
+    #menu label { display:inline-block; width:calc(33% - 8px); text-align:center;}
+}
+@media (min-width:860px) and (max-width:1079px) {
+    /* one side-column, rikai with responsive width if possible */
+    body { margin:0 10px; }
+    #menu { position:fixed; top:40px; right:10px; max-width:200px; }
+    @media (min-height:500px) {
+        #rikai {
+            position:fixed; right:10px; bottom:10px; max-width:calc(100% - 680px);
+            max-height:calc(250px); overflow:auto;
+        }
+    }
+}
+@media (min-width:1080px) and (max-width:1599px) {
+    /* two side-columns, rikai with responsive width */
+    #menu { position:fixed; top:40px; right:10px; max-width:200px; }
+    #rikai {
+        position:fixed; top:40px; left:10px; max-width:calc(50% - 340px);
+        max-height:calc(100% - 80px); overflow:auto;
+    }
+}
+@media (min-width:1600px) {
+    /* two side-columns, fixed width */
+    #menu { position:fixed; top:40px; right:40px; max-width:200px; }
+    #rikai {
+        position:fixed; top:40px; left:40px; max-width:400px;
+        max-height:calc(100% - 80px); overflow:auto;
+    }
+}

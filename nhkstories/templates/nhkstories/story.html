@@ -1,0 +1,16 @@
+{% extends 'nhkstories/base.html' %}
+{% load tz %}
+{% load static %}
+{% block title %}{{ story.title }}{% endblock %}
+{% block content %}
+{% if original_url %}
+<a href="{{ original_url }}">See on NHK News Web Easy</a>
+{% endif %}
+<article>
+<h3>{{ story.title_with_ruby|safe }}</h3>
+<h4><a href="{% url 'nhkstories:story' story.story_id story.title %}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</a></h4>
+{% if story.image %}<img src="{{ story.image.url }}">{% endif %}
+{% if story.voice %}<audio src="{{ story.voice.url }}" controls></audio>{% endif %}
+{{ story.content_with_ruby|safe }}
+</article>
+{% endblock %}

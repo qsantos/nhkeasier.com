@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>NHK News Web Easier - {% block title %}{% endblock %}</title>
+<link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
+<link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
+<h1><a href="{% url 'nhkstories:index' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
+<aside id="menu">
+    <label>
+        <input type="radio" name="ruby_toggle" value="always">
+        <img src="/static/nhkstories/always.svg">
+    </label>
+    <label>
+        <input type="radio" name="ruby_toggle" value="hover" checked>
+        <img src="/static/nhkstories/hover.svg">
+    </label>
+    <label>
+        <input type="radio" name="ruby_toggle" value="never">
+        <img src="/static/nhkstories/never.svg">
+    </label>
+    <p>Or use <a href="https://www.darrenlester.com/projects/furigana-toggle">Furigana Toggle</a></p>
+    <label>
+        <input type="checkbox" id="rikai_auto" checked>
+        Auto rikai
+    </label>
+    <p>Or use <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a> <br>
+    or <a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a></p>
+</aside>
+<aside id="rikai"><dl></dl></aside>
+{% block content %}
+Something went terribly wrong, I guess.
+{% endblock %}
+<script src="{% static 'nhkstories/scripts.js' %}"></script>
