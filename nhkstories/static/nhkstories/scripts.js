@@ -224,6 +224,15 @@ function set_rikai_from_point(x, y) {
 }
 
 function main() {
+    document.querySelectorAll('time').forEach(function(e) {
+        let dt = new Date(e.getAttribute('datetime') || e.innerText);
+        let options = {
+            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            timeZoneName: 'short',
+        };
+        e.title = dt.toLocaleString(undefined, options);
+    });
     document.querySelectorAll('input[name=ruby_toggle]').forEach(function(e) {
         // radio buttons trigger click event even on keyboard selection
         e.addEventListener('click', ruby_update)
