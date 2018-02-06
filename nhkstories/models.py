@@ -21,6 +21,7 @@ class Story(models.Model):
     webpage = models.FileField(upload_to=NameByStoryID('html'), null=True)
     image = models.FileField(upload_to=NameByStoryID('jpg'), null=True)
     voice = models.FileField(upload_to=NameByStoryID('mp3'), null=True)
+    video = models.FileField(upload_to=NameByStoryID('mp4'), null=True)
 
     class Meta:
         verbose_name_plural = 'stories'

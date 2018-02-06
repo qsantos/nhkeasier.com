@@ -1,7 +1,9 @@
 import re
+import os
 import json
 import datetime
 import tempfile
+import subprocess
 from urllib.request import urlopen
 
 from django.core.management.base import BaseCommand
@@ -89,6 +91,18 @@ def save_story(story):
     temp.seek(0)
     voice = File(temp)
 
+    # video
+    stream_base_url = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/'
+    if story['has_news_web_movie']:
+        filename = story['news_web_movie_uri']
+        video_url = stream_base_url + filename
+    else:
+        video_url = None
+    _, temp_name = tempfile.mkstemp()
+    subprocess.call(['rtmpdump', '-r', video_url, '-o', temp_name])
+    temp = open(temp_name, 'rb')
+    video = File(temp)
+
     Story.objects.create(
         story_id=story_id,
         published=published,
@@ -99,7 +113,10 @@ def save_story(story):
         webpage=webpage,
         image=image,
         voice=voice,
+        video=video,
     )
+    video.close()
+    os.remove(temp_name)
     voice.close()
     image.close()
     webpage.close()
