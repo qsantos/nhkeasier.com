@@ -24,4 +24,4 @@ class LatestStoriesFeed(Feed):
         )
 
     def item_link(self, item):
-        return reverse('nhkstories:story', args=[item.story_id])
+        return reverse('nhkstories:story', args=[item.id])
