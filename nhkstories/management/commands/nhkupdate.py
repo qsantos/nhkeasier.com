@@ -105,9 +105,11 @@ def save_story(info):
         _, temp_name = tempfile.mkstemp()
         res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
                              stderr=subprocess.DEVNULL)
-        if res == 0:
+        if res.returncode == 0:
             temp = open(temp_name, 'rb')
             story.video = File(temp)
+        else:
+            print('Failed')
 
     story.save()
     return created
