@@ -1,31 +1,9 @@
 {% extends 'nhkstories/base.html' %}
-{% load tz %}
-{% load static %}
 {% block title%}Latest stories{% endblock %}
 {% block content %}
-<nav><table><tr>
-    <td>{% if stories.has_previous %}<a href="./">&#x21E4;</a>{% else %}&#x21E4;{% endif %}</td>
-    <td>{% if stories.has_previous %}<a href="?page={{ stories.previous_page_number }}">&#x2190;</a>{% else %}&#x2190;{% endif %}</td>
-    <td>{{ stories.number }} / {{ stories.paginator.num_pages }}</td>
-    <td>{% if stories.has_next %}<a href="?page={{ stories.next_page_number }}">&#x2192;</a>{% else %}&#x2192;{% endif %}</td>
-    <td>{% if stories.has_next %}<a href="?page={{ stories.paginator.num_pages }}">&#x21E5;</a>{% else %}&#x21E5;{% endif %}</td>
-</tr></table></nav>
-
+{% include 'nhkstories/componentpagination.html' %}
 {% for story in stories %}
-<article>
-    <h3>{{ story.title_with_ruby|safe }}</h3>
-    <h4><a href="{% url 'nhkstories:story' story.id %}"><time datetime="{{ story.published|date:'c' }}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</time></a></h4>
-    {% if story.image %}<img src="{{ story.image.url }}">{% endif %}
-    {% if story.voice %}<audio src="{{ story.voice.url }}" controls preload="none"></audio>{% endif %}
-    {{ story.content_with_ruby|safe }}
-</article>
+{% include 'nhkstories/componentstory.html' %}
 {% endfor %}
-
-<nav><table><tr>
-    <td>{% if stories.has_previous %}<a href="./">&#x21E4;</a>{% else %}&#x21E4;{% endif %}</td>
-    <td>{% if stories.has_previous %}<a href="?page={{ stories.previous_page_number }}">&#x2190;</a>{% else %}&#x2190;{% endif %}</td>
-    <td>{{ stories.number }} / {{ stories.paginator.num_pages }}</td>
-    <td>{% if stories.has_next %}<a href="?page={{ stories.next_page_number }}">&#x2192;</a>{% else %}&#x2192;{% endif %}</td>
-    <td>{% if stories.has_next %}<a href="?page={{ stories.paginator.num_pages }}">&#x21E5;</a>{% else %}&#x21E5;{% endif %}</td>
-</tr></table></nav>
+{% include 'nhkstories/componentpagination.html' %}
 {% endblock %}
