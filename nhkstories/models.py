@@ -13,11 +13,11 @@ class NameByStoryID:
 
 class Story(models.Model):
     story_id = models.CharField(max_length=200, primary_key=True)
-    published = models.DateTimeField()
-    title_with_ruby = models.CharField(max_length=200)
-    title = models.CharField(max_length=200)
-    content_with_ruby = models.TextField()
-    content = models.TextField()
+    published = models.DateTimeField(null=True)
+    title_with_ruby = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=200, null=True)
+    content_with_ruby = models.TextField(null=True)
+    content = models.TextField(null=True)
     webpage = models.FileField(upload_to=NameByStoryID('html'), null=True)
     image = models.FileField(upload_to=NameByStoryID('jpg'), null=True)
     voice = models.FileField(upload_to=NameByStoryID('mp3'), null=True)
