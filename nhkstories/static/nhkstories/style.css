@@ -51,19 +51,38 @@ body.ruby_always ruby>rt { color:inherit; }
         }
     }
 }
+@media (max-width:859px), (max-height:499px) {
+    /* no room in right column for rikai either in width or height */
+    #rikai {
+        display:none;  /* overrided by Javascript */
+    }
+    #rikai dl {
+        position:fixed; top:10px; left:0; right:0; margin:0 auto;
+        width:420px; padding:10px;
+        max-width:calc(100% - 40px); max-height:calc(100% - 70px); overflow: auto;
+        border:1px solid lightgrey;
+        background-color: white;
+        z-index:10;
+    }
+    #mask {
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background-color:rgba(0,0,0,.5);
+        z-index:5;
+    }
+}
 @media (min-width:1080px) and (max-width:1599px) {
     /* two side-columns, rikai with responsive width */
     #menu { position:fixed; top:40px; right:10px; max-width:200px; }
     #rikai {
-        position:fixed; top:40px; left:10px; max-width:calc(50% - 340px);
-        max-height:calc(100% - 80px); overflow:auto;
+        position:fixed; top:40px; left:10px;
+        max-width:calc(50% - 340px); max-height:calc(100% - 80px); overflow:auto;
     }
 }
 @media (min-width:1600px) {
     /* two side-columns, fixed width */
     #menu { position:fixed; top:40px; right:40px; max-width:200px; }
     #rikai {
-        position:fixed; top:40px; left:40px; max-width:400px;
-        max-height:calc(100% - 80px); overflow:auto;
+        position:fixed; top:40px; left:40px;
+        max-width:400px; max-height:calc(100% - 80px); overflow:auto;
     }
 }

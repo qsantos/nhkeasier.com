@@ -245,17 +245,27 @@ function main() {
     fetch('/static/nhkstories/rikai/edict.dat', data => load_edict(edict, data));
     fetch('/static/nhkstories/rikai/names.dat', data => load_edict(names, data));
 
+    let rikai = document.querySelector('#rikai');
     let rikai_checkbox = document.querySelector('#rikai_auto')
     let auto_rikai_enabled = rikai_checkbox.checked;
     rikai_checkbox.addEventListener('input', function(evt) {
         auto_rikai_enabled = rikai_checkbox.checked;
     });
-    document.querySelector('#rikai').addEventListener('click', function(evt) {
+    rikai.addEventListener('click', function(evt) {
         evt.stopPropagation();
+    });
+    document.querySelector('#mask').addEventListener('click', function(evt) {
+        if (touch_enabled) {
+            return;
+        }
+        rikai.style.display = 'none';
     });
     let touch_enabled = false;
     window.addEventListener('touchstart', function(evt) {
         touch_enabled = true;
+        auto_rikai_enabled = false;
+        rikai_checkbox.checked = false;
+        rikai.style.display = 'none';
     });
     window.addEventListener('click', function(evt) {
         if (evt.button != 0) {
@@ -274,8 +284,7 @@ function main() {
         if (!set_rikai_from_point(evt.clientX, evt.clientY)) {
             return;
         }
-        auto_rikai_enabled = false;
-        rikai_checkbox.checked = false;
+        rikai.style.display = 'block';
     });
     window.addEventListener('mousemove', function(evt) {
         if (!auto_rikai_enabled) {
