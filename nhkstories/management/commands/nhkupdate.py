@@ -39,7 +39,7 @@ def parse_datetime_nhk(s):
 def save_story(info):
     # general information
     story_id = info['news_id']
-    story, created = Story.objects.get_or_create(pk=story_id)
+    story, created = Story.objects.get_or_create(story_id=story_id)
 
     story.published = parse_datetime_nhk(info['news_prearranged_time'])
     story.title = info['title']
