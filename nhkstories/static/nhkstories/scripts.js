@@ -26,10 +26,9 @@ function ruby_update(evt) {
 }
 
 function load_edict(dst, data) {
-    let regex = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm
+    let regex = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
-    let i = 0;
-    while (match = regex.exec(data)) {
+    while ((match = regex.exec(data))) {
         let type = 0;
 
         if (match[3].search('v1')) {
@@ -123,12 +122,7 @@ function get_text_at_point(x, y) {
     // <https://mail-archives.apache.org/mod_mbox/xml-general/200012.mbox/%3C002d01c05bbe$42d71680$1000a8c0@equitytg.com%3E>
     let treeWalker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT);
 
-    // skip nodes before target
-    let node = treeWalker.nextNode();
-    while (treeWalker.currentNode != target) {
-        treeWalker.nextNode();
-    }
-    // treeWalker.currentNode == target
+    while (treeWalker.nextNode() != target);  // skip nodes before target
     let text = target.data.substring(offset);
     // nodes after target
     while (treeWalker.nextNode()) {
@@ -141,7 +135,7 @@ function get_text_at_point(x, y) {
 }
 
 function iter_subfragments(text, callback) {
-    let re = /^[\u25cb\u3004-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]+/g
+    let re = /^[\u25cb\u3004-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]+/g;
     let match = re.exec(text);
     if (!match) {
         return;
@@ -235,7 +229,7 @@ function main() {
     });
     document.querySelectorAll('input[name=ruby_toggle]').forEach(function(e) {
         // radio buttons trigger click event even on keyboard selection
-        e.addEventListener('click', ruby_update)
+        e.addEventListener('click', ruby_update);
     });
     let mode = localStorage.getItem('ruby_toggle') || 'hover';
     document.querySelector('input[name=ruby_toggle][value=' + mode + ']').checked = true;
@@ -246,7 +240,7 @@ function main() {
     fetch('/static/nhkstories/rikai/names.dat', data => load_edict(names, data));
 
     let rikai = document.querySelector('#rikai');
-    let rikai_checkbox = document.querySelector('#rikai_auto')
+    let rikai_checkbox = document.querySelector('#rikai_auto');
     let auto_rikai_enabled = rikai_checkbox.checked;
     rikai_checkbox.addEventListener('input', function(evt) {
         auto_rikai_enabled = rikai_checkbox.checked;
@@ -268,7 +262,7 @@ function main() {
         rikai.style.display = 'none';
     });
     window.addEventListener('click', function(evt) {
-        if (evt.button != 0) {
+        if (evt.button !== 0) {
             return;
         }
         if (touch_enabled) {
