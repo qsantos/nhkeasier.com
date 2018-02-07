@@ -15,8 +15,8 @@ article audio { width:100%; margin:0; }
 article>p { cursor:default; }
 
 /* rubies */
-ruby>rt { color:white; transition:color .5s ease-out 2s; }
-ruby:hover>rt { color:inherit; transition:color 0s ease-in 0s; }
+ruby>rt { color:white; }
+ruby:hover>rt { color:inherit; }
 body.ruby_never ruby:hover>rt { color:white; }
 body.ruby_always ruby>rt { color:inherit; }
 
