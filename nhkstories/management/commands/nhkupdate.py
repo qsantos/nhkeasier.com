@@ -8,6 +8,7 @@ from urllib.request import urlopen
 
 from django.core.management.base import BaseCommand
 from django.core.files import File
+from django.core.files.base import ContentFile
 from nhkstories.models import Story
 
 base_url = 'http://www3.nhk.or.jp/news/easy'
@@ -50,12 +51,8 @@ def save_story(info):
     if not story.webpage:
         webpage_url = '%s/%s/%s.html' % (base_url, story_id, story_id)
         print('Download %s' % webpage_url)
-        with urlopen(webpage_url) as req:
-            data = req.read()
-        temp = tempfile.TemporaryFile()
-        temp.write(data)
-        temp.seek(0)
-        story.webpage = File(temp)
+        with urlopen(webpage_url) as f:
+            story.webpage.save('', f)
 
     # extract content from webpage
     data = story.webpage.read().decode()
@@ -75,10 +72,8 @@ def save_story(info):
         image_url = None
     if not story.image and image_url is not None:
         print('Download %s' % image_url)
-        temp = tempfile.TemporaryFile()
-        temp.write(urlopen(image_url).read())
-        temp.seek(0)
-        story.image = File(temp)
+        with urlopen(image_url) as f:
+            story.image.save('', f)
 
     # voice
     if info['has_news_easy_voice']:
@@ -88,10 +83,8 @@ def save_story(info):
         voice_url = None
     if not story.voice and voice_url is not None:
         print('Download %s' % voice_url)
-        temp = tempfile.TemporaryFile()
-        temp.write(urlopen(voice_url).read())
-        temp.seek(0)
-        story.voice = File(temp)
+        with urlopen(voice_url) as f:
+            story.voice.save('', f)
 
     # video
     stream_base_url = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/'
