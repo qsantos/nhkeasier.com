@@ -19,7 +19,7 @@ class LatestStoriesFeed(Feed):
         return item.published
 
     def item_description(self, item):
-        return '<img src="{}"><br><audio src="{}" controls></audio>{}'.format(
+        return '<img src="{}"><br><audio src="{}" alt="Story illustration" controls></audio>{}'.format(
             item.image.url, item.voice.url, item.content_with_ruby,
         )
 
