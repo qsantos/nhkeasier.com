@@ -150,8 +150,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         new_stories_count = 0
         news_list = get_news_list()
-        for stories_of_the_day in news_list[0].values():
-            for story in stories_of_the_day:
+        stories_per_day = news_list[0]  # day -> stories
+        for day in sorted(stories_per_day):
+            for story in stories_per_day[day]:
                 new_stories_count += save_story(story)
 
         if new_stories_count == 0:
