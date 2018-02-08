@@ -93,16 +93,28 @@ def save_story(info):
         video_url = stream_base_url + filename
     else:
         video_url = None
-    if not story.video and video_url is not None:
+    if not story.video_original and video_url is not None:
         print('Download %s' % video_url)
         _, temp_name = tempfile.mkstemp()
         res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
                              stderr=subprocess.DEVNULL)
         if res.returncode == 0:
-            temp = open(temp_name, 'rb')
-            story.video = File(temp)
+            with open(temp_name, 'rb') as f:
+                story.video_original.save('', f)
         else:
             print('Failed')
+        os.remove(temp_name)
+
+    if story.video_original and not story.video_reencoded:
+        print('Converting %s' % story.video_original.name)
+        _, temp_name = tempfile.mkstemp(suffix='.mp4')
+        subprocess.run(
+            ['ffmpeg', '-y', '-i', story.video_original.file.name, '-b:v', '500k', temp_name],
+            stderr=subprocess.DEVNULL, check=True
+        )
+        with open(temp_name, 'rb') as f:
+            story.video_reencoded.save('', f)
+        os.remove(temp_name)
 
     story.save()
     return created
