@@ -25,13 +25,6 @@ def index(request):
 
 def story(request, id):
     story = get_object_or_404(Story, pk=id)
-    if story.published > timezone.now() - timedelta(days=30):
-        url = 'https://www3.nhk.or.jp/news/easy/{0}/{0}.html'.format(
-            story.story_id
-        )
-    else:
-        url = None
     return render(request, 'nhkstories/story.html', {
         'story': story,
-        'original_url': url,
     })

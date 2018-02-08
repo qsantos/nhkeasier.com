@@ -1,8 +1,5 @@
 {% extends 'nhkstories/base.html' %}
 {% block title %}{{ story.title }}{% endblock %}
 {% block content %}
-{% if original_url %}
-<a href="{{ original_url }}">See on NHK News Web Easy</a>
-{% endif %}
 {% include 'nhkstories/componentstory.html' %}
 {% endblock %}
