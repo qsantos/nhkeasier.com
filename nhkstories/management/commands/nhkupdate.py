@@ -11,6 +11,12 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 from nhkstories.models import Story
 
+
+class DuplicateStoryIDType(Exception):
+    pass
+
+
+DuplicateStoryID = DuplicateStoryIDType()
 base_url = 'http://www3.nhk.or.jp/news/easy'
 
 
@@ -41,8 +47,13 @@ def save_story(info):
     # general information
     story_id = info['news_id']
     story, created = Story.objects.get_or_create(story_id=story_id)
+    published = parse_datetime_nhk(info['news_prearranged_time'])
 
-    story.published = parse_datetime_nhk(info['news_prearranged_time'])
+    if story.published and story.published != published:
+        # probably a reused story_id, not implemented yet
+        raise DuplicateStoryID
+
+    story.published = published
     story.title = info['title']
     story.title_with_ruby = info['title_with_ruby']
     assert remove_ruby(story.title_with_ruby) == story.title
