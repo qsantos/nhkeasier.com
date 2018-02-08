@@ -20,6 +20,18 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'nhkeasier.sinon.org', '192.168.1.19'
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
 
+# error reporting
+ADMINS = ['qsantos@qsantos.fr']
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'ssl0.ovh.net'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'nhkeasier@sinon.org'
+EMAIL_HOST_PASSWORD = 'mXBD9HVL7WFfgzpxHPWQ'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
+
+
 # Application definition
 INSTALLED_APPS = [
     'nhkstories.apps.NHKStoriesConfig',
