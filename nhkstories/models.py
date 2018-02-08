@@ -48,4 +48,4 @@ class Story(models.Model):
         verbose_name_plural = 'stories'
 
     def __str__(self):
-        return self.title
+        return '{}: {}'.format(self.id, self.title)
