@@ -4,6 +4,17 @@ let edict = {};
 let names = {};
 let deinflect = [];
 
+if (!NodeList.prototype.forEach) {
+    /* Internet Explorer and Edge... */
+    NodeList.prototype.forEach = function(func) {
+            /* Apply func to each element of a NodeList (similar to
+             * Array.forEach) */
+        for (var i = 0; i < this.length; i += 1) {
+                    func(this[i]);
+                }
+    }
+}
+
 function fetch(url, callback) {
     let req = new XMLHttpRequest();
     req.addEventListener('load', function(evt) {
@@ -77,7 +88,10 @@ function load_deinflect(data) {
         if (fields.length == 1) {  // string array
             reasons.push(line);
         } else {  // deinflection
-            let [from, to, type, reason] = fields;
+            let from = fields[0];
+            let to = fields[1];
+            let type = fields[2];
+            let reason = fields[3];
             reason = reasons[reason];
             type = +type;
             deinflect.push([from, to, type, reason]);
@@ -149,7 +163,11 @@ function iter_subfragments(text, callback) {
 function iter_deinflections(word, callback) {
     callback(word, 0, null);
     for (let i = 0; i < deinflect.length; i += 1) {
-        let [from, to, type, reason] = deinflect[i];
+        let fields = deinflect[i];
+        let from = fields[0];
+        let to = fields[1];
+        let type = fields[2];
+        let reason = fields[3];
         if (word.endsWith(from)) {
             let n = word.length - from.length;
             let candidate = word.substring(0, n) + to;
@@ -235,9 +253,9 @@ function main() {
     document.querySelector('input[name=ruby_toggle][value=' + mode + ']').checked = true;
     ruby_update(null);
 
-    fetch('/static/nhkstories/rikai/deinflect.dat', data => load_deinflect(data));
-    fetch('/static/nhkstories/rikai/edict.dat', data => load_edict(edict, data));
-    fetch('/static/nhkstories/rikai/names.dat', data => load_edict(names, data));
+    fetch('/static/nhkstories/rikai/deinflect.dat', load_deinflect);
+    fetch('/static/nhkstories/rikai/edict.dat', function(data) { load_edict(edict, data) });
+    fetch('/static/nhkstories/rikai/names.dat', function(data) { load_edict(names, data) });
 
     let rikai = document.querySelector('#rikai');
     let rikai_checkbox = document.querySelector('#rikai_auto');
