@@ -1,23 +1,38 @@
+/* general */
 * { box-sizing:border-box; }
 body { margin:0; font:14px sans-serif;}
-h1 {
-    margin:0; width:100%;
-    background-color:#0d182b;
-    font:28px sans-serif;
+
+/* header */
+header {
+    background-color:#0d182b; font:28px sans-serif;
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
 }
+header a { color:white; text-decoration:none; outline:none; }
+h1 { margin:0; font:28px sans-serif; letter-spacing:2px; word-spacing:2px; flex-grow:2; }
 h1 a {
-    color:white; text-decoration:none; outline:none;
     /* margin atop <a> (not padding in <h1>) for cross-browser consistency */
     display:inline-block; margin:10px 0 10px; padding:0 14px 18px;
 }
-main {
-    max-width:660px; margin:0 auto; padding:0 10px;
-}
+header nav { flex-basis:100px; flex-grow:1; }
+header nav ul { list-style-type:none; margin:0; padding:0; display:flex; justify-content:space-around; }
+header nav li { display:inline-block; padding:10px; }
+
 /* navigation bars */
-nav { font-size:x-large; }
-nav>table { table-layout:fixed; margin:0 auto; }
-nav td { text-align:center; padding:5px; }
-nav td:nth-child(3) { min-width:4em; }
+main nav { font-size:x-large; }
+main nav>table { table-layout:fixed; margin:0 auto; }
+main nav td { text-align:center; padding:5px; }
+main nav td:nth-child(3) { min-width:4em; }
+
+/* content */
+h2 { font-size:20px; border-bottom:1px solid black; margin-left:-9999px; padding-left:9999px; }
+main { max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
+@-moz-document url-prefix() {
+    /* Only Mozilla Firefox does proper hyphenation */
+    @media (min-width: 30em) {
+        /* Hyphenation won't save us on short lines */
+        main {text-align:justify;hyphens:auto;}
+    }
+}
 
 /* stories */
 article h3 { font:28px sans-serif; margin:0; }

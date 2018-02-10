@@ -6,7 +6,15 @@
 <title>NHK News Web Easier - {% block title %}{% endblock %}</title>
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
-<h1><a href="{% url 'nhkstories:index' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
+<header>
+    <h1><a href="{% url 'nhkstories:index' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
+    <nav>
+        <ul>
+            <li><a href="{% url 'nhkstories:index' %}">Index</a></li>
+            <li><a href="{% url 'nhkstories:about' %}">About</a></li>
+        </ul>
+    </nav>
+</header>
 <aside id="tools">
     <ul class="ruby-toggles">
         <li>

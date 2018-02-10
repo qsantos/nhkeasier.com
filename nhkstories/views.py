@@ -28,3 +28,7 @@ def story(request, id):
     return render(request, 'nhkstories/story.html', {
         'story': story,
     })
+
+
+def about(request):
+    return render(request, 'nhkstories/about.html')
