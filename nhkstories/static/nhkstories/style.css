@@ -1,5 +1,18 @@
-body { max-width:640px; margin:0 auto; font-family:sans-serif; }
-
+* { box-sizing:border-box; }
+body { margin:0; font:14px sans-serif;}
+h1 {
+    margin:0; width:100%;
+    background-color:#0d182b;
+    font:28px sans-serif;
+}
+h1 a {
+    color:white; text-decoration:none; outline:none;
+    /* margin atop <a> (not padding in <h1>) for cross-browser consistency */
+    display:inline-block; margin:10px 0 10px; padding:0 14px 18px;
+}
+main {
+    max-width:660px; margin:0 auto; padding:0 10px;
+}
 /* navigation bars */
 nav { font-size:x-large; }
 nav>table { table-layout:fixed; margin:0 auto; }
@@ -7,55 +20,43 @@ nav td { text-align:center; padding:5px; }
 nav td:nth-child(3) { min-width:4em; }
 
 /* stories */
-h3 { margin:0; }
-h4 { font-size:large; margin:0; }
-article { margin-bottom:4em; }
+article h3 { font:28px sans-serif; margin:0; }
+article h4 { font-size:large; margin:0 0 10px; }
+article h4 a { text-decoration:none; color:black; font-family:mono; }
+article .permalink { float:right; font-variant:uppercase; }
+article h4 a:hover * { text-decoration:underline; }
+article {
+    margin-bottom:100px;
+    font-size:20px;
+    overflow-wrap:break-word;
+    /* From Jisho */
+    font-family: "HiraKakuProN-W3", "Hiragino Kaku Gothic ProN W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
+}
 article img { display:block; margin:0 auto !important; max-width:100%; }
-article audio { width:100%; margin:0; }
-article>p { cursor:default; }
+article audio { width:100%; }
+article video { max-width:100%; }
+article>p { cursor:default; margin-bottom:40px; }
 
 /* rubies */
-ruby>rt { color:white; }
-ruby:hover>rt { color:inherit; }
-body.ruby_never ruby:hover>rt { color:white; }
-body.ruby_always ruby>rt { color:inherit; }
+ruby>rt { visibility:hidden; }
+ruby:hover>rt { visibility:inherit; }
+.ruby_never ruby:hover>rt { visibility:hidden; }
+.ruby_always ruby>rt { visibility:inherit; }
+.ruby-toggles {
+    list-style-type:none; margin-top:10px; padding:0;
+    display:flex; flex-direction:row; justify-content:space-around;
+}
+.ruby-toggles input { display:none; }
+.ruby-toggles img { height:60px; width:60px; padding:5px; }
+.ruby-toggles :checked + img { padding:4px; border:1px solid black; border-radius:3px; }
 
 /* asides */
-#menu label>input[name=ruby_toggle] { display:none; }
-#menu label>img { display:inline-block; height:40px; width:40px; padding:5px; }
-#menu :checked + img { border:1px solid black; padding:4px; }
-#menu p { font-size:medium; }
-
-/* responsiveness
- * main content is up to 640px wide
- * -  860px and up: enough margin to fit one 200px column with 10px margins
- * - 1080px and up: enough margin to fit two 200px columns with 10px margins
- * - 1600px and up: columns can take up to 400px with 40px margin
- * Rikai is put in the left column, or in the right column when enough vertical
- * space is available; otherwise, atop the content.
- * Menu is put in the right column; otherwise, atop the content.
- */
-@media (max-width:859px) {
-    /* main column with no side-columns */
-    #menu { width:100%; }
-    #menu label { display:inline-block; width:calc(33% - 8px); text-align:center;}
+#tools p { font-size:medium; }
+@media (max-width:1279px) {
+    #tools { max-width:640px; margin:0 auto; }
 }
-@media (min-width:860px) and (max-width:1079px) {
-    /* one side-column, rikai with responsive width if possible */
-    body { margin:0 10px; }
-    #menu { position:fixed; top:40px; right:10px; max-width:200px; }
-    @media (min-height:500px) {
-        #rikai {
-            position:fixed; right:10px; bottom:10px; max-width:calc(100% - 680px);
-            max-height:calc(250px); overflow:auto;
-        }
-    }
-}
-@media (max-width:859px), (max-height:499px) {
-    /* no room in right column for rikai either in width or height */
-    #rikai {
-        display:none;  /* overrided by Javascript */
-    }
+@media (max-width:1279px), (max-height:499px) {
+    #rikai { display:none; }  /* overrided by Javascript */
     #rikai dl {
         position:fixed; top:10px; left:0; right:0; margin:0 auto;
         width:420px; padding:10px;
@@ -70,19 +71,10 @@ body.ruby_always ruby>rt { color:inherit; }
         z-index:5;
     }
 }
-@media (min-width:1080px) and (max-width:1599px) {
-    /* two side-columns, rikai with responsive width */
-    #menu { position:fixed; top:40px; right:10px; max-width:200px; }
-    #rikai {
-        position:fixed; top:40px; left:10px;
-        max-width:calc(50% - 340px); max-height:calc(100% - 80px); overflow:auto;
-    }
-}
-@media (min-width:1600px) {
-    /* two side-columns, fixed width */
-    #menu { position:fixed; top:40px; right:40px; max-width:200px; }
-    #rikai {
-        position:fixed; top:40px; left:40px;
-        max-width:400px; max-height:calc(100% - 80px); overflow:auto;
+@media (min-width:1280px) {
+    #tools {
+        position:sticky; top:0px; float:left; width:310px; height:100vh;
+        background-color:#f7f9fd; border-right:10px solid #0d182b;
+        padding:20px; overflow:auto;
     }
 }

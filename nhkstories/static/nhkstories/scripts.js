@@ -266,10 +266,10 @@ function main() {
     rikai.addEventListener('click', function(evt) {
         evt.stopPropagation();
     });
+    rikai.addEventListener('touchstart', function(evt) {
+        evt.stopPropagation();
+    });
     document.querySelector('#mask').addEventListener('click', function(evt) {
-        if (touch_enabled) {
-            return;
-        }
         rikai.style.display = 'none';
     });
     let touch_enabled = false;
@@ -277,13 +277,9 @@ function main() {
         touch_enabled = true;
         auto_rikai_enabled = false;
         rikai_checkbox.checked = false;
-        rikai.style.display = 'none';
     });
     window.addEventListener('click', function(evt) {
         if (evt.button !== 0) {
-            return;
-        }
-        if (touch_enabled) {
             return;
         }
         if (!set_rikai_from_point(evt.clientX, evt.clientY)) {
@@ -291,11 +287,6 @@ function main() {
         }
         auto_rikai_enabled = false;
         rikai_checkbox.checked = false;
-    });
-    window.addEventListener('dblclick', function(evt) {
-        if (!set_rikai_from_point(evt.clientX, evt.clientY)) {
-            return;
-        }
         rikai.style.display = 'block';
     });
     window.addEventListener('mousemove', function(evt) {

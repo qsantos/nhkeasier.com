@@ -6,31 +6,40 @@
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
 <h1><a href="{% url 'nhkstories:index' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
-<aside id="menu">
-    <label>
-        <input type="radio" name="ruby_toggle" value="always">
-        <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
-    </label>
-    <label>
-        <input type="radio" name="ruby_toggle" value="hover" checked>
-        <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
-    </label>
-    <label>
-        <input type="radio" name="ruby_toggle" value="never">
-        <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
-    </label>
-    <p>Or use <a href="https://www.darrenlester.com/projects/furigana-toggle">Furigana Toggle</a></p>
+<aside id="tools">
+    <ul class="ruby-toggles">
+        <li>
+            <label>
+                <input type="radio" name="ruby_toggle" value="always">
+                <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="radio" name="ruby_toggle" value="hover" checked>
+                <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
+            </label>
+        </li>
+        <li>
+            <label>
+                <input type="radio" name="ruby_toggle" value="never">
+                <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
+            </label>
+        </li>
+    </ul>
     <label>
         <input type="checkbox" id="rikai_auto" checked>
         Auto rikai
     </label>
-    <p>Or use <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a> <br>
-    or <a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a></p>
+    <p>See also <a href="https://www.darrenlester.com/projects/furigana-toggle">Furigana Toggle</a> and
+    <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a>/<a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a></p>
+    <div id="rikai"><div id="mask"></div><dl></dl></div>
 </aside>
-<aside id="rikai"><div id="mask"></div><dl></dl></aside>
+<main>
 {% block content %}
 Something went terribly wrong, I guess.
 {% endblock %}
+</main>
 <script src="{% static 'nhkstories/scripts.js' %}"></script>
 {% if not debug %}
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-113732431-1"></script>
