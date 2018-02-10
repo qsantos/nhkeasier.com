@@ -30,9 +30,7 @@ article {
     font-size:20px;
     overflow-wrap:break-word;
 }
-article img { display:block; margin:0 auto !important; max-width:100%; }
-article audio { width:100%; }
-article video { max-width:100%; }
+article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
 
 /* rubies */
