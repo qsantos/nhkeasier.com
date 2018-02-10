@@ -10,4 +10,5 @@
 {{ story.content_with_ruby|safe }}
 {% if story.voice %}<audio src="{{ story.voice.url }}" controls preload="none"></audio>{% endif %}
 <a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html">See on NHK News Web Easy</a> (if still available)
+<a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a>
 </article>
