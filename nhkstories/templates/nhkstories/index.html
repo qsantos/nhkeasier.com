@@ -1,5 +1,6 @@
 {% extends 'nhkstories/base.html' %}
-{% block title%}Latest stories{% endblock %}
+{% block title %}Latest stories{% endblock %}
+{% block header %}Latest stories{% endblock %}
 {% block content %}
 {% include 'nhkstories/componentpagination.html' %}
 {% for story in stories %}
