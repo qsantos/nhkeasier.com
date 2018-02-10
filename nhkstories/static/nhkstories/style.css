@@ -29,8 +29,6 @@ article {
     margin-bottom:100px;
     font-size:20px;
     overflow-wrap:break-word;
-    /* From Jisho */
-    font-family: "HiraKakuProN-W3", "Hiragino Kaku Gothic ProN W3", "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", "メイリオ", Meiryo, "游ゴシック", YuGothic, "ＭＳ Ｐゴシック", "MS PGothic", "ＭＳ ゴシック", "MS Gothic", sans-serif;
 }
 article img { display:block; margin:0 auto !important; max-width:100%; }
 article audio { width:100%; }

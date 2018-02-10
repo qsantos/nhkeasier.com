@@ -1,5 +1,5 @@
 {% load tz %}
-<article>
+<article lang=ja>
 <h3>{{ story.title_with_ruby|safe }}</h3>
 <h4><a href="{% url 'nhkstories:story' story.id %}"><time datetime="{{ story.published|date:'c' }}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</time></a></h4>
 {% if story.video_reencoded %}
