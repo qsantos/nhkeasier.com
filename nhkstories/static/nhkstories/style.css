@@ -39,6 +39,8 @@ article .permalink { float:right; font-variant:uppercase; }
 article { margin-bottom:100px; font-size:20px; overflow-wrap:break-word; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
+/* fix Google Chrome bug where <audio> and <video> show above all */
+audio, video { position:relative; z-index:-1; }
 
 /* rubies */
 ruby>rt { visibility:hidden; }
