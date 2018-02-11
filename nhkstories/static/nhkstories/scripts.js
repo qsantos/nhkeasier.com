@@ -147,8 +147,8 @@ function parse_edict(dst, data) {
         if (match[3].search('v1'))    { type |=  256; }
         if (match[3].search('v5'))    { type |=  512; }
         if (match[3].search('adj-i')) { type |= 1024; }
-        if (match[3].search('vk'))    { type |= 1024; }
-        if (match[3].search('vs'))    { type |= 1024; }
+        if (match[3].search('vk'))    { type |= 2048; }
+        if (match[3].search('vs'))    { type |= 4096; }
 
         let kanji, kana;
         if (match[2]) {
