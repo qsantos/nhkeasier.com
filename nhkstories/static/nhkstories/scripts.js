@@ -78,8 +78,13 @@ if (!NodeList.prototype.forEach) {
 let edict = {};
 let names = {};
 let deinflect = [];
-let rikai = $('#rikai');
+let rikai_container = $('#rikai-container');
+let rikai_edict = $('#rikai-edict', rikai_container);
+let rikai_names = $('#rikai-names', rikai_container);
+let rikai_mask = $('#rikai-mask', rikai_container);
 let autorikai_checkbox = $('#rikai_auto');
+
+hide_rikai();
 
 /* Start downloading data */
 fetch('/static/nhkstories/rikai/deinflect.dat', load_deinflect);
@@ -90,9 +95,11 @@ fetch('/static/nhkstories/rikai/names.dat', load_names);
 window.addEventListener('mousemove', autorikai);
 window.addEventListener('click', manualrikai);
 window.addEventListener('touchstart', disable_autorikai);
-rikai.addEventListener('click', ignore_event);
-rikai.addEventListener('touchstart', ignore_event);
-$('#mask').addEventListener('click', hide_rikai);
+rikai_edict.addEventListener('click', ignore_event);
+rikai_edict.addEventListener('touchstart', ignore_event);
+rikai_names.addEventListener('click', ignore_event);
+rikai_names.addEventListener('touchstart', ignore_event);
+rikai_mask.addEventListener('click', hide_rikai);
 
 /* Event handlers */
 function autorikai(event) {
@@ -104,18 +111,20 @@ function manualrikai(event) {
     if (event.button === 0) {
         if (set_rikai_from_point(event.clientX, event.clientY)) {
             disable_autorikai();
-            show_rikai();
         }
     }
 }
 function ignore_event(event) {
     event.stopPropagation();
 }
-function show_rikai() {
-    rikai.style.display = 'block';
+function show_rikai(event) {
+    rikai_container.style.visibility = 'visible';
 }
-function hide_rikai() {
-    rikai.style.display = 'none';
+function hide_rikai(event) {
+    rikai_container.style.visibility = 'hidden';
+    if (event) {
+        ignore_event(event);
+    }
 }
 function disable_autorikai() {
     autorikai_checkbox.checked = false;
@@ -278,9 +287,6 @@ function append_sense(html, sense, reason) {
 
 function set_rikai_from_point(x, y) {
     let text = get_text_at_point(x, y);
-    if (!text) {
-        return false;
-    }
 
     let edict_html = [];
     iter_subfragments(text, function(subfragment) {
@@ -301,17 +307,15 @@ function set_rikai_from_point(x, y) {
         }
     });
 
-    let html = [];
-    if (edict_html.length && names_html.length) {
-        html = edict_html.concat(['<hr>'], names_html);
-    } else if(edict_html.length) {
-        html = edict_html;
+    if (edict_html.length || names_html.length) {
+        $('dl', rikai_edict).innerHTML = edict_html.join('');
+        $('dl', rikai_names).innerHTML = names_html.join('');
+        show_rikai();
+        return true;
     } else {
-        html = names_html;
+        hide_rikai();
+        return false;
     }
-
-    $('#rikai dl').innerHTML = html.join('');
-    return html != [];
 }
 
 })();

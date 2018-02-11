@@ -15,34 +15,46 @@
         </ul>
     </nav>
 </header>
-<aside id="tools">
-    <ul id="ruby-toggles">
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="always">
-                <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
-            </label>
-        </li>
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="hover" checked>
-                <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
-            </label>
-        </li>
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="never">
-                <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
-            </label>
-        </li>
-    </ul>
-    <label>
-        <input type="checkbox" id="rikai_auto" checked>
-        Auto rikai
-    </label>
-    <p>See also <a href="https://www.darrenlester.com/projects/furigana-toggle">Furigana Toggle</a> and
-    <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a>/<a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a></p>
-    <div id="rikai"><div id="mask"></div><dl></dl></div>
+<aside>
+    <section id="tools">
+        <ul id="ruby-toggles">
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="always">
+                    <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="hover" checked>
+                    <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="never">
+                    <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
+                </label>
+            </li>
+        </ul>
+        <label>
+            <input type="checkbox" id="rikai_auto" checked>
+            Auto rikai
+        </label>
+        <p>See also <a href="https://www.darrenlester.com/projects/furigana-toggle">Furigana Toggle</a> and
+        <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a>/<a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a></p>
+    </section>
+    <div id="rikai-container">
+        <section id="rikai-edict">
+            <h1>EDICT Translations</h1>
+            <dl></dl>
+        </section>
+        <section id="rikai-names">
+            <h1>Names translations</h1>
+            <dl></dl>
+        </section>
+        <div id="rikai-mask"></div>
+    </div>
 </aside>
 <main>
 <h2>{% block header %}{% endblock %}</h2>

@@ -63,30 +63,29 @@ ruby:hover>rt { visibility:inherit; }
 #ruby-toggles :checked + img { padding:4px; border:1px solid black; border-radius:3px; }
 
 /* asides */
-#tools p { font-size:medium; }
-@media (max-width:1279px) {
-    #tools { max-width:640px; margin:0 auto; }
+aside section {
+    background-color:#f7f9fd; margin:20px 10px 0; padding:20px; overflow:auto;
+    border:1px solid #eee; border-radius:3px; box-shadow:0 1px 1px #0d182b;
+}
+#rikai-container {
+    max-height:calc(100% - 300px); overflow:auto; padding:0; margin:0;
 }
 @media (max-width:1279px), (max-height:499px) {
-    #rikai { display:none; }  /* overrided by Javascript */
-    #rikai dl {
-        position:fixed; top:10px; left:0; right:0; margin:0 auto;
-        width:420px; padding:10px;
-        max-width:calc(100% - 40px); max-height:calc(100% - 70px); overflow: auto;
-        border:1px solid lightgrey;
-        background-color: white;
-        z-index:10;
+    #rikai-container {
+        position:fixed; top:0; width:100%; height:100%;
+        display:flex; flex-direction:column; justify-content:space-around; align-items:center;
     }
-    #mask {
+    #rikai-edict, #rikai-names {
+        width:420px;
+        max-width:calc(100% - 40px); max-height:calc(100% - 70px); overflow:auto;
+    }
+    #rikai-mask {
         position:fixed; top:0; left:0; width:100%; height:100%;
-        background-color:rgba(0,0,0,.5);
-        z-index:5;
+        background-color:rgba(0,0,0,.5); z-index:-1;
     }
 }
 @media (min-width:1280px) {
-    #tools {
+    aside {
         position:sticky; top:0px; float:left; width:310px; height:100vh;
-        background-color:#f7f9fd; border-right:10px solid #0d182b;
-        padding:20px; overflow:auto;
     }
 }
