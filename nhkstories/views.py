@@ -32,3 +32,6 @@ def story(request, id):
 
 def about(request):
     return render(request, 'nhkstories/about.html')
+
+def tools(request):
+    return render(request, 'nhkstories/tools.html')
