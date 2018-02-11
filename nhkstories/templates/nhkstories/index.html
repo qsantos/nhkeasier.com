@@ -1,7 +1,15 @@
 {% extends 'nhkstories/base.html' %}
-{% block title %}Latest stories{% endblock %}
+{% block title %}easier Japanese practice from News Web Easy{% endblock %}
 {% block header %}Latest stories{% endblock %}
 {% block content %}
+<article>
+<p>
+Practice Japanese on real news from <a
+href="https://www3.nhk.or.jp/news/easy/">NNK News Web Easy</a> even more
+easily. Just try moving your cursor above kanji and difficult words (desktop
+and laptops) or touching them (smartphones and tablets).
+</p>
+</article>
 {% include 'nhkstories/componentpagination.html' %}
 {% for story in stories %}
 {% include 'nhkstories/componentstory.html' %}
