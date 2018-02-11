@@ -51,15 +51,15 @@ article>p { cursor:default; margin-bottom:40px; }
 /* rubies */
 ruby>rt { visibility:hidden; }
 ruby:hover>rt { visibility:inherit; }
-.ruby_never ruby:hover>rt { visibility:hidden; }
-.ruby_always ruby>rt { visibility:inherit; }
-.ruby-toggles {
+.ruby-never ruby:hover>rt { visibility:hidden; }
+.ruby-always ruby>rt { visibility:inherit; }
+#ruby-toggles {
     list-style-type:none; margin-top:10px; padding:0;
     display:flex; flex-direction:row; justify-content:space-around;
 }
-.ruby-toggles input { display:none; }
-.ruby-toggles img { height:60px; width:60px; padding:5px; }
-.ruby-toggles :checked + img { padding:4px; border:1px solid black; border-radius:3px; }
+#ruby-toggles input { display:none; }
+#ruby-toggles img { height:60px; width:60px; padding:5px; }
+#ruby-toggles :checked + img { padding:4px; border:1px solid black; border-radius:3px; }
 
 /* asides */
 #tools p { font-size:medium; }

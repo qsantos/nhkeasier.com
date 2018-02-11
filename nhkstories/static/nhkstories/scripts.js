@@ -1,9 +1,22 @@
-(function(){"use strict";
+"use strict";
 
-let edict = {};
-let names = {};
-let deinflect = [];
-
+/* Define $, $$ and ensure forEach exists */
+function $(selector, context) {
+    /* Standard element selector */
+    context = context || document;
+    if (!context.querySelector) {
+        return undefined;
+    }
+    return context.querySelector(selector);
+}
+function $$(selector, context) {
+    /* Standard multiple element selector */
+    context = context || document;
+    if (!context.querySelector) {
+        return undefined;
+    }
+    return context.querySelectorAll(selector);
+}
 if (!NodeList.prototype.forEach) {
     /* Internet Explorer and Edge... */
     NodeList.prototype.forEach = function(func) {
@@ -15,48 +28,118 @@ if (!NodeList.prototype.forEach) {
     }
 }
 
+/* Show time in locale format in tooltip when hovering <time> elements */
+(function(){
+    $$('time').forEach(function(element) {
+        let iso8601 = element.getAttribute('datetime') || element.innerText
+        let datetime = new Date(iso8601);
+        let options = {
+            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            timeZoneName: 'short',
+        };
+        element.title = datetime.toLocaleString(undefined, options);
+    });
+})();
+
+/* Toggle <rt> in <ruby> elements depending on <input type="radio"> */
+(function(){
+    let toggles = $('#rubby-toggles');
+    $$('input', toggles).forEach(function(element) {
+        element.addEventListener('click', update);
+    });
+    set_mode(localStorage.getItem('ruby-toggle') || 'hover');
+    update();
+
+    function set_mode(mode) {
+        let input_element = $('[value=' + mode + ']', toggles)
+        input_element.checked = true;
+    }
+
+    function get_mode(mode) {
+        return $(':checked', toggles).value;
+    }
+
+    function update(event) {
+        let mode = get_mode();
+        localStorage.setItem('ruby-toggle', mode);
+        document.body.classList.remove('ruby-never');
+        document.body.classList.remove('ruby-always');
+        if (mode == 'always') {
+            document.body.classList.add('ruby-always');
+        } else if (mode == 'never') {
+            document.body.classList.add('ruby-never');
+        }
+    }
+})();
+
+/* The rest is rikai handling (loading EDICT and showing translations) */
+(function(){
+let edict = {};
+let names = {};
+let deinflect = [];
+let rikai = $('#rikai');
+let autorikai_checkbox = $('#rikai_auto');
+
+/* Start downloading data */
+fetch('/static/nhkstories/rikai/deinflect.dat', load_deinflect);
+fetch('/static/nhkstories/rikai/edict.dat', load_edict);
+fetch('/static/nhkstories/rikai/names.dat', load_names);
+
+/* Event binding */
+window.addEventListener('mousemove', autorikai);
+window.addEventListener('click', manualrikai);
+window.addEventListener('touchstart', disable_autorikai);
+rikai.addEventListener('click', ignore_event);
+rikai.addEventListener('touchstart', ignore_event);
+$('#mask').addEventListener('click', hide_rikai);
+
+/* Event handlers */
+function autorikai(event) {
+    if (autorikai_checkbox.checked) {
+        set_rikai_from_point(event.clientX, event.clientY);
+    }
+}
+function manualrikai(event) {
+    if (event.button === 0) {
+        if (set_rikai_from_point(event.clientX, event.clientY)) {
+            disable_autorikai();
+            show_rikai();
+        }
+    }
+}
+function ignore_event(event) {
+    event.stopPropagation();
+}
+function show_rikai() {
+    rikai.style.display = 'block';
+}
+function hide_rikai() {
+    rikai.style.display = 'none';
+}
+function disable_autorikai() {
+    autorikai_checkbox.checked = false;
+}
+
 function fetch(url, callback) {
     let req = new XMLHttpRequest();
-    req.addEventListener('load', function(evt) {
+    req.addEventListener('load', function(event) {
         callback(req.response);
     });
     req.open('GET', url);
     req.send();
 }
 
-function ruby_update(evt) {
-    let mode = document.querySelector('input[name=ruby_toggle]:checked').value;
-    document.body.classList.remove('ruby_never');
-    document.body.classList.remove('ruby_always');
-    if (mode == 'always') {
-        document.body.classList.add('ruby_always');
-    } else if (mode == 'never') {
-        document.body.classList.add('ruby_never');
-    }
-    localStorage.setItem('ruby_toggle', mode);
-}
-
-function load_edict(dst, data) {
+function parse_edict(dst, data) {
     let regex = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
     while ((match = regex.exec(data))) {
         let type = 0;
-
-        if (match[3].search('v1')) {
-            type |= 256;
-        }
-        if (match[3].search('v5')) {
-            type |= 512;
-        }
-        if (match[3].search('adj-i')) {
-            type |= 1024;
-        }
-        if (match[3].search('vk')) {
-            type |= 1024;
-        }
-        if (match[3].search('vs')) {
-            type |= 1024;
-        }
+        if (match[3].search('v1'))    { type |=  256; }
+        if (match[3].search('v5'))    { type |=  512; }
+        if (match[3].search('adj-i')) { type |= 1024; }
+        if (match[3].search('vk'))    { type |= 1024; }
+        if (match[3].search('vs'))    { type |= 1024; }
 
         let kanji, kana;
         if (match[2]) {
@@ -67,33 +150,34 @@ function load_edict(dst, data) {
         }
 
         let info = {
-            'kanji': match[1],
-            'kana': match[2],
+            'kanji': kanji,
+            'kana': kana,
             'glosses': match[3].replace(/\//g, '; '),
             'type': type,
         };
-        dst[match[1]] = info;
-        if (match[2]) {
-            dst[match[2]] = info;
-        }
+        dst[kana] = info;
+        dst[kanji] = info;
     }
+}
+
+function load_edict(data) {
+    parse_edict(edict, data);
+}
+
+function load_names(data) {
+    parse_edict(names, data);
 }
 
 function load_deinflect(data) {
     let lines = data.split('\n');
     let reasons = [];
     for (let i = 1; i < lines.length; i += 1) {  // skip headers
-        let line = lines[i];
-        let fields = line.split('\t');
+        let fields = lines[i].split('\t');
         if (fields.length == 1) {  // string array
-            reasons.push(line);
+            reasons.push(lines[i]);
         } else {  // deinflection
-            let from = fields[0];
-            let to = fields[1];
-            let type = fields[2];
-            let reason = fields[3];
+            let [from, to, type, reason] = fields;
             reason = reasons[reason];
-            type = +type;
             deinflect.push([from, to, type, reason]);
         }
     }
@@ -117,6 +201,7 @@ function get_text_at_point(x, y) {
         // label for toggling auto rikai
         return '';
     }
+    // check that the cursor is actually within target
     let rect = target.parentNode.getBoundingClientRect();
     if (!rect ||
         !(rect.left <= x && x <= rect.right) ||
@@ -163,11 +248,7 @@ function iter_subfragments(text, callback) {
 function iter_deinflections(word, callback) {
     callback(word, 0, null);
     for (let i = 0; i < deinflect.length; i += 1) {
-        let fields = deinflect[i];
-        let from = fields[0];
-        let to = fields[1];
-        let type = fields[2];
-        let reason = fields[3];
+        let [from, to, type, reason] = deinflect[i];
         if (word.endsWith(from)) {
             let n = word.length - from.length;
             let candidate = word.substring(0, n) + to;
@@ -178,13 +259,11 @@ function iter_deinflections(word, callback) {
 
 function append_sense(html, sense, reason) {
     if (sense.kanji) {
-        html.push('<dt>');
-        html.push('<a href="https://jisho.org/search/%23kanji%20');
+        html.push('<dt><a href="https://jisho.org/search/%23kanji%20');
         html.push(sense.kanji);
         html.push('">');
         html.push(sense.kanji);
-        html.push('</a>');
-        html.push('</dt><dt>');
+        html.push('</a></dt><dt>');
     }
     html.push(sense.kana);
     if (reason) {
@@ -231,71 +310,8 @@ function set_rikai_from_point(x, y) {
         html = names_html;
     }
 
-    document.querySelector('#rikai dl').innerHTML = html.join('');
+    $('#rikai dl').innerHTML = html.join('');
     return html != [];
 }
-
-function main() {
-    document.querySelectorAll('time').forEach(function(e) {
-        let dt = new Date(e.getAttribute('datetime') || e.innerText);
-        let options = {
-            year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
-            hour: 'numeric', minute: 'numeric', second: 'numeric',
-            timeZoneName: 'short',
-        };
-        e.title = dt.toLocaleString(undefined, options);
-    });
-    document.querySelectorAll('input[name=ruby_toggle]').forEach(function(e) {
-        // radio buttons trigger click event even on keyboard selection
-        e.addEventListener('click', ruby_update);
-    });
-    let mode = localStorage.getItem('ruby_toggle') || 'hover';
-    document.querySelector('input[name=ruby_toggle][value=' + mode + ']').checked = true;
-    ruby_update(null);
-
-    fetch('/static/nhkstories/rikai/deinflect.dat', load_deinflect);
-    fetch('/static/nhkstories/rikai/edict.dat', function(data) { load_edict(edict, data) });
-    fetch('/static/nhkstories/rikai/names.dat', function(data) { load_edict(names, data) });
-
-    let rikai = document.querySelector('#rikai');
-    let rikai_checkbox = document.querySelector('#rikai_auto');
-    let auto_rikai_enabled = rikai_checkbox.checked;
-    rikai_checkbox.addEventListener('input', function(evt) {
-        auto_rikai_enabled = rikai_checkbox.checked;
-    });
-    rikai.addEventListener('click', function(evt) {
-        evt.stopPropagation();
-    });
-    rikai.addEventListener('touchstart', function(evt) {
-        evt.stopPropagation();
-    });
-    document.querySelector('#mask').addEventListener('click', function(evt) {
-        rikai.style.display = 'none';
-    });
-    let touch_enabled = false;
-    window.addEventListener('touchstart', function(evt) {
-        touch_enabled = true;
-        auto_rikai_enabled = false;
-        rikai_checkbox.checked = false;
-    });
-    window.addEventListener('click', function(evt) {
-        if (evt.button !== 0) {
-            return;
-        }
-        if (!set_rikai_from_point(evt.clientX, evt.clientY)) {
-            return;
-        }
-        auto_rikai_enabled = false;
-        rikai_checkbox.checked = false;
-        rikai.style.display = 'block';
-    });
-    window.addEventListener('mousemove', function(evt) {
-        if (!auto_rikai_enabled) {
-            return;
-        }
-        set_rikai_from_point(evt.clientX, evt.clientY);
-    });
-}
-main();
 
 })();
