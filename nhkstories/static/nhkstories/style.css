@@ -30,6 +30,7 @@ main h2 { font-size:28px; color:#24447a; letter-spacing:4px; word-spacing:4px; }
     /* Only Mozilla Firefox does proper hyphenation */
     @media (min-width:30em) { main {text-align:justify;hyphens:auto;} }
 }
+.feed-icon { max-width:20px; }
 
 /* stories */
 article h3 { font:24px sans-serif; margin:0; color:#24447a; }
@@ -39,8 +40,6 @@ article .permalink { float:right; font-variant:uppercase; }
 article { margin-bottom:100px; font-size:20px; overflow-wrap:break-word; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
-/* fix Google Chrome bug where <audio> and <video> show above all */
-audio, video { position:relative; z-index:-1; }
 
 /* rubies */
 ruby>rt { visibility:hidden; }
@@ -63,7 +62,7 @@ aside section {
 }
 @media (max-width:1279px), (max-height:499px) {
     #rikai-container {
-        position:fixed; top:0; width:100%; height:100%;
+        position:fixed; top:0; width:100%; height:100%; z-index:1;
         display:flex; flex-direction:column; justify-content:space-around; align-items:center;
     }
     #rikai-edict, #rikai-names {
