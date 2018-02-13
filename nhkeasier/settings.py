@@ -16,18 +16,18 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '8w@pj1*b1nn@epg(%m3tcq+$kq=4i54cd$qkju6&z=bmlr2)5e'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'nhkeasier.sinon.org', '192.168.1.19']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'nhkeasier.com', '192.168.1.19']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
 
 # error reporting
-ADMINS = ['qsantos@qsantos.fr']
+ADMINS = [('Site administrator', 'contact@nhkeasier.com')]
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'ssl0.ovh.net'
 EMAIL_PORT = 465
-EMAIL_HOST_USER = 'nhkeasier@sinon.org'
-EMAIL_HOST_PASSWORD = 'mXBD9HVL7WFfgzpxHPWQ'
+EMAIL_HOST_USER = 'bugs@nhkeasier.com'
+EMAIL_HOST_PASSWORD = '6ju7lnw7zSMyxcQuma0hQOh7Ydx6GO'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 
