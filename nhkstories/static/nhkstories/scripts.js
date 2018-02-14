@@ -20,11 +20,9 @@ function $$(selector, context) {
 if (!NodeList.prototype.forEach) {
     /* Internet Explorer and Edge... */
     NodeList.prototype.forEach = function(func) {
-            /* Apply func to each element of a NodeList (similar to
-             * Array.forEach) */
         for (var i = 0; i < this.length; i += 1) {
-                    func(this[i]);
-                }
+            func(this[i]);
+        }
     }
 }
 
