@@ -85,6 +85,10 @@ def save_story(info):
         print('Download %s' % image_url)
         with urlopen(image_url) as f:
             story.image.save('', f)
+        subprocess.run(
+            ['mogrify', '-interlace', 'plane', story.image.file.name],
+            check=True
+        )
 
     # voice
     if info['has_news_easy_voice']:
