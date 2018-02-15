@@ -4,7 +4,7 @@ import json
 import datetime
 import tempfile
 import subprocess
-from urllib.request import urlopen
+from urllib.request import urlopen, HTTPError
 
 from django.core.management.base import BaseCommand
 from django.core.files import File
@@ -83,12 +83,16 @@ def save_story(info):
         image_url = None
     if not story.image and image_url is not None:
         print('Download %s' % image_url)
-        with urlopen(image_url) as f:
-            story.image.save('', f)
-        subprocess.run(
-            ['mogrify', '-interlace', 'plane', story.image.file.name],
-            check=True
-        )
+        try:
+            with urlopen(image_url) as f:
+                story.image.save('', f)
+        except HTTPError:
+            pass
+        else:
+            subprocess.run(
+                ['mogrify', '-interlace', 'plane', story.image.file.name],
+                check=True
+            )
 
     # voice
     if info['has_news_easy_voice']:
@@ -98,8 +102,11 @@ def save_story(info):
         voice_url = None
     if not story.voice and voice_url is not None:
         print('Download %s' % voice_url)
-        with urlopen(voice_url) as f:
-            story.voice.save('', f)
+        try:
+            with urlopen(voice_url) as f:
+                story.voice.save('', f)
+        except HTTPError:
+            pass
 
     # video
     stream_base_url = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/'
