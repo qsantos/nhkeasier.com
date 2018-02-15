@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Story
 
 def index(request):
-    stories = Story.objects.order_by('-id')
+    stories = Story.objects.order_by('-published', '-id')
     paginator = Paginator(stories, 10)
 
     page = request.GET.get('page')
