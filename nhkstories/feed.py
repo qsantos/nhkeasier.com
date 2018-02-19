@@ -18,10 +18,17 @@ class LatestStoriesFeed(Feed):
     def item_pubdate(self, item):
         return item.published
 
-    def item_description(self, item):
-        return '<img src="{}"><br><audio src="{}" alt="Story illustration" controls></audio>{}'.format(
-            item.image.url, item.voice.url, item.content_with_ruby,
-        )
+    def item_description(self, story):
+        html = ''
+        if story.video_reencoded:
+            html += '<video src="{}" poster="{}" controls preload="none""></video>'.format(story.video_reencoded.url, story.image.url)
+        elif story.image:
+            html += '<img src="{}" alt="Story illustration">'.format(story.image.url)
+        html += story.content_with_ruby
+        if story.voice:
+            html += '<audio src={} controls preload="none"></audio>'.format(story.voice.url)
+        html += '<a href="https://www3.nhk.or.jp/news/easy/{0}/{0}.html">See on NHK News Web Easy</a> (if still available)'.format(story.story_id)
+        return html
 
     def item_link(self, item):
         return reverse('nhkstories:story', args=[item.id])
