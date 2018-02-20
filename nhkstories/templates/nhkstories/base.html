@@ -4,7 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="flattr:id" content="w150z0">
-<title>NHK News Web Easier - {% block title %}{% endblock %}</title>
+<title>{{ title }} | NHK News Web Easier</title>
+<meta property="og:title" content="{{ title }}" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{{ url }}" />
+{% if description %}
+    <meta name="description" content="{{ description }}">
+    <meta property="og:description" content="{{ description }}" />
+{% endif %}
+{% if image %}<meta property="og:image" content="{{ image }}" />{% endif %}
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
 <header>
@@ -60,7 +68,7 @@
     </div>
 </aside>
 <main>
-<h2>{% block header %}{% endblock %}</h2>
+<h2>{{ header }}</h2>
 {% block content %}
 Something went terribly wrong, I guess.
 {% endblock %}
