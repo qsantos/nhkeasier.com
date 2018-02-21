@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^about/', views.about, name='about'),
     url(r'^tools/', views.tools, name='tools'),
     url(r'^feed/', feed.LatestStoriesFeed(), name='feed'),
-    url(r'^$', views.index, name='index'),
+    url(r'^(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', views.archive, name='archive'),
+    url(r'^$', views.archive, name='index'),
 ]

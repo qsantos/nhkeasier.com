@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timedelta
+from datetime import date
 
 from django.http import HttpResponse
 from django.urls import reverse
@@ -9,23 +9,22 @@ from django.shortcuts import render, get_object_or_404
 
 from .models import Story
 
-def index(request):
-    stories = Story.objects.order_by('-published', '-id')
-    paginator = Paginator(stories, 10)
+def archive(request, year=None, month=None, day=None):
+    if year is not None and month is not None and day is not None:
+        day = date(int(year), int(month), int(day))
+        header = 'Stories on {}'.format(day)
+    else:
+        day = Story.objects.order_by('-published').first().published.date()
+        header = 'Latest stories'
 
-    page = request.GET.get('page')
-    try:
-        stories = paginator.page(page)
-    except PageNotAnInteger:
-        stories = paginator.page(1)
-    except EmptyPage:
-        stories = paginator.page(paginator.num_pages)
-
+    stories = Story.objects.filter(published__date=day).order_by('-published', '-id')
+    previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
+    next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
     url = request.build_absolute_uri(reverse('nhkstories:index'))
     return render(request, 'nhkstories/index.html', {
         'url': url,
         'title': 'Easier Japanese practice',
-        'header': 'Latest stories',
+        'header': header,
         'description': 
             'Come practice reading and listening to Japanese with recent news '
             'stories! Simple vocabulary, simple kanji and simple sentence '
@@ -33,6 +32,9 @@ def index(request):
             'integrated dictionary will let you train until you get more '
             'comfortable for harder materials.',
         'stories': stories,
+        'previous_day': previous_day,
+        'day': day,
+        'next_day': next_day,
     })
 
 

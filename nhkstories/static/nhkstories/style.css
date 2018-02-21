@@ -17,11 +17,18 @@ header nav ul { list-style-type:none; margin:0; padding:0; display:flex; justify
 header nav li { display:inline-block; padding:10px; }
 header nav a { color: #ccc; }
 
-/* navigation bars */
+/* pagination */
 main nav { font-size:x-large; }
-main nav>table { table-layout:fixed; margin:0 auto; }
-main nav td { text-align:center; padding:5px; }
-main nav td:nth-child(3) { min-width:4em; }
+main nav ul { list-style-type:none; padding:0; }
+@media (max-width:639px) {
+    main nav li { width:100%; text-align:center; }
+}
+@media (min-width:640px) {
+    main nav ul { display:flex; }
+    main nav li { width:10em; }
+    main nav li:nth-child(2) { text-align:center; }
+    main nav li:last-child { text-align:right; }
+}
 
 /* content */
 main { max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
