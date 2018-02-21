@@ -87,7 +87,7 @@ def save_story(info):
             with urlopen(image_url) as f:
                 story.image.save('', f)
         except HTTPError:
-            pass
+            print('Failed')
         else:
             subprocess.run(
                 ['mogrify', '-interlace', 'plane', story.image.file.name],
