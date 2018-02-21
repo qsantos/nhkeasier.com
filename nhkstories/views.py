@@ -21,6 +21,7 @@ def archive(request, year=None, month=None, day=None):
     previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
     next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
     url = request.build_absolute_uri(reverse('nhkstories:index'))
+    image = request.build_absolute_uri(stories.exclude(image='').first().image.url)
     return render(request, 'nhkstories/index.html', {
         'url': url,
         'title': 'Easier Japanese practice',
@@ -31,6 +32,7 @@ def archive(request, year=None, month=None, day=None):
             'structures, as well as kanji readings (furigana) and an '
             'integrated dictionary will let you train until you get more '
             'comfortable for harder materials.',
+        'image': image,
         'stories': stories,
         'previous_day': previous_day,
         'day': day,
