@@ -45,6 +45,10 @@ def remove_all_html(content):
 
 def story(request, id):
     story = get_object_or_404(Story, pk=id)
+    previous_stories = Story.objects.filter(published__date=story.published.date(), id__lt=story.id) | Story.objects.filter(published__date__lt=story.published.date())
+    previous_story = previous_stories.order_by('-published', '-id').first()
+    next_stories = Story.objects.filter(published__date=story.published.date(), id__gt=story.id) | Story.objects.filter(published__date__gt=story.published.date())
+    next_story = next_stories.order_by('published', 'id').first()
     url = request.build_absolute_uri(reverse('nhkstories:story', args=(id,))),
     image = request.build_absolute_uri(story.image.url) if story.image else None
     return render(request, 'nhkstories/story.html', {
@@ -54,6 +58,8 @@ def story(request, id):
         'description': remove_all_html(story.content),
         'image': image,
         'story': story,
+        'previous_story': previous_story,
+        'next_story': next_story,
     })
 
 
