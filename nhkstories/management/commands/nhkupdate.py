@@ -31,7 +31,11 @@ def clean_up_content(content):
 
 
 def remove_ruby(content):
+    content = re.sub('<rp>.*?</rp>', '', content)
     content = re.sub('<rt>.*?</rt>', '', content)
+    content = re.sub('<rtc>.*?</rtc>', '', content)
+    content = content.replace('<rb>', '')
+    content = content.replace('</rb>', '')
     content = content.replace('</ruby>', '')
     content = content.replace('<ruby>', '')
     return content
