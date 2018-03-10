@@ -41,6 +41,7 @@
 すて /(f) Sute/
 そを /(f) Soo (Sowo)/
 たけを /(m) Takeo (Takewo)/
+たみん /(f) Tamin/
 たると /(f) Taruto/
 ちてき /(g) Chiteki/
 ちると /(f) Chiruto/
@@ -78,6 +79,7 @@
 やまゆり /(f) Yamayuri/
 やまゆり園 [やまゆりえん] /(p) Yamayurien/
 ゆり園 [ゆりえん] /(p) Yurien/
+より子 [よりこ] /(f) Yoriko/
 らうな /(f) Rauna/
 らだ /(f) Rada/
 りから /(f) Rikara/
@@ -85,6 +87,7 @@
 りにい /(f) Rinii/
 りみん /(f) Rimin/
 りや子 [りやこ] /(f) Riyako/
+るいす /(f) Ruisu/
 るに /(f) Runi/
 る奈 [るな] /(f) Runa/
 る実 [るみ] /(f) Rumi/
@@ -140,6 +143,7 @@
 アリババ /(u) Ali Baba/
 アリン /(p) Allyn/
 アリー /(u) Ally/Arye/
+アリーナ /(f) Ari-na/Alina/
 アル /(u) Al/
 アルゼン /(u) Alsen/
 アルゼンチン /(p) Argentina/
@@ -160,6 +164,8 @@
 アレッポ /(p) Aleppo (Syria)/
 アレル /(u) Harel/
 アン /(f) An/Ane/Ang/Ann/Anne/(p) Hens (France)/
+アンカ /(u) Anka/
+アンカラ /(p) Ankara (capital of Turkey)/
 アンコ /(f) Anko/
 アンコール /(p) Angkor (Cambodia)/
 アンジ /(f) Anji/
@@ -241,7 +247,9 @@
 イー /(u) Yi/Ii/
 ウィスコンシン /(p) Wisconsin/
 ウィスコンシン州 [ウィスコンシンしゅう] /(p) Wisconsin/
+ウィリアム /(u) Wiliam/William/
 ウィン /(u) Winn/
+ウィンストン /(s) Whinston/Winston/Wiston/
 ウィー /(pr) Wii (Nintendo video games console)/
 ウィーン /(p) Vienna/Wien (Austria)/
 ウイ /(p) Huy/
@@ -373,6 +381,7 @@
 カタルーニャ /(p) Catalonia/
 カタール /(p) Qatar/
 カッシーニ /(s) Cassini/Casini/
+カット /(u) Katt/
 カツ /(f) Katsu/(p) Catu/
 カトマンズ /(p) Katmandu (Nepal)/
 カトリ /(u) Khatri/
@@ -455,6 +464,7 @@
 キト /(p) Quito (Ecuador)/
 キトラ古墳 [キトラこふん] /(p) Kitora Tumulus/
 キャッシュ /(s) Cash/
+キャップ /(u) Capp/Kapp/
 キャラ /(u) Cara/
 キャリア /(u) Carrier/
 キャン /(u) Camps/(p) Quillan/
@@ -859,6 +869,7 @@
 セネ /(u) Czene/
 セネガル /(p) Senegal/
 セル /(u) Szell/
+セルビア /(p) Serbia/
 セン /(f) Sen/
 センタ /(p) Senta/
 センター /(u) Senter/
@@ -873,6 +884,7 @@
 ゼン /(u) Senn/
 ソウ /(u) Thaw/
 ソウル /(p) Seoul (South Korea)/(s) Saul/
+ソチ /(p) Sochi (Russia)/
 ソナタ /(f) Sonata/
 ソニック /(pr) Sonic (the Hedgehog) (video game series)/
 ソニー /(c) Sony/
@@ -947,6 +959,7 @@
 ダウ /(u) Dau/Dow/
 ダウン /(u) Daun/Down/
 ダク /(u) Duk/
+ダクラ /(p) Dahkla/
 ダニ /(u) Dani/
 ダニエル /(u) Daniel/Daniele/Danielle/Daniell/
 ダビ /(u) Dabit/
@@ -987,6 +1000,7 @@
 チャン /(f,s) Chan/Chiang/Tran/
 チャー /(g) Cha/
 チャーチ /(u) Chruch/Church/
+チャーチル /(p) Churchill (Canada)/
 チュー /(p) Chu (Russia)/
 チョ /(u) Cho/
 チョウ /(u) Choue/
@@ -1034,6 +1048,7 @@
 テル /(f) Teru/
 テルアビブ /(p) Tel Aviv/Tel Aviv-Giaffa/Tel Aviv-Jaffa/Tel Aviv-Yafo/
 テルブ /(p) Terbu/
+テル代 [テルよ] /(f) Teruyo/
 テン /(u) Tenn/
 テート /(u) Teyte/
 デ /(u) De/Des/
@@ -1213,6 +1228,7 @@
 ノー /(u) Nau/
 ノート /(u) Noth/Noto/
 ノーベル /(s) Nobel/
+ノーボ /(u) Norvo/
 ハ /(p) Wa/
 ハイ /(p) Al-Hayy (Iraq)/High/Hy/
 ハイマー /(u) Hymer/
@@ -1245,6 +1261,8 @@
 ハン /(u) Hann/Khan/
 ハンガリー /(p) Hungary/
 ハンソル /(u) Hansol/
+ハンド /(u) Hand/Handt/
+ハンドル /(u) Handl/
 ハンブル /(u) Humble/
 ハンブルク /(p) Hamburg/Hambourg/
 ハー /(u) Herr/
@@ -1439,6 +1457,8 @@
 ブリュッセル /(p) Bruxelles/
 ブル /(u) Bull/
 ブルク /(p) Bourg (France)/Burg/
+ブルワー /(p) Bulwer/
+ブルワーズ /(o) Milwaukee Brewers/
 ブルー /(f) Buru/
 ブレー /(p) Bray/Bree/
 ブロ /(g) Buro/
@@ -1468,6 +1488,7 @@
 プーケット /(p) Phuket (Thailand)/
 プーチン /(s) Putin/
 プール /(p) Poole (Britain)/Pool/
+ヘア /(u) Hare/
 ヘイ /(u) Hay/Hey/
 ヘイズ /(u) Hayes/Hays/
 ヘブロン /(u) Hebron/
@@ -1603,6 +1624,7 @@
 マコー /(p) Mako/
 マサ /(f) Masa/
 マサチューセッツ /(p) Massachusetts/
+マサル /(g) Masaru/
 マサン /(p) Masan/
 マス /(f) Masu/
 マスコ /(g) Masuko/
@@ -1628,6 +1650,7 @@
 マナ /(p) Mana/
 マナウス /(p) Manaus (Brazil)/
 マニ /(f) Mani/
+マニア /(f) Mania/
 マニラ /(p) Manila (Philipines)/
 マフラ /(p) Mafra (Portugal)/
 マホ /(f) Maho/
@@ -1819,9 +1842,11 @@
 ラジ /(u) Raji/
 ラジン /(p) Rajin/
 ラス /(u) Russ/
+ラスト /(u) Last/Rast/
 ラスベガス /(p) Las Vegas/
 ラセ /(u) Rasse/
 ラダ /(f) Lada/Radha/
+ラダク /(p) Ladakh/
 ラッカ /(p) Ar-Raqqah (Syria)/Raqqa/
 ラック /(p) Lacq (France)/Lach/Lack/Luck/Ruck/
 ラックス /(u) Lax/Luks/
@@ -1865,6 +1890,7 @@
 ラー /(p) Laa/Lahr/
 ラート /(u) Lert/
 リア /(f) Ria/Leah/
+リアム /(u) Liam/
 リアル /(u) Rial/Riehl/Ryall/
 リアン /(u) LeAnn/
 リイ /(f) Rii/
@@ -1953,6 +1979,7 @@
 ルネ /(f) Renee/Rene/Rena/
 ルバ /(p) Luba/Le/Bas/Va/
 ルバニ /(p) Luban/
+ルビア /(u) Rubbia/
 ルビン /(p) Lubin/Rubin/
 ルビー /(p) Ruby/
 ルフラン /(u) Lefranc/
@@ -1974,6 +2001,7 @@
 ルーブル /(p) Louvres/
 ルーブル美術館 [ルーブルびじゅつかん] /(p) muse'e du Louvre -,/
 ループ /(u) Lupe/
+ルーマ /(p) Ruma/
 ルール /(u) Rule/
 ルーレ /(u) Roulet/Roullet/
 レ /(u) Le/
@@ -2088,6 +2116,7 @@
 ワルツ /(u) Walz/
 ワン /(u) Wann/Wong/
 ワーク /(u) Work/
+ワーズ /(u) Wirz/
 ワーテルロー /(p) Waterloo/
 ワード /(u) Ward/
 ワール /(u) Waal/Wahl/
@@ -2103,6 +2132,7 @@
 一平 [かずへい] /(u) Kazuhei/
 一年 [かずとし] /(m) Kazutoshi/
 一度 [いったく] /(s) Ittaku/
+一弘 [かつひろ] /(u) Katsuhiro/
 一本 [ひともと] /(s) Hitomoto/
 一本松 [いっぽんまつ] /(p,s) Ipponmatsu/
 一波 [いっぱ] /(g) Ippa/
@@ -2155,7 +2185,11 @@
 三手 [みて] /(p) Mite/
 三摩 [さんま] /(s) Sanma/
 三段 [さんだん] /(s) Sandan/
+三沢 [みつざわ] /(s) Mitsuzawa/
+三沢市 [みさわし] /(p) Misawa (city)/
 三洋 [みひろ] /(u) Mihiro/
+三津 [みと] /(p,s) Mito/
+三津村 [みつむら] /(s) Mitsumura/
 三浦 [みらう] /(s) Mirau/
 三浦知良 [みうらかずよし] /(h) Miura Kazuyoshi (1967.2-)/
 三瀬 [させ] /(s) Sase/
@@ -2170,6 +2204,7 @@
 三輪 [みわ] /(p,s,f) Miwa/
 三輪山 [みわやま] /(s) Miwayama/
 三重 [みつしげ] /(u) Mitsushige/
+三重大学 [みえだいがく] /(p) Mie University/
 三重県 [みえけん] /(p) Mie Prefecture/
 三間 [みま] /(p,s) Mima/
 三陸 [さんりく] /(p) Sanriku/
@@ -2271,6 +2306,7 @@
 中国地方 [ちゅうごくちほう] /(p) Chuugokuchihou/
 中国科学院 [ちゅうごくかがくいん] /(o) Chinese Academy of Sciences/
 中央 [まお] /(f) Mao/
+中央アフリカ [ちゅうおうアフリカ] /(p) Central Africa/
 中央区 [ちゅうおうく] /(p) Chuuouku (in Tokyo)/
 中央郵便局 [ちゅうおうゆうびんきょく] /(p) Chuuouyuubinkyoku/
 中将 [ちゅうじょう] /(p) Chuujou/
@@ -2397,6 +2433,7 @@
 事故 [じこ] /(s) Jiko/
 二 [ふた] /(p) Futa/
 二一 [にいち] /(g) Niichi/
+二串 [にくし] /(s) Nikushi/
 二丸 [にまる] /(s) Nimaru/
 二井内 [にいない] /(s) Niinai/
 二区 [にく] /(p) Niku/
@@ -2440,6 +2477,7 @@
 五島 [ごどう] /(s) Godou/
 五島列島 [ごとうれっとう] /(p) Gotou Archipelago/
 五戸 [いつど] /(s) Itsudo/
+五月 [めい] /(f) Mei/
 五本 [いつもと] /(s) Itsumoto/
 五百家 [いうか] /(p) Iuka/
 五百瀬 [いおせ] /(s) Iose/
@@ -2510,6 +2548,7 @@
 人形 [ひとがた] /(s) Hitogata/
 人形町 [にんぎょうちょう] /(p) Ningyouchou/
 人権協会 [じんけんきょうかい] /(o) Civil Rights Association/
+人生 [ひとは] /(f) Hitoha/
 人神 [にんじん] /(p) Ninjin/
 人見 [ひとみ] /(p,s,f) Hitomi/
 人魚 [ひとな] /(f) Hitona/
@@ -2533,6 +2572,7 @@
 仁鎌 [にかま] /(s) Nikama/
 今 [いま] /(s) Ima/
 今 [やきにく] /(s) Yakiniku/
+今き [いまき] /(s) Imaki/
 今下 [いました] /(s) Imashita/
 今出 [いまで] /(p,s) Imade/
 今出 [こんで] /(s) Konde/
@@ -2580,6 +2620,7 @@
 仰 [たかし] /(g) Takashi/
 仲 [なかむら] /(u) Nakamura/
 仲保 [なかぼ] /(s) Nakabo/
+仲出 [なかで] /(s) Nakade/
 仲嘉 [なかが] /(s) Nakaga/
 仲間 [びびあな] /(s) Bibiana/
 仲馬 [なかうま] /(s) Nakauma/
@@ -2593,6 +2634,7 @@
 伊勢 [とせ] /(s) Tose/
 伊勢崎 [いせざき] /(s) Isezaki/
 伊勢崎市 [いせさきし] /(p) Isesaki (city)/
+伊勢神宮 [いせじんぐう] /(p) Ise Grand Shrine/
 伊方 [いがた] /(u) Igata/
 伊東 [いとう] /(p,s) Itou/
 伊東明 [いとうあきら] /(h) Itou Akira (1969.8.16-)/
@@ -2651,6 +2693,7 @@
 佐官 [さかん] /(s) Sakan/
 佐川 [さがわ] /(p,s) Sagawa/
 佐川急便 [さがわきゅうびん] /(c) Sagawa Express (parcel delivery company)/
+佐義名 [さぎな] /(s) Sagina/
 佐茂 [さも] /(s) Samo/
 佐藤 [しとう] /(s) Shitou/
 佐藤愛子 [さとうあいこ] /(h) Satou Aiko (1923.11-)/
@@ -2658,6 +2701,7 @@
 佐賀 [さが] /(p,s) Saga/
 佐賀市 [さがし] /(p) Saga (city)/
 佐賀県 [さがけん] /(p) Saga Prefecture/
+佐野田 [さのた] /(s) Sanota/
 佐馬野 [さまの] /(s) Samano/
 佑由 [うゆ] /(f) Uyu/
 体山 [たいざん] /(g) Taizan/
@@ -2772,6 +2816,7 @@
 元気 [もとき] /(f) Motoki/
 元肥土 [もとひど] /(p) Motohido/
 兄 [けい] /(u) Kei/
+兄弟 [きょうだい] /(u) Kyoudai/
 充 [むねざわ] /(u) Munezawa/
 兆 [とき] /(u) Toki/
 先 [ひろさき] /(s) Hirosaki/
@@ -2788,6 +2833,7 @@
 光謙 [みのる] /(u) Minoru/
 光雲 [みつも] /(f) Mitsumo/
 克 [よし] /(g) Yoshi/
+克徳 [かつのり] /(m) Katsunori/
 免 [ゆるす] /(s) Yurusu/
 児 [こさき] /(s) Kosaki/
 児島 [こじま] /(p,s) Kojima/
@@ -2798,6 +2844,7 @@
 兒野 [ちごの] /(s) Chigono/
 党 [とう] /(s) Tou/
 入 [かえる] /(s) Kaeru/
+入井 [いるい] /(s) Irui/
 入佐 [いさ] /(s) Isa/
 入倉 [にゅうぐら] /(p) Nyuugura/
 入国 [いりくに] /(s) Irikuni/
@@ -2893,6 +2940,7 @@
 冒 [ほうねん] /(u) Hounen/
 写 [つぎや] /(u) Tsugiya/
 冠 [まさる] /(g) Masaru/
+冨樫 [とかき] /(s) Tokaki/
 冬 [ふゆ] /(f) Fuyu/
 冬父 [とぶ] /(p) Tobu/
 冲田 [おきた] /(s) Okita/
@@ -2942,11 +2990,13 @@
 出橋 [ではし] /(s) Dehashi/
 出毛 [でもう] /(p) Demou/
 出水 [ですい] /(s) Desui/
+出洲 [でず] /(p) Dezu/
 出海 [でかい] /(u) Dekai/
 出渕 [いず] /(s) Izu/
 出湯 [でゆ] /(p,s) Deyu/
 出濱 [ではま] /(s) Dehama/
 出版 [しゅっぱん] /(s) Shuppan/
+出版科学研究所 [しゅっぱんかがくけんきゅうじょ] /(o) Research Institute for Publications/
 出田 [でた] /(p,s) Deta/
 出田 [でだ] /(p,s) Deda/
 出町 [でまち] /(p,s) Demachi/
@@ -2964,6 +3014,8 @@
 出野 [での] /(s) Deno/
 出間 [でま] /(s) Dema/
 出雲 [いつも] /(p) Itsumo/
+出雲 [でぐも] /(s) Degumo/
+出雲市 [いずもし] /(p) Izumo (city)/
 出頭 [でどう] /(s) Dedou/
 出馬 [でうま] /(s) Deuma/
 函館 [はこだて] /(p,s) Hakodate/
@@ -3071,6 +3123,7 @@
 勝 [まさる] /(f,s) Masaru/
 勝山 [しょうざん] /(g) Shouzan/
 勝山市 [かつやまし] /(p) Katsuyama (city)/
+勝征 [かつゆき] /(g) Katsuyuki/
 勝手 [かって] /(p) Katte/
 勝浦 [かつうら] /(p,s) Katsuura/
 勝浦町 [かつうらちょう] /(p) Katsuurachou/
@@ -3082,6 +3135,7 @@
 勢亡 [せいぼう] /(p) Seibou/
 勢博 [せいひろ] /(u) Seihiro/
 勢馬 [せま] /(s) Sema/
+勤 [つとめ] /(u) Tsutome/
 勧 [つとむ] /(m) Tsutomu/
 勲 [つとむ] /(m) Tsutomu/
 匂 [かおる] /(m,f) Kaoru/
@@ -3107,6 +3161,7 @@
 北方領土 [ほっぽうりょうど] /(p) the Northern Territories/
 北日本 [きたにほん] /(p) Kitanihon/
 北朝鮮 [きたちょうせん] /(p) Kitachousen/
+北来 [きたらい] /(s) Kitarai/
 北極 [ほっきょく] /(p) Hokkyoku/
 北海 [ほっかい] /(s) Hokkai/
 北海道 [ほっかいどう] /(p) Hokkaidou (island prefecture in the north)/
@@ -3121,6 +3176,7 @@
 北谷 [ちゃたん] /(p,s) Chatan/
 北谷町 [ちゃたんちょう] /(p) Chatanchou/
 北部 [ほくぶ] /(p,s) Hokubu/
+北野田 [きたのだ] /(p) Kitanoda/
 北陸 [ほくりく] /(p,s) Hokuriku/
 北陸電力 [ほくりくでんりょく] /(c) Hokuriku Electrical Power/
 匹 [ひき] /(s) Hiki/
@@ -3161,6 +3217,7 @@
 千葉県 [ちばけん] /(p) Chiba Prefecture/
 千足 [ちたり] /(f) Chitari/
 千野 [ゆきの] /(f) Yukino/
+千野町 [ちのまち] /(p) Chinomachi/
 千露 [ちろ] /(f) Chiro/
 千鹿谷 [ちがや] /(p) Chigaya/
 午 [こごえ] /(u) Kogoe/
@@ -3190,6 +3247,7 @@
 南沙 [なんさ] /(p) Nansa/
 南海 [みなみうみ] /(s) Minamiumi/
 南瓜 [かぼちゃ] /(f) Kabocha/
+南町 [みなみまち] /(p) Minamimachi/
 南砂 [なさ] /(f) Nasa/
 南花 [なのか] /(f) Nanoka/
 南西 [みなみにし] /(s) Minaminishi/
@@ -3210,6 +3268,7 @@
 博物館 [はくぶつかん] /(p) Hakubutsukan/
 卞 [び] /(s) Bi/
 卞云 [かう] /(s) Kau/
+占婆 [チャンパ] /(p) (ancient Vietnamese kingdom)/
 卯乃香 [うのか] /(f) Unoka/
 卯華凪 [うかな] /(f) Ukana/
 卯西 [うにし] /(s) Unishi/
@@ -3234,6 +3293,7 @@
 厳麗 [いつり] /(u) Itsuri/
 参 [はかる] /(g) Hakaru/
 参野 [さんの] /(s) Sanno/
+又 [また] /(s) Mata/
 又江 [おの] /(s) Ono/
 友 [ゆうじ] /(u) Yuuji/
 友吾 [ともあ] /(m) Tomoa/
@@ -3266,6 +3326,7 @@
 古市 [ふるうち] /(s) Furuuchi/
 古戦場 [こせんじょう] /(p) Kosenjou/
 古本 [ふるもと] /(s) Furumoto/
+古櫓多 [ごろだ] /(p) Goroda/
 古謝 [こしや] /(s) Koshiya/
 古都志 [ことし] /(u) Kotoshi/
 只 [し] /(u) Shi/
@@ -3387,6 +3448,7 @@
 和 [わたる] /(g) Wataru/
 和也 [まさや] /(g) Masaya/
 和人 [よりと] /(g) Yorito/
+和佳 [やわか] /(f) Yawaka/
 和公 [わこう] /(s) Wakou/
 和博 [やすひろ] /(u) Yasuhiro/
 和名 [わな] /(p) Wana/
@@ -3412,6 +3474,7 @@
 和紗 [あさ] /(f) Asa/
 和良地 [わらじ] /(s) Waraji/
 和葉 [かよ] /(f) Kayo/
+和里田 [わりた] /(s) Warita/
 和野 [かずの] /(s) Kazuno/
 和野 [わの] /(p,s) Wano/
 和音 [おと] /(f) Oto/
@@ -3445,6 +3508,7 @@
 唐菜 [からな] /(f,s) Karana/
 唐辛 [とうがらし] /(s) Tougarashi/
 唐音 [からおと] /(p) Karaoto/
+唯井 [ただい] /(s) Tadai/
 唯亜 [いあ] /(f) Ia/
 唯祝 [いのり] /(f) Inori/
 唱 [とのお] /(s) Tonoo/
@@ -3551,6 +3615,7 @@
 土本 [どもと] /(p,s) Domoto/
 土気 [とけ] /(p) Toke/
 土池 [どいけ] /(s) Doike/
+土海 [とかい] /(s) Tokai/
 土生 [どいく] /(s) Doiku/
 土生 [どき] /(s) Doki/
 土生都 [はぶつ] /(s) Habutsu/
@@ -3667,6 +3732,7 @@
 壱番 [いちばん] /(p) Ichiban/
 売布 [めふ] /(p) Mefu/
 壹与 [いよ] /(f) Iyo/
+壽々 [すず] /(f) Suzu/
 壽華 [としか] /(f) Toshika/
 夏 [ぱいん] /(f) Pain/
 夏々梨 [かかり] /(f) Kakari/
@@ -3721,6 +3787,7 @@
 夢子 [むこ] /(f) Muko/
 夢琴 [むこと] /(f) Mukoto/
 夢花 [むか] /(f) Muka/
+夢茉 [むま] /(f) Muma/
 夢葉 [むよう] /(u) Muyou/
 夢露 [めろ] /(f) Mero/
 大 [ゆたか] /(g) Yutaka/
@@ -3765,8 +3832,11 @@
 大文字 [だいもんじ] /(p,s) Daimonji/
 大文字山 [だいもんじやま] /(u) Daimonjiyama/
 大日 [だいにち] /(p,s) Dainichi/
+大智 [ひろとも] /(u) Hirotomo/
 大曲 [おおまげ] /(s) Oomage/
 大東 [だいどう] /(s) Daidou/
+大林 [たいりん] /(g) Tairin/
+大林宣彦 [おおばやしのぶひこ] /(h) Oobayashi Nobuhiko (1938.1-)/
 大根 [だいこん] /(f) Daikon/
 大気 [ひろき] /(u) Hiroki/
 大沼 [おぬま] /(s) Onuma/
@@ -3792,6 +3862,7 @@
 大神 [だいじん] /(p,s) Daijin/
 大神神社 [だいじんじんじゃ] /(p) Daijin Shrine/
 大縄 [おおなわ] /(s) Oonawa/
+大翔 [だいと] /(m) Daito/
 大臣 [ひろおみ] /(u) Hiroomi/
 大船 [だいせん] /(g) Daisen/
 大船渡 [おおふなと] /(p) Oofunato/
@@ -3940,6 +4011,7 @@
 子鉄 [してつ] /(g) Shitetsu/
 字 [あざ] /(p) Aza/
 字山 [あざやま] /(s) Azayama/
+存 [やすし] /(g) Yasushi/
 孝 [やすあき] /(g) Yasuaki/
 孟子 [もうし] /(h) Mencius (372-289 BCE)/
 孟買 [ムンバイ] /(p) Mumbai (India)/
@@ -3958,6 +4030,7 @@
 宇世 [うよ] /(f,s) Uyo/
 宇丹 [うたん] /(s) Utan/
 宇仁田 [うにた] /(s) Unita/
+宇内 [うだい] /(s) Udai/
 宇利 [うとし] /(s) Utoshi/
 宇加津 [うかつ] /(s) Ukatsu/
 宇加谷 [うかや] /(s) Ukaya/
@@ -4030,6 +4103,7 @@
 実 [みのる] /(m,f) Minoru/
 客 [きやく] /(s) Kiyaku/
 宣 [よしひろ] /(u) Yoshihiro/
+宣彦 [よしひこ] /(m) Yoshihiko/
 室 [むろらん] /(u) Muroran/
 室市 [むろいち] /(s) Muroichi/
 室町 [もろまち] /(s) Moromachi/
@@ -4046,12 +4120,14 @@
 宮城 [みやんじょう] /(s) Miyanjou/
 宮城県 [みやぎけん] /(p) Miyagi Prefecture/
 宮崎 [みやざき] /(p,s) Miyazaki/
+宮崎市 [みやざきし] /(p) Miyazaki (city)/
 宮崎県 [みやざきけん] /(p) Miyazaki Prefecture/
 宮市 [みやいち] /(p,s,g) Miyaichi/
 宮平 [みやひら] /(p,s) Miyahira/
 宮幸 [みやこ] /(s) Miyako/
 宮本 [みやもと] /(p,s) Miyamoto/
 宮正 [みやしょう] /(s) Miyashou/
+宮輪 [みやわ] /(s) Miyawa/
 宮里 [みやり] /(s) Miyari/
 宮里藍 [みやざとあい] /(h) Miyazato Ai (1985.6.19-)/
 宮野 [みやの] /(p,s,f) Miyano/
@@ -4065,6 +4141,8 @@
 宿輪 [しくわ] /(s) Shikuwa/
 寂 [よしか] /(f) Yoshika/
 寄 [よりざき] /(s) Yorizaki/
+寅 [ふさ] /(s) Fusa/
+寅さん [とらさん] /(u) Tora-san (leading character from Japanese movie series "Otoko wa Tsurai yo")/
 密 [みつ] /(f,s) Mitsu/
 富 [ゆたか] /(s,g) Yutaka/
 富久 [ふく] /(f,s) Fuku/
@@ -4142,6 +4220,9 @@
 小室 [さがみずし] /(s) Sagamizushi/
 小屋 [こや] /(p,s) Koya/
 小屋島 [こやじま] /(u) Koyajima/
+小川 [こがわ] /(p,s) Kogawa/
+小川原 [こがわら] /(p) Kogawara/
+小川原湖 [おがはちこ] /(u) Ogahachiko/
 小平 [しょうへい] /(s) Shouhei/
 小平市 [こだいらし] /(p) Kodaira (city)/
 小戸川 [ことがわ] /(p) Kotogawa/
@@ -4160,6 +4241,8 @@
 小牧 [こまぎ] /(p) Komagi/
 小牧市 [こまきし] /(p) Komaki (city)/
 小田 [やないだ] /(p) Yanaida/
+小田原 [こだわら] /(p) Kodawara/
+小田原市 [おだわらし] /(p) Odawara (city)/
 小田急 [おだきゅう] /(p) Odakyu (department store & train line)/
 小笠 [こがさ] /(s) Kogasa/
 小笠原 [こがさわら] /(s) Kogasawara/
@@ -4178,6 +4261,7 @@
 小野寺 [このでら] /(s) Konodera/
 小野田 [このた] /(s) Konota/
 小野田 [めいり] /(s) Meiri/
+小駒 [ここま] /(s) Kokoma/
 小高 [こだか] /(p,s) Kodaka/
 小高駅 [おだかえき] /(st) Odaka Station/
 小鹿 [こしが] /(s) Koshiga/
@@ -4213,6 +4297,8 @@
 尾花 [おばな] /(f,s) Obana/
 尾花沢 [おばなざわ] /(p) Obanazawa/
 尾花沢市 [おばなざわし] /(p) Obanazawa (city)/
+尾道 [おみち] /(s) Omichi/
+尾道市 [おのみちし] /(p) Onomichi (city)/
 尾那 [おな] /(s) Ona/
 局 [つぼね] /(f,s) Tsubone/
 屁奈 [へな] /(s) Hena/
@@ -4266,10 +4352,12 @@
 山本 [やもまと] /(s) Yamomato/
 山本耕史 [やまもとこうじ] /(h) Yamamoto Kouji (1976.10.31-)/
 山梨 [やまなし] /(p,s) Yamanashi/
+山梨学院大学 [やまなしがくいんだいがく] /(p) Yamanashi Gakuin University/
 山梨県 [やまなしけん] /(p) Yamanashi Prefecture/
 山水 [やまみず] /(s) Yamamizu/
 山浅 [やまあさ] /(s) Yamaasa/
 山海 [さんかい] /(s) Sankai/
+山田 [よまだ] /(s) Yomada/
 山県 [やまむら] /(s) Yamamura/
 山神 [やまがみ] /(p,s) Yamagami/
 山神社 [やまのかみしゃ] /(u) Yamanokamisha/
@@ -4289,6 +4377,7 @@
 屶納 [なたの] /(s) Natano/
 岐 [ふなと] /(s) Funato/
 岐阜 [ぎふ] /(p,s) Gifu/
+岐阜市 [ぎふし] /(p) Gifu (city)/
 岐阜県 [ぎふけん] /(p) Gifu Prefecture/
 岡 [おか] /(p,s) Oka/
 岡山 [おかやま] /(p,s) Okayama/
@@ -4355,6 +4444,7 @@
 川内原 [かわないはら] /(p) Kawanaihara/
 川内村 [かわうちむら] /(p) Kawauchimura/
 川南 [かわみなみ] /(p,s) Kawaminami/
+川原 [こうばら] /(u) Koubara/
 川口 [かわぐち] /(p,s) Kawaguchi/
 川口市 [かわぐちし] /(p) Kawaguchi (city)/
 川図 [かわず] /(s) Kawazu/
@@ -4419,6 +4509,8 @@
 帝京大学 [ていきょうだいがく] /(p) Teikyou University/
 帝国ホテル [ていこくホテル] /(p) Imperial Hotel (in Tokyo)/
 帝耀 [たいよう] /(u) Taiyou/
+帝釈 [たいしやく] /(s) Taishiyaku/
+帝釈天 [たいしゃくてん] /(u) Taishakuten/
 師 [もろさき] /(s) Morosaki/
 席 [せき] /(s) Seki/
 帯 [おび] /(s) Obi/
@@ -4488,6 +4580,7 @@
 年未 [としみ] /(s) Toshimi/
 年松 [としまつ] /(g) Toshimatsu/
 年柄 [としから] /(p) Toshikara/
+年梅 [ねんばい] /(s) Nenbai/
 年正 [としまさ] /(g) Toshimasa/
 年生 [としお] /(g) Toshio/
 年秋 [としあき] /(u) Toshiaki/
@@ -4609,10 +4702,12 @@
 彭 [ご] /(u) Go/
 彭 [ぽん] /(s) Pon/
 彭 [みつる] /(g) Mitsuru/
+彰 [しょう] /(g) Shou/
 影 [かげ] /(s) Kage/
 役 [まもる] /(g) Mamoru/
 役所 [やくしょ] /(s) Yakusho/
 往 [のぼり] /(u) Nobori/
+征 [やく] /(u) Yaku/
 径 [わたる] /(u) Wataru/
 律 [りつじ] /(u) Ritsuji/
 後 [のち] /(s) Nochi/
@@ -4897,6 +4992,7 @@
 揚 [よう] /(f,s) You/
 揚田 [あげた] /(s) Ageta/
 換 [かん] /(u) Kan/
+握 [にぎり] /(p) Nigiri/
 援 [たすく] /(g) Tasuku/
 揺 [よう] /(f) You/
 損 [たくじ] /(u) Takuji/
@@ -5151,6 +5247,7 @@
 晏 [あん] /(f,s) An/
 晏侑 [あゆ] /(f) Ayu/
 晏野 [あんの] /(f) Anno/
+晩 [ばん] /(s) Ban/
 晩田 [ばんで] /(p) Bande/
 普 [ふかつ] /(u) Fukatsu/
 普天 [ふてん] /(g) Futen/
@@ -5184,6 +5281,7 @@
 暁 [ゆたか] /(u) Yutaka/
 暁光 [ぎょうこう] /(u) Gyoukou/
 暁波 [あけは] /(f) Akeha/
+暉範 [てるの] /(u) Teruno/
 暑 [あつ] /(f) Atsu/
 暖 [ゆとり] /(u) Yutori/
 暗 [ひかげ] /(f) Hikage/
@@ -5200,6 +5298,7 @@
 曲 [まがる] /(f) Magaru/
 更 [ふけ] /(u) Fuke/
 更新 [こうしん] /(p) Koushin/
+書間 [かきま] /(s) Kakima/
 曽 [ちゆん] /(s) Chiyun/
 曽我 [ますが] /(s) Masuga/
 曽我ひとみ [そがひとみ] /(h) Soga Hitomi/
@@ -5320,6 +5419,7 @@
 本 [やなかもと] /(s) Yanakamoto/
 本中 [もとなか] /(s) Motonaka/
 本作 [もとさく] /(s) Motosaku/
+本保 [もとほ] /(s) Motoho/
 本出 [ほんで] /(s) Honde/
 本原 [もとはら] /(p,s) Motohara/
 本城 [もとしろ] /(s) Motoshiro/
@@ -5544,7 +5644,10 @@
 柱 [みはしら] /(u) Mihashira/
 柳 [りよう] /(s) Riyou/
 柳木 [やぎ] /(p) Yagi/
+柴 [むらさき] /(s) Murasaki/
 柴原 [しばら] /(p) Shibara/
+柴又 [しばまた] /(p,s) Shibamata/
+柴又駅 [しばまたえき] /(st) Shibamata Station/
 柵 [しがらみ] /(s) Shigarami/
 査 [さ] /(s) Sa/
 栃 [とち] /(s) Tochi/
@@ -5610,11 +5713,13 @@
 梅の木 [うめのき] /(p) Umenoki/
 梅居 [ばいい] /(s) Baii/
 梅市 [うめいち] /(s,g) Umeichi/
+梅林 [ばいりん] /(p,s) Bairin/
 梅雨 [まゆ] /(f) Mayu/
 梛 [やし] /(s) Yashi/
 梨 [しな] /(f) Shina/
 梨 [りん] /(f) Rin/
 梨井 [なしい] /(s) Nashii/
+梨地 [なしじ] /(s) Nashiji/
 梨子 [なし] /(s) Nashi/
 梨沙 [りさ] /(f) Risa/
 梯 [はしご] /(s) Hashigo/
@@ -5768,6 +5873,7 @@
 武道館 [ぶどうかん] /(u) Budoukan/
 武野 [むの] /(s) Muno/
 歩 [すすむ] /(g) Susumu/
+歩夢 [あゆめ] /(f) Ayume/
 歩子 [ぽこ] /(f) Poko/
 歩行 [かち] /(p) Kachi/
 歩都 [あゆと] /(g) Ayuto/
@@ -5821,10 +5927,12 @@
 毬都 [まりと] /(f) Marito/
 氏 [はまうじ] /(s) Hamauji/
 民 [みん] /(u) Min/
+民代 [みよ] /(f) Miyo/
 民宜 [みに] /(g) Mini/
 民家 [たみや] /(s) Tamiya/
 民家園 [みんかえん] /(p) Minkaen/
 民愛 [たいと] /(f) Taito/
+民栄 [たみえ] /(f) Tamie/
 民生 [みんせい] /(g) Minsei/
 民衣 [たえ] /(f) Tae/
 民進党 [みんしんとう] /(o) Democratic Progressive Party/
@@ -5865,6 +5973,7 @@
 氷田 [ひた] /(s) Hita/
 永 [ひさし] /(g) Hisashi/
 永世 [ながよ] /(s) Nagayo/
+永住 [ながずみ] /(s) Nagazumi/
 永武 [ながたけ] /(s) Nagatake/
 永華 [とわか] /(f) Towaka/
 汀奈 [てな] /(f) Tena/
@@ -6011,6 +6120,7 @@
 津島市 [つしまし] /(p) Tsushima (city)/
 津市 [つし] /(p) Tsu (city)/
 津戸 [つど] /(p,s) Tsudo/
+津村 [つむら] /(p,s) Tsumura/
 津波 [つわ] /(s) Tsuwa/
 津浪 [つは] /(s) Tsuha/
 津渡野 [つどの] /(p) Tsudono/
@@ -6092,6 +6202,7 @@
 消費者庁 [しょうひしゃちょう] /(o) Consumer Affairs Agency/
 涌 [わく] /(s) Waku/
 涌谷 [わくや] /(p,s) Wakuya/
+涙 [るい] /(f) Rui/
 涼 [りよう] /(f) Riyou/
 涼乃 [さやの] /(f) Sayano/
 涼流子 [りるこ] /(f) Riruko/
@@ -6152,6 +6263,7 @@
 源 [もとし] /(s) Motoshi/
 源地 [げんち] /(s) Genchi/
 源田 [げた] /(s) Geta/
+源頼朝 [みなもとのよりとも] /(h) Minamoto No Yoritomo (1147-1199.2.9)/
 準 [ひとし] /(m) Hitoshi/
 溝 [みぞさき] /(s) Mizosaki/
 滉人 [こうと] /(g) Kouto/
@@ -6208,6 +6320,7 @@
 瀬戸井 [せとい] /(p,s) Setoi/
 瀬戸内 [せとうち] /(p,s) Setouchi/
 瀬戸内海 [せとないかい] /(p) Setonaikai/
+瀬戸市 [せとし] /(p) Seto (city)/
 瀬流子 [せるこ] /(f) Seruko/
 瀬瀬 [せせ] /(s) Sese/
 瀬瑠都 [せると] /(f) Seruto/
@@ -6389,6 +6502,7 @@
 琉球 [りゅうきゅう] /(p) Ryuukyuu/
 琉球大学 [りゅうきゅうだいがく] /(p) University of the Ryukyus/
 琥珀 [こ] /(g) Ko/
+琴 [ことみ] /(f) Kotomi/
 琴似 [ことに] /(f,p) Kotoni/
 琴岳 [ことだけ] /(p) Kotodake/
 瑜伽 [ゆか] /(s) Yuka/
@@ -6446,6 +6560,7 @@
 産 [うむ] /(u) Umu/
 産業 [さんぎょう] /(p) Sangyou/
 産業技術総合研究所 [さんぎょうぎじゅつそうごうけんきゅうしょ] /(o) National Institute of Advanced Industrial Science and Technology/NAIST/
+産物 [さんぶつ] /(p) Sanbutsu/
 産野 [さんや] /(p) Sanya/
 甦人 [やすと] /(g) Yasuto/
 用 [よう] /(p) You/
@@ -6495,6 +6610,7 @@
 田皆 [たみな] /(p) Tamina/
 田県 [たがた] /(p) Tagata/
 田真 [たま] /(s) Tama/
+田知 [たち] /(s) Tachi/
 田福 [たふく] /(s) Tafuku/
 田穂 [たほ] /(p,s,f) Taho/
 田籾 [たもみ] /(p,s) Tamomi/
@@ -6512,6 +6628,7 @@
 田近 [たちか] /(s) Tachika/
 田野 [たの] /(p,s) Tano/
 田野田 [たのだ] /(s) Tanoda/
+田雄 [たづお] /(u) Tadzuo/
 田面 [たおも] /(p) Taomo/
 由 [よしつぐ] /(u) Yoshitsugu/
 由人 [よしんど] /(g) Yoshindo/
@@ -6530,6 +6647,7 @@
 甲鳥子 [かもし] /(g) Kamoshi/
 申 [すう] /(s) Suu/
 男 [だん] /(m) Dan/
+男はつらいよ [おとこはつらいよ] /(pr) Otoko Wa Tsurai Yo (long-running series of Japanese comedy movies)/
 男体山 [なんたいさん] /(u) Nantaisan/
 男鹿 [おじか] /(p,s) Ojika/
 男鹿半島 [おがはんとう] /(p) Oga Peninsula/
@@ -6668,6 +6786,8 @@
 相模原 [さがみはら] /(p) Sagamihara/
 相模原市 [さがみはらし] /(p) Sagamihara (city)/
 相馬 [あいま] /(s) Aima/
+相馬 [そおま] /(s) Sooma/
+相馬市 [そうまし] /(p) Souma (city)/
 省 [みつむ] /(f) Mitsumu/
 省広 [せいひろ] /(u) Seihiro/
 眉 [まゆ] /(f) Mayu/
@@ -6722,6 +6842,7 @@
 督 [まさる] /(u) Masaru/
 瞬 [まどか] /(f) Madoka/
 矗 [のぶ] /(g) Nobu/
+矜田 [きょうだ] /(s) Kyouda/
 矢 [や] /(p) Ya/
 矢 [やばしり] /(u) Yabashiri/
 矢下 [やした] /(s) Yashita/
@@ -6750,6 +6871,8 @@
 知良 [ともよし] /(m) Tomoyoshi/
 知識 [ともしき] /(s) Tomoshiki/
 知連 [ちれん] /(p) Chiren/
+知那 [ちな] /(f) China/
+知那美 [ちなみ] /(f) Chinami/
 短 [いやま] /(u) Iyama/
 短期大学 [たんきだいがく] /(p) Tanki University/
 石 [つるいし] /(s) Tsuruishi/
@@ -6757,6 +6880,7 @@
 石井野 [いしいの] /(p) Ishiino/
 石出 [いしいで] /(s) Ishiide/
 石出 [いして] /(u) Ishite/
+石切 [いすな] /(f) Isuna/
 石原 [としはら] /(s) Toshihara/
 石原慎太郎 [いしはらしんたろう] /(h) Ishihara Shintarou (1932.9-)/
 石垣 [いしがき] /(p,s) Ishigaki/
@@ -6952,6 +7076,7 @@
 立作 [たち] /(s) Tachi/
 立命館 [りつめいかん] /(p,s) Ritsumeikan/
 立命館大学 [りつめいかんだいがく] /(p) Ritsumeikan University/
+立小 [たちしょう] /(s) Tachishou/
 立山 [りつざん] /(g) Ritsuzan/
 立川 [たてがわ] /(s) Tategawa/
 立川市 [たちかわし] /(p) Tachikawa (city)/
@@ -7003,6 +7128,7 @@
 等 [ひとし] /(s,m,f) Hitoshi/
 筋 [すじ] /(s) Suji/
 筏 [いかだ] /(s) Ikada/
+筐 [しょう] /(u) Shou/
 筑 [つく] /(s) Tsuku/
 筑後 [ちくご] /(p,s) Chikugo/
 筑後市 [ちくごし] /(p) Chikugo (city)/
@@ -7076,6 +7202,7 @@
 糞 [みねひさ] /(u) Minehisa/
 糧 [はぜ] /(s) Haze/
 糸 [いとやなぎ] /(s) Itoyanagi/
+糸島 [いとじま] /(s) Itojima/
 糸木 [いとき] /(s) Itoki/
 糸木名 [いときな] /(p) Itokina/
 糸満 [いとみつ] /(s) Itomitsu/
@@ -7176,6 +7303,8 @@
 綺麗 [きれい] /(f) Kirei/
 綺麗出 [きれいで] /(f) Kireide/
 綺麗奈 [きれいな] /(f) Kireina/
+綾 [りん] /(f) Rin/
+綾乃 [あやの] /(f,s) Ayano/
 綿 [わたざき] /(s) Watazaki/
 綿田 [わただ] /(p,s) Watada/
 緋 [あか] /(u) Aka/
@@ -7201,6 +7330,7 @@
 縣 [がた] /(s) Gata/
 縦 [むねお] /(u) Muneo/
 縫殿 [ぬい] /(g) Nui/
+縮 [ちぢみ] /(s) Chidzimi/
 績 [つむぐ] /(g) Tsumugu/
 繁 [とくしげ] /(s) Tokushige/
 繁雄 [しげお] /(g) Shigeo/
@@ -7230,6 +7360,7 @@
 羅萠 [らもい] /(p) Ramoi/
 羅飛 [らひ] /(g) Rahi/
 羅馬 [ろま] /(p) Roma (Rome)/
+羅馬尼亜 [ルーマニア] /(p) Romania/Rumania/Roumania/
 羅麻 [らま] /(f) Rama/
 羊 [よう] /(f) You/
 美 [よみする] /(u) Yomisuru/
@@ -7524,6 +7655,7 @@
 茂谷 [もや] /(s) Moya/
 茂逸 [もいつ] /(g) Moitsu/
 范 [はん] /(s) Han/
+茅ノ間 [ちのま] /(s) Chinoma/
 茉 [ま] /(u) Ma/
 茉 [まつ] /(u) Matsu/
 茉 [まりか] /(f) Marika/
@@ -7637,6 +7769,7 @@
 菜な [なな] /(f) Nana/
 菜亜 [なあ] /(g) Naa/
 菜美 [なみ] /(f) Nami/
+菜那 [なな] /(f) Nana/
 華 [りりか] /(f) Ririka/
 華明 [かみん] /(f) Kamin/
 華江 [はない] /(f) Hanai/
@@ -7676,6 +7809,7 @@
 葉木 [はき] /(p,s,f) Haki/
 葉樹 [ようじゅ] /(f) Youju/
 葉池 [はいけ] /(p) Haike/
+葉瀬 [はせ] /(s) Hase/
 葉糸 [はいと] /(s) Haito/
 葉紅 [はく] /(f) Haku/
 葉緒 [はお] /(f) Hao/
@@ -7695,6 +7829,7 @@
 葛飾北斎 [かつしかほくさい] /(h) Katsushika Hokusai (1760-1849)/
 葛飾区 [かつしかく] /(p) Katsushikaku/
 葡萄 [ぶどう] /(p) Budou/
+葩夕 [はせき] /(g) Haseki/
 葬 [はふり] /(u) Hafuri/
 葭 [かや] /(p) Kaya/
 葵 [まもる] /(g) Mamoru/
@@ -7752,6 +7887,7 @@
 藤光 [ふじみつ] /(p,s) Fujimitsu/
 藤園 [ふじぞの] /(s) Fujizono/
 藤山 [ふぢやま] /(s) Fudziyama/
+藤澤 [ふじざわ] /(s) Fujizawa/
 藤美 [ふじよし] /(u) Fujiyoshi/
 藤義 [ふじよし] /(m) Fujiyoshi/
 藤賀 [とうが] /(s) Touga/
@@ -8047,6 +8183,7 @@
 賀長 [がちょう] /(s) Gachou/
 賄 [よもぎだ] /(u) Yomogida/
 資 [もと] /(f) Moto/
+資亜利 [しあり] /(g) Shiari/
 資料館 [しりょうかん] /(p) Shiryoukan/
 資生 [よりお] /(g) Yorio/
 資生堂 [しせいどう] /(c) Shiseido (Japanese cosmetics firm)/
@@ -8110,6 +8247,7 @@
 軽子 [かるこ] /(f) Karuko/
 軽戸 [かると] /(s) Karuto/
 軽野 [かるの] /(p,s) Karuno/
+載 [みつる] /(g) Mitsuru/
 輔 [らいすけ] /(g) Raisuke/
 輕尾 [かるお] /(s) Karuo/
 輪 [るん] /(f) Run/
@@ -8129,6 +8267,7 @@
 辺 [ほとり] /(f,s) Hotori/
 辺野 [へんの] /(s) Henno/
 辺野古 [へのこ] /(p) Henoko/
+辻 [つぢ] /(s) Tsudzi/
 迎 [むかえ] /(s) Mukae/
 迎賓館 [げいひんかん] /(p) Geihinkan/
 近 [はまちか] /(s) Hamachika/
@@ -8205,11 +8344,13 @@
 道南 [どうなん] /(p) Dounan/
 道喜 [みちよし] /(m) Michiyoshi/
 道大 [みちまさ] /(u) Michimasa/
+道市 [みちいち] /(p,s) Michiichi/
 道弥 [とや] /(f) Toya/
 道後 [みちご] /(s) Michigo/
 道後温泉 [どうごおんせん] /(p) Dougoonsen/
 道志 [どうし] /(p) Doushi/
 道新 [どうしん] /(p) Doushin/
+道津 [どうつ] /(s) Doutsu/
 道海 [どうかい] /(s,g) Doukai/
 道煕 [とひ] /(u) Tohi/
 道租尾 [さいのお] /(s) Sainoo/
@@ -8241,6 +8382,7 @@
 那智勝浦町 [なちかつうらちょう] /(p) Nachikatsuurachou/
 那珂 [なか] /(p,s) Naka/
 那珂川 [なかがわ] /(p,s) Nakagawa/
+那美 [なみ] /(f) Nami/
 那覇 [なは] /(p,s) Naha/
 那覇市 [なはし] /(p) Nahashi/(p) Naha City (Okinawa)/
 那謨 [なも] /(s) Namo/
@@ -8335,9 +8477,11 @@
 重 [おもし] /(g) Omoshi/
 重 [じゅう] /(s,g) Juu/
 重 [むねのり] /(u) Munenori/
+重大 [じゅうだい] /(s,g) Juudai/
 重太 [じゅうた] /(g) Juuta/
 重岳 [しげたけ] /(p) Shigetake/
 重橋 [じゅうばし] /(s) Juubashi/
+重計 [しげかず] /(u) Shigekazu/
 野 [やざき] /(s) Yazaki/
 野上野 [のこの] /(p) Nokono/
 野丸 [のまる] /(s) Nomaru/
@@ -8385,6 +8529,7 @@
 野林 [のりん] /(f) Norin/
 野森 [のもり] /(s) Nomori/
 野模 [のぼ] /(s) Nobo/
+野歩 [やほ] /(g) Yaho/
 野殿 [のどの] /(p,s) Nodono/
 野毛 [のも] /(s) Nomo/
 野水 [のすい] /(s) Nosui/
@@ -8467,6 +8612,7 @@
 鈴木直 [すずきなお] /(h) Suzuki Nao/
 鈴木直樹 [すずきなおき] /(h) Suzuki Naoki/
 鈴萌 [れも] /(f) Remo/
+鈴里 [すずり] /(s) Suzuri/
 鉄 [まがね] /(g) Magane/
 鉅鹿 [おが] /(s) Oga/
 鉛 [なまり] /(s) Namari/
@@ -8487,7 +8633,11 @@
 銚子 [ちょうし] /(p,s) Choushi/
 銚子市 [ちょうしし] /(p) Choushi (city)/
 銚子駅 [ちょうしえき] /(st) Choushi Station/
+銭 [ちえん] /(s) Chien/
 鋤 [くわ] /(s) Kuwa/
+鋸 [のこぎり] /(p) Nokogiri/
+鋸南 [きょなん] /(p) Kyonan/
+鋸南町 [きょなんまち] /(p) Kyonanmachi/
 鋼 [はがね] /(f,s) Hagane/
 錢 [せん] /(s) Sen/
 錢 [ぜに] /(s) Zeni/
@@ -8644,6 +8794,7 @@
 階 [しな] /(s) Shina/
 階戸 [しなど] /(u) Shinado/
 隕 [いん] /(u) In/
+隕石 [いんせき] /(u) Inseki/
 際 [きわ] /(s) Kiwa/
 隠 [なばり] /(s) Nabari/
 隣 [となり] /(u) Tonari/
@@ -8657,6 +8808,7 @@
 雀 [じゃく] /(s) Jaku/
 雀志 [じゃくし] /(g) Jakushi/
 雄 [ゆうじ] /(u) Yuuji/
+雄司 [ゆうじ] /(g) Yuuji/
 雄場 [おば] /(s) Oba/
 雄物川 [おものがわ] /(p) Omonogawa/
 雅 [もと] /(u) Moto/
@@ -8703,6 +8855,7 @@
 靄 [あい] /(f) Ai/
 青 [はる] /(f) Haru/
 青い [あおい] /(f) Aoi/
+青ヶ島 [あおがしま] /(p) Aogashima/
 青山 [せいざん] /(g) Seizan/
 青山学院大学 [あおやまがくいんだいがく] /(p) Aoyama Gakuin University/
 青木 [おおぎ] /(p) Oogi/
@@ -8770,9 +8923,11 @@
 領 [りょう] /(g) Ryou/
 領地 [りょうち] /(s) Ryouchi/
 頭 [つむり] /(u) Tsumuri/
+頭利 [ずり] /(s) Zuri/
 頭町 [かしらちょう] /(p) Kashirachou/
 頼 [らい] /(f,s) Rai/
 頼巳 [よりみ] /(g) Yorimi/
+頼朝 [よりとも] /(s,g) Yoritomo/
 頼母 [たのも] /(f) Tanomo/
 頼母 [よりも] /(s) Yorimo/
 頼田 [せた] /(s) Seta/
@@ -8894,6 +9049,7 @@
 馬島 [ばしま] /(s) Bashima/
 馬川 [ばがわ] /(s) Bagawa/
 馬川 [まのかわ] /(p) Manokawa/
+馬市 [うまいち] /(p) Umaichi/
 馬来 [マレー] /(p) Malay peninsula (and surrounding isles)/
 馬杷 [まが] /(s) Maga/
 馬楽 [ばらく] /(g) Baraku/
@@ -8909,6 +9065,7 @@
 駄間 [だま] /(s) Dama/
 駄阿 [だあ] /(s) Daa/
 駅 [えき] /(s) Eki/
+駒出 [こまで] /(s) Komade/
 駛馬 [はやめ] /(p) Hayame/
 駱 [らく] /(s) Raku/
 駿 [はやと] /(u) Hayato/
@@ -9004,6 +9161,7 @@
 鳥中 [うなか] /(s) Unaka/
 鳥取 [とりどり] /(s) Toridori/
 鳥取県 [とっとりけん] /(p) Tottori Prefecture/
+鳥居 [とりごい] /(s) Torigoi/
 鳥島 [とりしま] /(p,s) Torishima/
 鳥巣 [とす] /(s) Tosu/
 鳥栖市 [とすし] /(p) Tosu (city)/
@@ -9061,6 +9219,7 @@
 鷺野 [さぎの] /(s) Sagino/
 鸞 [らん] /(s) Ran/
 鹿 [ろく] /(u) Roku/
+鹿仁島 [かにしま] /(s) Kanishima/
 鹿伏 [かぶせ] /(p) Kabuse/
 鹿伏兎 [かぶと] /(s) Kabuto/
 鹿児 [かご] /(s) Kago/
@@ -9133,3 +9292,4 @@
 龍田 [たった] /(p) Tatta/
 龍野 [たつの] /(p,s) Tatsuno/
 龝 [あき] /(f,s) Aki/
+龝間 [あきま] /(s) Akima/
