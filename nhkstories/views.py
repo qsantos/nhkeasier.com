@@ -70,7 +70,7 @@ def story(request, id):
     return render(request, 'nhkstories/story.html', {
         'url': url,
         'title': story.title,
-        'header': story.title,
+        'header': 'Single story',
         'description': remove_all_html(story.content),
         'image': image,
         'story': story,
