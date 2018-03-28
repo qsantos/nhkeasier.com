@@ -72,7 +72,9 @@ def save_story(info):
     # extract content from webpage
     data = story.webpage.read().decode()
     story.webpage.seek(0)  # the webpage might be read when updating story
-    m = re.search(r'(?s)<div id="newsarticle">\n(.*?)\n\s*</div>', data)
+    m = re.search(r'(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)</div>', data)
+    if m is None:
+        m = re.search(r'(?s)<div id="newsarticle">(.*?)</div>', data)
     raw_content = m.group(1)
     story.content_with_ruby = clean_up_content(raw_content)
     story.content = remove_ruby(story.content_with_ruby)
