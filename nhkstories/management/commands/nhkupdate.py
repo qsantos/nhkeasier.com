@@ -53,7 +53,7 @@ def save_story(info):
     story, created = Story.objects.get_or_create(story_id=story_id)
     published = parse_datetime_nhk(info['news_prearranged_time'])
 
-    if story.published and story.published != published:
+    if story.published and abs(story.published - published).days > 2:
         # probably a reused story_id, not implemented yet
         raise DuplicateStoryID
 
