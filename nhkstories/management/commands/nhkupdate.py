@@ -88,7 +88,7 @@ def save_story(info):
     else:
         image_url = None
     if not story.image and image_url is not None:
-        print('Download %s' % image_url)
+        print('Download image %s' % image_url)
         try:
             with urlopen(image_url) as f:
                 story.image.save('', f)
@@ -107,12 +107,29 @@ def save_story(info):
     else:
         voice_url = None
     if not story.voice and voice_url is not None:
-        print('Download %s' % voice_url)
-        try:
-            with urlopen(voice_url) as f:
-                story.voice.save('', f)
-        except HTTPError:
-            pass
+        if voice_url.endswith('.mp4'):
+            # fragmented MP4 using HTTP Live Streaming
+            voice_url = 'https://nhks-vh.akamaihd.net/i/news/easy/' + \
+                story_id + '.mp4/master.m3u8'
+            print('Download voice (fragmented MP4) %s' % voice_url)
+            _, temp_name = tempfile.mkstemp(suffix='.mp3')
+            res = subprocess.run(
+                ['ffmpeg', '-y', '-i', voice_url, temp_name],
+                stderr=subprocess.DEVNULL
+            )
+            if res.returncode == 0:
+                with open(temp_name, 'rb') as f:
+                    story.voice.save('', f)
+            else:
+                print('Failed')
+            os.remove(temp_name)
+        else:
+            print('Download voice %s' % voice_url)
+            try:
+                with urlopen(voice_url) as f:
+                    story.voice.save('', f)
+            except HTTPError:
+                print('Failed')
 
     # video
     stream_base_url = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/'
@@ -122,7 +139,7 @@ def save_story(info):
     else:
         video_url = None
     if not story.video_original and video_url is not None:
-        print('Download %s' % video_url)
+        print('Download video %s' % video_url)
         _, temp_name = tempfile.mkstemp()
         res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
                              stderr=subprocess.DEVNULL)
