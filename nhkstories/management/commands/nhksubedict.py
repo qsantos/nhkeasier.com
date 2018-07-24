@@ -33,5 +33,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         since = options['since']
         stories = Story.objects.filter(published__date__gte=since)
-        update_subedict('nhkstories/static/nhkstories/rikai/edict.dat', jmdict.default_edict, stories)
-        update_subedict('nhkstories/static/nhkstories/rikai/names.dat', jmdict.default_enamdict, stories)
+        update_subedict('media/subedict.dat', jmdict.default_edict, stories)
+        update_subedict('media/subenamdict.dat', jmdict.default_enamdict, stories)

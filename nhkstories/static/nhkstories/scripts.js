@@ -74,7 +74,7 @@ if (!NodeList.prototype.forEach) {
 /* The rest is rikai handling (loading EDICT and showing translations) */
 (function(){
 let edict = {};
-let names = {};
+let enamdict = {};
 let deinflect = [];
 let rikai_container = $('#rikai-container');
 let rikai_edict = $('#rikai-edict', rikai_container);
@@ -85,9 +85,9 @@ let autorikai_checkbox = $('#rikai_auto');
 hide_rikai();
 
 /* Start downloading data */
-fetch('/static/nhkstories/rikai/deinflect.dat', load_deinflect);
-fetch('/static/nhkstories/rikai/edict.dat', load_edict);
-fetch('/static/nhkstories/rikai/names.dat', load_names);
+fetch('/static/nhkstories/deinflect.dat', load_deinflect);
+fetch('/media/subedict.dat', load_edict);
+fetch('/media/subenamdict.dat', load_enamdict);
 
 /* Event binding */
 window.addEventListener('mousemove', autorikai);
@@ -171,8 +171,8 @@ function load_edict(data) {
     parse_edict(edict, data);
 }
 
-function load_names(data) {
-    parse_edict(names, data);
+function load_enamdict(data) {
+    parse_edict(enamdict, data);
 }
 
 function load_deinflect(data) {
@@ -299,7 +299,7 @@ function set_rikai_from_point(x, y) {
 
     let names_html = [];
     iter_subfragments(text, function(candidate) {
-        let info = names[candidate];
+        let info = enamdict[candidate];
         if (info) {
             append_sense(names_html, info);
         }
