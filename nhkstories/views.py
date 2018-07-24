@@ -35,7 +35,7 @@ def archive(request, year=None, month=None, day=None):
         'url': url,
         'title': 'Easier Japanese practice',
         'header': header,
-        'description': 
+        'description':
             'Come practice reading and listening to Japanese with recent news '
             'stories! Simple vocabulary, simple kanji and simple sentence '
             'structures, as well as kanji readings (furigana) and an '
