@@ -17,12 +17,17 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+import django.views.defaults
+from django.http import Http404
+import nhkstories.views
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^', include('nhkstories.urls')),
 ]
-
+handler404 = nhkstories.views.handler404
+handler500 = nhkstories.views.handler500
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

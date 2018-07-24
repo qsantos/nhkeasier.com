@@ -10,5 +10,6 @@ urlpatterns = [
     url(r'^tools/', views.tools, name='tools'),
     url(r'^feed/', feed.LatestStoriesFeed(), name='feed'),
     url(r'^(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/', views.archive, name='archive'),
+    url(r'^404/$', views.handler404),
     url(r'^$', views.archive, name='index'),
 ]

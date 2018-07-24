@@ -9,6 +9,34 @@ from django.shortcuts import render, get_object_or_404
 
 from .models import Story
 
+
+def handler400(request):
+    url = request.build_absolute_uri()
+    return render(request, 'nhkstories/400.html', {
+        'url': url,
+        'title': 'Bad request',
+        'header': 'Bad request',
+    }, status=400)
+
+
+def handler404(request):
+    url = request.build_absolute_uri()
+    return render(request, 'nhkstories/404.html', {
+        'url': url,
+        'title': 'Page not found',
+        'header': 'Page not found',
+    }, status=404)
+
+
+def handler500(request):
+    url = request.build_absolute_uri()
+    return render(request, 'nhkstories/500.html', {
+        'url': url,
+        'title': 'Server error',
+        'header': 'Server error',
+    }, status=404)
+
+
 def archive(request, year=None, month=None, day=None):
     if year is not None and month is not None and day is not None:
         day = date(int(year), int(month), int(day))
