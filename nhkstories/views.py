@@ -39,7 +39,10 @@ def handler500(request):
 
 def archive(request, year=None, month=None, day=None):
     if year is not None and month is not None and day is not None:
-        day = date(int(year), int(month), int(day))
+        try:
+            day = date(int(year), int(month), int(day))
+        except ValueError:
+            return handler400(request)
         header = 'Stories on {}'.format(day)
     else:
         day = Story.objects.order_by('-published').first().published.date()
