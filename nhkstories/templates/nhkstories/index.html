@@ -15,4 +15,7 @@ and laptops) or touching them (smartphones and tablets). You can also subscribe 
 {% include 'nhkstories/componentstory.html' %}
 {% endfor %}
 {% include 'nhkstories/componentpagination.html' %}
+<script>
+var edict_filename = '{{ day|date:'Y-m-d' }}.dat';
+</script>
 {% endblock %}

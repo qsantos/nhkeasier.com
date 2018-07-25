@@ -88,3 +88,8 @@ def subedict(dictionary, text):
             # we don't care about the reason, and it may generate duplicate
             items.add(line)
     return items
+
+
+def save_subedict(subedict, filename):
+    with open(filename, 'w') as f:
+        f.write(''.join(sorted(subedict)))

@@ -86,8 +86,8 @@ hide_rikai();
 
 /* Start downloading data */
 fetch('/static/nhkstories/deinflect.dat', load_deinflect);
-fetch('/media/subedict.dat', load_edict);
-fetch('/media/subenamdict.dat', load_enamdict);
+fetch('/media/subedict/' + edict_filename, load_edict);
+fetch('/media/subenamdict/' + edict_filename, load_enamdict);
 
 /* Event binding */
 window.addEventListener('mousemove', autorikai);

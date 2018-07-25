@@ -43,6 +43,7 @@ class Story(models.Model):
     voice = models.FileField(upload_to=voice_filename, null=True)
     video_original = models.FileField(upload_to=video_original_filename, null=True)
     video_reencoded = models.FileField(upload_to=video_reencoded_filename, null=True)
+    subedict_created = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'stories'

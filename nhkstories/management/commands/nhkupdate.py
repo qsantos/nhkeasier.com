@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.core.files.base import ContentFile
 from nhkstories.models import Story
+from nhkstories.subedict import jmdict
 
 
 class DuplicateStoryIDType(Exception):
@@ -180,6 +181,53 @@ def fetch_story(story_id, story_url, image_url, voice_url):
     return success
 
 
+def create_subedicts():
+    stories = Story.objects.filter(subedict_created=False)
+
+    if not stories:
+        return
+
+    # load EDICT files
+    edict = jmdict.load_from_filename(jmdict.default_edict)
+    enamdict = jmdict.load_from_filename(jmdict.default_enamdict)
+
+    # ensure the directories exist
+    subedict_dir = os.path.join('media', 'subedict')
+    subenamdict_dir = os.path.join('media', 'subenamdict')
+    os.makedirs(subedict_dir, exist_ok=True)
+    os.makedirs(subenamdict_dir, exist_ok=True)
+
+    # create sub EDICT files for stories and list days that must be updated
+    new_days = set()
+    for story in stories:
+        new_days.add(story.published.date())
+        # create sub EDICT files for story
+        subedict = jmdict.subedict(edict, story.content)
+        subenamdict = jmdict.subedict(enamdict, story.content)
+        filename = '{:05}.dat'.format(story.id)
+        jmdict.save_subedict(subedict, os.path.join(subedict_dir, filename))
+        jmdict.save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
+        print(filename)
+    print('Story-wise sub EDICT files updated')
+
+    # update sub EDICT files for days
+    for day in sorted(new_days):
+        # aggregate stories of the day
+        day_stories = Story.objects.filter(published__date=day)
+        text = ''.join(story.content for story in day_stories)
+        # update sub EDICT files for day
+        subedict = jmdict.subedict(edict, text)
+        subenamdict = jmdict.subedict(enamdict, text)
+        filename = '{}.dat'.format(day)
+        jmdict.save_subedict(subedict, os.path.join(subedict_dir, filename))
+        jmdict.save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
+        print(filename)
+    print('Day-wise sub EDICT files updated')
+
+    # note that the subedict have been generated for those stories
+    stories.update(subedict_created=True)
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
         new_stories_count = 0
@@ -195,3 +243,5 @@ class Command(BaseCommand):
             print('1 new story')
         else:
             print('%i new stories' % new_stories_count)
+
+        create_subedicts()

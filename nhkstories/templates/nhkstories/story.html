@@ -3,4 +3,7 @@
 {% include 'nhkstories/componentstorynavigation.html' %}
 {% include 'nhkstories/componentstory.html' %}
 {% include 'nhkstories/componentstorynavigation.html' %}
+<script>
+var edict_filename = '{{ story.id|stringformat:"05d" }}.dat';
+</script>
 {% endblock %}

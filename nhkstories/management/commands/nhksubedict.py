@@ -22,8 +22,7 @@ def update_subedict(subedict_filename, edict_filename, stories):
     print('{} new words ({} total)'.format(len(dif_subedict), len(cur_subedict)))
 
     # save new subedict
-    with open(subedict_filename, 'w') as f:
-        f.write(''.join(sorted(cur_subedict)))
+    jmdict.save_subedict(cur_subedict, subedict_filename)
 
 
 class Command(BaseCommand):
