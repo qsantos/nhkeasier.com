@@ -14,8 +14,8 @@ def handler400(request):
     url = request.build_absolute_uri()
     return render(request, 'nhkstories/400.html', {
         'url': url,
-        'title': 'Bad request',
-        'header': 'Bad request',
+        'title': 'Bad Request',
+        'header': 'Bad Request',
     }, status=400)
 
 
@@ -23,8 +23,8 @@ def handler404(request):
     url = request.build_absolute_uri()
     return render(request, 'nhkstories/404.html', {
         'url': url,
-        'title': 'Page not found',
-        'header': 'Page not found',
+        'title': 'Page Not Found',
+        'header': 'Page Fot Found',
     }, status=404)
 
 
@@ -32,8 +32,8 @@ def handler500(request):
     url = request.build_absolute_uri()
     return render(request, 'nhkstories/500.html', {
         'url': url,
-        'title': 'Server error',
-        'header': 'Server error',
+        'title': 'Server Error',
+        'header': 'Server Error',
     }, status=404)
 
 
@@ -46,7 +46,7 @@ def archive(request, year=None, month=None, day=None):
         header = 'Stories on {}'.format(day)
     else:
         day = Story.objects.order_by('-published').first().published.date()
-        header = 'Latest stories'
+        header = 'Latest Stories'
 
     stories = Story.objects.filter(published__date=day).order_by('-published', '-id')
 
@@ -64,7 +64,7 @@ def archive(request, year=None, month=None, day=None):
 
     return render(request, 'nhkstories/index.html', {
         'url': url,
-        'title': 'Easier Japanese practice',
+        'title': 'Easier Japanese Practice',
         'header': header,
         'description':
             'Come practice reading and listening to Japanese with recent news '
@@ -101,7 +101,7 @@ def story(request, id):
     return render(request, 'nhkstories/story.html', {
         'url': url,
         'title': story.title,
-        'header': 'Single story',
+        'header': 'Single Story',
         'description': remove_all_html(story.content),
         'image': image,
         'story': story,
