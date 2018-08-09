@@ -22,6 +22,7 @@ INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
 # error reporting
 ADMINS = [('Site administrator', 'contact@nhkeasier.com')]
+MANAGERS = ADMINS
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_SSL = True
 EMAIL_HOST = 'ssl0.ovh.net'
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
 ]
 ROOT_URLCONF = 'nhkeasier.urls'
 TEMPLATES = [
