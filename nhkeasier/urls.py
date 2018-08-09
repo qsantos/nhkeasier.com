@@ -18,12 +18,14 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 import django.views.defaults
+from django.views.generic.base import RedirectView
 from django.http import Http404
 import nhkstories.views
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + '/nhkstories/favicon.ico')),
     url(r'^', include('nhkstories.urls')),
 ]
 handler404 = nhkstories.views.handler404
