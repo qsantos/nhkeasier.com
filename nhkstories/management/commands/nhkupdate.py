@@ -10,7 +10,8 @@ from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.core.files.base import ContentFile
 from nhkstories.models import Story
-from nhkstories.subedict import jmdict
+from nhkstories.edict.parse import load_edict, load_enamdict
+from nhkstories.edict.filter import filter_edict, save_subedict
 
 
 class DuplicateStoryIDType(Exception):
@@ -188,8 +189,8 @@ def create_subedicts():
         return
 
     # load EDICT files
-    edict = jmdict.load_from_filename(jmdict.default_edict)
-    enamdict = jmdict.load_from_filename(jmdict.default_enamdict)
+    edict = load_edict()
+    enamdict = load_enamdict()
 
     # ensure the directories exist
     subedict_dir = os.path.join('media', 'subedict')
@@ -202,11 +203,11 @@ def create_subedicts():
     for story in stories:
         new_days.add(story.published.date())
         # create sub EDICT files for story
-        subedict = jmdict.subedict(edict, story.content)
-        subenamdict = jmdict.subedict(enamdict, story.content)
+        subedict = filter_edict(edict, story.content)
+        subenamdict = filter_edict(enamdict, story.content)
         filename = '{:05}.dat'.format(story.id)
-        jmdict.save_subedict(subedict, os.path.join(subedict_dir, filename))
-        jmdict.save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
+        save_subedict(subedict, os.path.join(subedict_dir, filename))
+        save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
         print(filename)
     print('Story-wise sub EDICT files updated')
 
@@ -216,11 +217,11 @@ def create_subedicts():
         day_stories = Story.objects.filter(published__date=day)
         text = ''.join(story.content for story in day_stories)
         # update sub EDICT files for day
-        subedict = jmdict.subedict(edict, text)
-        subenamdict = jmdict.subedict(enamdict, text)
+        subedict = filter_edict(edict, text)
+        subenamdict = filter_edict(enamdict, text)
         filename = '{}.dat'.format(day)
-        jmdict.save_subedict(subedict, os.path.join(subedict_dir, filename))
-        jmdict.save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
+        save_subedict(subedict, os.path.join(subedict_dir, filename))
+        save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
         print(filename)
     print('Day-wise sub EDICT files updated')
 

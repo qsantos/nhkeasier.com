@@ -137,6 +137,11 @@ function fetch(url, callback) {
     req.send();
 }
 
+function defaultdict_append(dict, key, value) {
+    dict[key] = dict[key] || [];
+    dict[key].push(value);
+}
+
 function parse_edict(dst, data) {
     let regex = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
@@ -162,8 +167,8 @@ function parse_edict(dst, data) {
             'glosses': match[3].replace(/\//g, '; '),
             'type': type,
         };
-        dst[kana] = info;
-        dst[kanji] = info;
+        defaultdict_append(dst, kana, info);
+        defaultdict_append(dst, kanji, info);
     }
 }
 
@@ -289,20 +294,16 @@ function set_rikai_from_point(x, y) {
     let edict_html = [];
     iter_subfragments(text, function(subfragment) {
         iter_deinflections(subfragment, function(candidate, type, reason) {
-            let info = edict[candidate];
-            if (!info || (type  && !(info.type & type))) {
-                return;
-            }
-            append_sense(edict_html, info, reason);
+            let infos = edict[candidate] || [];
+            infos.filter(info => !type || (info.type & type))
+                 .forEach(info => append_sense(edict_html, info, reason));
         });
     });
 
     let names_html = [];
     iter_subfragments(text, function(candidate) {
-        let info = enamdict[candidate];
-        if (info) {
-            append_sense(names_html, info);
-        }
+        let infos = enamdict[candidate] || [];
+        infos.forEach(info => append_sense(names_html, info));
     });
 
     if (edict_html.length || names_html.length) {
