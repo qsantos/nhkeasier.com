@@ -1,4 +1,4 @@
 __pycache__/
-db.sqlite3
-media/
-static/
+/db.sqlite3
+/media/
+/static/
