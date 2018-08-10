@@ -9,6 +9,7 @@ from urllib.request import urlopen, HTTPError
 from django.core.management.base import BaseCommand
 from django.core.files import File
 from django.core.files.base import ContentFile
+from django.conf import settings
 from nhkstories.models import Story
 from nhkstories.edict.parse import load_edict, load_enamdict
 from nhkstories.edict.filter import filter_edict, save_subedict
@@ -193,8 +194,8 @@ def create_subedicts():
     enamdict = load_enamdict()
 
     # ensure the directories exist
-    subedict_dir = os.path.join('media', 'subedict')
-    subenamdict_dir = os.path.join('media', 'subenamdict')
+    subedict_dir = os.path.join(settings.BASE_DIR, 'media', 'subedict')
+    subenamdict_dir = os.path.join(settings.BASE_DIR, 'media', 'subenamdict')
     os.makedirs(subedict_dir, exist_ok=True)
     os.makedirs(subenamdict_dir, exist_ok=True)
 
