@@ -122,7 +122,7 @@ if 'runserver' in sys.argv:
 else:
     DEBUG = False
     # security stuff
-    SECURE_HSTS_SECONDS = True
+    SECURE_HSTS_SECONDS = 86400
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_BROWSER_XSS_FILTER = True
