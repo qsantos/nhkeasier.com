@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang=en>
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="flattr:id" content="w150z0">
@@ -16,6 +17,8 @@
 <link rel="icon" href="{% static 'nhkstories/favicon.png' %}">
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
+</head>
+<body>
 <header>
     <h1><a href="{% url 'nhkstories:index' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
     <nav>
@@ -84,4 +87,5 @@ gtag('js', new Date());
 gtag('config', 'UA-113732431-1');
 </script>
 {% endif %}
+</body>
 </html>
