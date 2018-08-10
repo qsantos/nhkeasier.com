@@ -16,7 +16,7 @@ import sys
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '8w@pj1*b1nn@epg(%m3tcq+$kq=4i54cd$qkju6&z=bmlr2)5e'
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'nhkeasier.com', '192.168.1.19']
+ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
 
