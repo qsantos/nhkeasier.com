@@ -34,7 +34,7 @@ def handler500(request):
         'url': url,
         'title': 'Server Error',
         'header': 'Server Error',
-    }, status=404)
+    }, status=500)
 
 
 def archive(request, year=None, month=None, day=None):
