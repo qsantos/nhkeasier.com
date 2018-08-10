@@ -93,7 +93,8 @@ def archive(request, year=None, month=None, day=None):
     # information for links (canonical URL, links to previous and next days)
     previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
     next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
-    url = request.build_absolute_uri(reverse('nhkstories:index'))
+    date_info = (day.year, '{:02}'.format(day.month), '{:02}'.format(day.day))
+    url = request.build_absolute_uri(reverse('nhkstories:archive', args=date_info))
 
     # take the image of one of the story as page illustration, if any
     illustrated_story = stories.exclude(image='').first()
@@ -133,7 +134,7 @@ def story(request, id):
     previous_story = previous_stories.order_by('-published', '-id').first()
     next_stories = Story.objects.filter(published__date=story.published.date(), id__gt=story.id) | Story.objects.filter(published__date__gt=story.published.date())
     next_story = next_stories.order_by('published', 'id').first()
-    url = request.build_absolute_uri(reverse('nhkstories:story', args=(id,))),
+    url = request.build_absolute_uri(reverse('nhkstories:story', args=(id,)))
 
     # take the image of the story as page illustration, if any
     image = request.build_absolute_uri(story.image.url) if story.image else None
