@@ -28,6 +28,8 @@ urlpatterns = [
     url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + '/nhkstories/favicon.ico')),
     url(r'^', include('nhkstories.urls')),
 ]
+handler400 = nhkstories.views.handler400
+handler403 = nhkstories.views.handler403
 handler404 = nhkstories.views.handler404
 handler500 = nhkstories.views.handler500
 

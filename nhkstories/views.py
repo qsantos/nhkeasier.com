@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404
+from django.core.mail import send_mail
 
 from .models import Story
 
@@ -16,6 +17,15 @@ def handler400(request):
         'url': url,
         'title': 'Bad Request',
         'header': 'Bad Request',
+    }, status=400)
+
+
+def handler403(request):
+    url = request.build_absolute_uri()
+    return render(request, 'nhkstories/403.html', {
+        'url': url,
+        'title': 'Forbidden',
+        'header': 'Forbidden',
     }, status=400)
 
 
@@ -35,6 +45,36 @@ def handler500(request):
         'title': 'Server Error',
         'header': 'Server Error',
     }, status=500)
+
+
+def external_error(request, code):
+    email_from = 'bugs@nhkeasier.com'
+    email_to = 'contact@nhkeasier.com'
+    email_subject = '[Django] Broken EXTERNAL link ({}) on {}'.format(code, request.META.get('SERVER_NAME'))
+    email_body = (
+        'Referrer: {}\r\n'
+        'Requested URL: {}\r\n'
+        'User agent: {}\r\n'
+        'IP address: {}\r\n'.format(
+        request.META.get('HTTP_REFERER'),
+        request.META.get('REQUEST_URI'),
+        request.META.get('HTTP_USER_AGENT'),
+        request.META.get('REMOTE_ADDR'),
+    ))
+    send_mail(email_subject, email_body, email_from, [email_to])
+    url = request.build_absolute_uri()
+    error = {
+        '400': 'Bad Request',
+        '403': 'Forbidden',
+        '404': 'Page Not Found',
+        '500': 'Server Error',
+    }.get(code, 'Unknown error')
+    return render(request, 'nhkstories/{}.html'.format(code), {
+        'url': url,
+        'title': error,
+        'header': error,
+    }, status=int(code))
+
 
 
 def archive(request, year=None, month=None, day=None):
@@ -117,6 +157,7 @@ def about(request):
         'title': 'About',
         'header': 'About',
     })
+
 
 def tools(request):
     url = request.build_absolute_uri(reverse('nhkstories:tools'))

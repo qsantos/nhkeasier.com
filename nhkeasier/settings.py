@@ -19,6 +19,8 @@ SECRET_KEY = '8w@pj1*b1nn@epg(%m3tcq+$kq=4i54cd$qkju6&z=bmlr2)5e'
 ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
+# fix result of Django's get_script_name() when apache2 has DocumentRoot
+FORCE_SCRIPT_NAME = '/'
 
 # error reporting
 ADMINS = [('Site administrator', 'contact@nhkeasier.com')]
