@@ -116,10 +116,10 @@ function ignore_event(event) {
     event.stopPropagation();
 }
 function show_rikai(event) {
-    rikai_container.style.visibility = 'visible';
+    rikai_container.classList.remove('hidden');
 }
 function hide_rikai(event) {
-    rikai_container.style.visibility = 'hidden';
+    rikai_container.classList.add('hidden');
     if (event) {
         ignore_event(event);
     }
