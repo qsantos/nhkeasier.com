@@ -89,6 +89,8 @@ def archive(request, year=None, month=None, day=None):
         header = 'Latest Stories'
 
     stories = Story.objects.filter(published__date=day).order_by('-published', '-id')
+    if not stories:
+        return handler404(request)
 
     # information for links (canonical URL, links to previous and next days)
     previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
