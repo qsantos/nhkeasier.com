@@ -25,6 +25,15 @@ if (!NodeList.prototype.forEach) {
         }
     }
 }
+if (!String.prototype.endsWith) {
+    /* Internet Explorer... */
+    String.prototype.endsWith = function(search, this_len) {
+        if (this_len === undefined || this_len > this.length) {
+            this_len = this.length;
+        }
+        return this.substring(this_len - search.length, this_len) === search;
+    };
+}
 
 /* Show time in locale format in tooltip when hovering <time> elements */
 (function(){
@@ -188,7 +197,10 @@ function load_deinflect(data) {
         if (fields.length == 1) {  // string array
             reasons.push(lines[i]);
         } else {  // deinflection
-            let [from, to, type, reason] = fields;
+            let from = fields[0];
+            let to = fields[1];
+            let type = fields[2];
+            let reason = fields[3];
             reason = reasons[reason];
             deinflect.push([from, to, type, reason]);
         }
@@ -198,14 +210,32 @@ function load_deinflect(data) {
 function get_text_at_point(x, y) {
     let range, target, offset;
     if (document.caretPositionFromPoint) {
+        // Mozilla
         range = document.caretPositionFromPoint(x, y);
         target = range.offsetNode;
         offset = range.offset;
     } else if (document.caretRangeFromPoint) {
+        // Webkit
         range = document.caretRangeFromPoint(x, y);
         target = range.startContainer;
         offset = range.startOffset;
+    } else if (document.body.createTextRange) {
+        // MSIE
+        range = document.body.createTextRange();
+        try {
+            range.moveToPoint(x, y);
+        } catch (e) {
+            return '';
+        }
+        range.select();
+        range = window.getSelection().getRangeAt(0);
+        target = range.startContainer;
+        offset = range.startOffset;
+    } else {
+        console.log('Browser supports no text range method!');
+        return '';
     }
+
     if (!target || target.nodeType != Node.TEXT_NODE) {
         return '';
     }
@@ -231,7 +261,7 @@ function get_text_at_point(x, y) {
     } while (display == 'inline' || display == 'ruby');
     // treeWalker and nodeIterator are the same unless the DOM is modified
     // <https://mail-archives.apache.org/mod_mbox/xml-general/200012.mbox/%3C002d01c05bbe$42d71680$1000a8c0@equitytg.com%3E>
-    let treeWalker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT);
+    let treeWalker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
 
     while (treeWalker.nextNode() != target);  // skip nodes before target
     let text = target.data.substring(offset);
@@ -260,7 +290,10 @@ function iter_subfragments(text, callback) {
 function iter_deinflections(word, callback) {
     callback(word, 0, null);
     for (let i = 0; i < deinflect.length; i += 1) {
-        let [from, to, type, reason] = deinflect[i];
+        let from = deinflect[0];
+        let to = deinflect[1];
+        let type = deinflect[2];
+        let reason = deinflect[3];
         if (word.endsWith(from)) {
             let n = word.length - from.length;
             let candidate = word.substring(0, n) + to;
@@ -295,15 +328,15 @@ function set_rikai_from_point(x, y) {
     iter_subfragments(text, function(subfragment) {
         iter_deinflections(subfragment, function(candidate, type, reason) {
             let infos = edict[candidate] || [];
-            infos.filter(info => !type || (info.type & type))
-                 .forEach(info => append_sense(edict_html, info, reason));
+            infos.filter(function(info) { return !type || (info.type & type); })
+                 .forEach(function(info) { return append_sense(edict_html, info, reason); });
         });
     });
 
     let names_html = [];
     iter_subfragments(text, function(candidate) {
         let infos = enamdict[candidate] || [];
-        infos.forEach(info => append_sense(names_html, info));
+        infos.forEach(function(info) { return append_sense(names_html, info); });
     });
 
     if (edict_html.length || names_html.length) {

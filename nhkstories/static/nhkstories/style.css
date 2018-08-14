@@ -31,7 +31,7 @@ main nav ul { list-style-type:none; padding:0; }
 }
 
 /* content */
-main { max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
+main { display:block; max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
 main h2 { font-size:28px; color:#24447a; letter-spacing:4px; word-spacing:4px; }
 @-moz-document url-prefix() {
     /* Only Mozilla Firefox does proper hyphenation */
