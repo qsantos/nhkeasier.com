@@ -10,7 +10,7 @@ class LatestStoriesFeed(Feed):
     description = "Latest stories from NHK News Web easy"
 
     def items(self):
-        return Story.objects.order_by('-published', '-id')[:20]
+        return Story.objects.exclude(content_with_ruby=None).order_by('-published', '-id')[:20]
 
     def item_title(self, item):
         return item.title

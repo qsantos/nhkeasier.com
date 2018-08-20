@@ -88,7 +88,7 @@ def archive(request, year=None, month=None, day=None):
         day = Story.objects.order_by('-published').first().published.date()
         header = 'Latest Stories'
 
-    stories = Story.objects.filter(published__date=day).order_by('-published', '-id')
+    stories = Story.objects.exclude(content_with_ruby=None).filter(published__date=day).order_by('-published', '-id')
     if not stories:
         return handler404(request)
 
