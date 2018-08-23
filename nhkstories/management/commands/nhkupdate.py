@@ -146,7 +146,8 @@ def save_story(info):
         _, temp_name = tempfile.mkstemp()
         res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
                              stderr=subprocess.DEVNULL)
-        if res.returncode == 0:
+        if res.returncode in (0, 2):  # some videos trigger a partial download
+            # save file
             with open(temp_name, 'rb') as f:
                 story.video_original.save('', f)
         else:
