@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 import sys
+import re
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -34,6 +35,10 @@ EMAIL_HOST_PASSWORD = '6ju7lnw7zSMyxcQuma0hQOh7Ydx6GO'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 
+IGNORABLE_404_URLS = [
+    re.compile(r'^/external-error/'),
+    re.compile(r'^/\.well-known/assetlinks\.json'),
+]
 
 # Application definition
 INSTALLED_APPS = [
