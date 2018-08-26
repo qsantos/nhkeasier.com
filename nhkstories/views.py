@@ -48,6 +48,9 @@ def handler500(request):
 
 
 def external_error(request, code):
+    if request.META.get('REQUEST_URI') == '/.well-known/assetlinks.json':
+        return handler404(request)
+
     email_from = 'bugs@nhkeasier.com'
     email_to = 'contact@nhkeasier.com'
     email_subject = '[Django] Broken EXTERNAL link ({}) on {}'.format(code, request.META.get('SERVER_NAME'))

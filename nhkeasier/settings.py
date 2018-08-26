@@ -37,7 +37,6 @@ SERVER_EMAIL = EMAIL_HOST_USER
 
 IGNORABLE_404_URLS = [
     re.compile(r'^/external-error/'),
-    re.compile(r'^/\.well-known/assetlinks\.json'),
 ]
 
 # Application definition
