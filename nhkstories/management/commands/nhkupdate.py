@@ -11,8 +11,7 @@ from django.core.files import File
 from django.core.files.base import ContentFile
 from django.conf import settings
 from nhkstories.models import Story
-from nhkstories.edict.parse import load_edict, load_enamdict
-from nhkstories.edict.filter import filter_edict, save_subedict
+from nhkstories.edict.subedict import create_subedict, create_subenamdict, save_subedict
 
 
 class DuplicateStoryIDType(Exception):
@@ -53,6 +52,7 @@ def parse_datetime_nhk(s):
 def save_story(info):
     # general information
     story_id = info['news_id']
+
     story, created = Story.objects.get_or_create(story_id=story_id)
     published = parse_datetime_nhk(info['news_prearranged_time'])
 
@@ -190,10 +190,6 @@ def create_subedicts():
     if not stories:
         return
 
-    # load EDICT files
-    edict = load_edict()
-    enamdict = load_enamdict()
-
     # ensure the directories exist
     subedict_dir = os.path.join(settings.BASE_DIR, 'media', 'subedict')
     subenamdict_dir = os.path.join(settings.BASE_DIR, 'media', 'subenamdict')
@@ -205,8 +201,8 @@ def create_subedicts():
     for story in stories:
         new_days.add(story.published.date())
         # create sub EDICT files for story
-        subedict = filter_edict(edict, story.content)
-        subenamdict = filter_edict(enamdict, story.content)
+        subedict = create_subedict(story.content)
+        subenamdict = create_subenamdict(story.content)
         filename = '{:05}.dat'.format(story.id)
         save_subedict(subedict, os.path.join(subedict_dir, filename))
         save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
@@ -219,8 +215,8 @@ def create_subedicts():
         day_stories = Story.objects.filter(published__date=day)
         text = ''.join(story.content for story in day_stories)
         # update sub EDICT files for day
-        subedict = filter_edict(edict, text)
-        subenamdict = filter_edict(enamdict, text)
+        subedict = create_subedict(text)
+        subenamdict = create_subenamdict(text)
         filename = '{}.dat'.format(day)
         save_subedict(subedict, os.path.join(subedict_dir, filename))
         save_subedict(subenamdict, os.path.join(subenamdict_dir, filename))
@@ -233,6 +229,7 @@ def create_subedicts():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        '''
         new_stories_count = 0
         news_list = get_news_list()
         stories_per_day = news_list[0]  # day -> stories
@@ -246,5 +243,6 @@ class Command(BaseCommand):
             print('1 new story')
         else:
             print('%i new stories' % new_stories_count)
+        '''
 
         create_subedicts()
