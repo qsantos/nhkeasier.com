@@ -161,32 +161,45 @@ function defaultdict_append(dict, key, value) {
 }
 
 function parse_edict(dst, data) {
-    let regex = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
+    let edict_line_pattern = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
-    while ((match = regex.exec(data))) {
-        let type = 0;
-        if (match[3].search('v1'))    { type |=  256; }
-        if (match[3].search('v5'))    { type |=  512; }
-        if (match[3].search('adj-i')) { type |= 1024; }
-        if (match[3].search('vk'))    { type |= 2048; }
-        if (match[3].search('vs'))    { type |= 4096; }
+    while ((match = edict_line_pattern.exec(data))) {
+        let type = 1<<7;
+        if (match[3].search('v1') >= 0)    { type |= 1<<0; }
+        if (match[3].search('v5') >= 0)    { type |= 1<<1; }
+        if (match[3].search('adj-i') >= 0) { type |= 1<<2; }
+        if (match[3].search('vk') >= 0)    { type |= 1<<3; }
+        if (match[3].search('vs') >= 0)    { type |= 1<<4; }
 
-        let kanji, kana;
-        if (match[2]) {
-            kanji = match[1];
-            kana = match[2];
-        } else {
-            kana = match[1];
+        let kanjis = match[1];
+        let kanas = match[2];
+        let common_marker = /\([^)]*\)/gm;
+        kanjis = kanjis.replace(common_marker, '');
+        kanas = kanas !== undefined ? kanas.replace(common_marker, '') : undefined;
+
+        if (kanas) {  // kanjis and kanas are given
+            let kana = kanas.split(';')[0];
+            kanjis.split(';').forEach(function(kanji) {
+                let info = {
+                    'kanji': kanji,
+                    'kana': kana,
+                    'glosses': match[3].replace(/\//g, '; '),
+                    'type': type,
+                };
+                defaultdict_append(dst, kanji, info);
+                defaultdict_append(dst, kana, info);
+            });
+        } else {  // only kanas
+            kanjis.split(';').forEach(function(kanji) {
+                let info = {
+                    'kanji': kanji,
+                    'kana': kanji,
+                    'glosses': match[3].replace(/\//g, '; '),
+                    'type': type,
+                };
+                defaultdict_append(dst, kanji, info);
+            });
         }
-
-        let info = {
-            'kanji': kanji,
-            'kana': kana,
-            'glosses': match[3].replace(/\//g, '; '),
-            'type': type,
-        };
-        defaultdict_append(dst, kana, info);
-        defaultdict_append(dst, kanji, info);
     }
 }
 
@@ -297,22 +310,50 @@ function iter_subfragments(text, callback) {
 }
 
 function iter_deinflections(word, callback) {
-    callback(word, 0, null);
-    for (let i = 0; i < deinflect.length; i += 1) {
-        let from = deinflect[0];
-        let to = deinflect[1];
-        let type = deinflect[2];
-        let reason = deinflect[3];
-        if (word.endsWith(from)) {
-            let n = word.length - from.length;
-            let candidate = word.substring(0, n) + to;
-            callback(candidate, type, reason);
+    let candidates = [[word, 0xff, []]]
+    // consider all candidates and their deinflections recursively
+    for (let i = 0; i < candidates.length; i += 1) {
+        let candidate = candidates[i];
+        let word = candidate[0];
+        let wtype = candidate[1];
+        let wreason = candidate[2];
+
+        callback(word, wtype, wreason);
+
+        // iterate over rules
+        for (let j = 0; j < deinflect.length; j += 1) {
+            let rule = deinflect[j];
+            let rfrom = rule[0];
+            let rto = rule[1];
+            let rtype = rule[2];
+            let rreason = rule[3];
+
+            // check types match
+            if (wtype & rtype === 0) {
+                continue;
+            }
+            // check suffix matches
+            if (!word.endsWith(rfrom)) {
+                continue
+            }
+
+            // append new candidate
+            let new_word = word.substr(0, word.length-rfrom.length) + rto;  // replace suffix
+            let new_type = rtype >> 8;
+            let new_reason = wreason.slice();
+            new_reason.push(rreason);
+            candidates.push([new_word, new_type, new_reason])
+            /* NOTE: could check that new_word is already in candidates
+             * Rikaikun merges with previous candidate; if this candidate
+             * has already been processed, the new type is ignored
+             * Rikaichamp only combines candidates of identical types
+             */
         }
     }
 }
 
 function append_sense(html, sense, reason) {
-    if (sense.kanji) {
+    if (sense.kana != sense.kanji) {
         html.push('<dt><a href="https://jisho.org/search/%23kanji%20');
         html.push(sense.kanji);
         html.push('">');
@@ -320,9 +361,9 @@ function append_sense(html, sense, reason) {
         html.push('</a></dt><dt>');
     }
     html.push(sense.kana);
-    if (reason) {
+    if (reason && reason.length) {
         html.push(' (');
-        html.push(reason);
+        html.push(reason.join(' '));
         html.push(')');
     }
     html.push('</dt><dd>');
@@ -334,11 +375,18 @@ function set_rikai_from_point(x, y) {
     let text = get_text_at_point(x, y);
 
     let edict_html = [];
+    let added_words = [];
     iter_subfragments(text, function(subfragment) {
         iter_deinflections(subfragment, function(candidate, type, reason) {
             let infos = edict[candidate] || [];
-            infos.filter(function(info) { return !type || (info.type & type); })
-                 .forEach(function(info) { return append_sense(edict_html, info, reason); });
+            infos.filter(function(info) { return (info.type & type) !== 0; })
+            .forEach(function(info) {
+                if (added_words.indexOf(info) >= 0) {
+                    return;
+                }
+                added_words.push(info);
+                append_sense(edict_html, info, reason);
+            });
         });
     });
 
