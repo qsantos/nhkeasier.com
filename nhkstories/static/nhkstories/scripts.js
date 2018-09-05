@@ -108,10 +108,19 @@ rikai_names.addEventListener('click', ignore_event);
 rikai_names.addEventListener('touchstart', ignore_event);
 rikai_mask.addEventListener('click', hide_rikai);
 
+let enabled = localStorage.getItem('autorikai') === 'true';
+if (enabled === undefined) {
+    enabled = true;
+}
+autorikai_checkbox.checked = enabled;
+
 /* Event handlers */
 function autorikai(event) {
     if (autorikai_checkbox.checked) {
         set_rikai_from_point(event.clientX, event.clientY);
+        localStorage.setItem('autorikai', true);
+    } else {
+        localStorage.setItem('autorikai', false);
     }
 }
 function manualrikai(event) {
