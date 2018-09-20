@@ -229,7 +229,6 @@ def create_subedicts():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        '''
         new_stories_count = 0
         news_list = get_news_list()
         stories_per_day = news_list[0]  # day -> stories
@@ -243,6 +242,5 @@ class Command(BaseCommand):
             print('1 new story')
         else:
             print('%i new stories' % new_stories_count)
-        '''
 
         create_subedicts()
