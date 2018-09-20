@@ -20,8 +20,10 @@ class LatestStoriesFeed(Feed):
 
     def item_description(self, story):
         html = ''
-        if story.video_reencoded:
+        if story.video_reencoded and story.image:
             html += '<video src="{}" poster="{}" controls preload="none""></video>'.format(story.video_reencoded.url, story.image.url)
+        elif story.video_reencoded:
+            html += '<video src="{}" controls preload="none""></video>'.format(story.video_reencoded.url)
         elif story.image:
             html += '<img src="{}" alt="Story illustration">'.format(story.image.url)
         html += story.content_with_ruby
