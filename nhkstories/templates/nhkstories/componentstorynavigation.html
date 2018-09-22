@@ -1,5 +1,5 @@
 <nav><ul>
     <li>{% if previous_story %}<a href="{% url 'nhkstories:story' previous_story.id %}">Previous Story</a>{% endif %}</li>
-    <li><a href="{{ day|date:'/Y/m/d/' }}">{{ day|date:'Y-m-d' }}</a></li>
+    <li><a href="{{ story.published|date:'/Y/m/d/' }}">{{ story.published|date:'Y-m-d' }}</a></li>
     <li>{% if next_story %}<a href="{% url 'nhkstories:story' next_story.id %}">Next story</a>{% endif %}</li>
 </ul></nav>
