@@ -163,12 +163,3 @@ def about(request):
         'title': 'About',
         'header': 'About',
     })
-
-
-def tools(request):
-    url = request.build_absolute_uri(reverse('nhkstories:tools'))
-    return render(request, 'nhkstories/tools.html', {
-        'url': url,
-        'title': 'Tools',
-        'header': 'Tools',
-    })
