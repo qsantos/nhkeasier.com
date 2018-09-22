@@ -15,5 +15,5 @@ urlpatterns = [
     url(r'^403/$', views.handler403),
     url(r'^404/$', views.handler404),
     url(r'^500/$', views.handler500),
-    url(r'^$', views.archive, name='index'),
+    url(r'^$', views.archive, name='home'),
 ]
