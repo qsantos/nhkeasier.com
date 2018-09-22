@@ -11,32 +11,28 @@ from django.core.mail import send_mail
 from .models import Story
 
 
+def simple_message(request, title, message, status=200):
+    return render(request, 'nhkstories/message.html', {
+        'title': title,
+        'header': title,
+        'message': message,
+    }, status=status)
+
+
 def handler400(request):
-    return render(request, 'nhkstories/400.html', {
-        'title': 'Bad Request',
-        'header': 'Bad Request',
-    }, status=400)
+    return simple_message(request, 'Bad Request', 'Sorry, we were not able to handle the request you sent us. Please check that it is formatted correctly.', 400)
 
 
 def handler403(request):
-    return render(request, 'nhkstories/403.html', {
-        'title': 'Forbidden',
-        'header': 'Forbidden',
-    }, status=400)
+    return simple_message(request, 'Forbidden', 'Sorry, the permissions of this document are not configured properly to let you access it.', 403)
 
 
 def handler404(request):
-    return render(request, 'nhkstories/404.html', {
-        'title': 'Page Not Found',
-        'header': 'Page Fot Found',
-    }, status=404)
+    return simple_message(request, 'Page Not Found', 'Sorry, we could not find the page you requested. Maybe the URL you followed is incomplete, or the document has been moved.', 404)
 
 
 def handler500(request):
-    return render(request, 'nhkstories/500.html', {
-        'title': 'Server Error',
-        'header': 'Server Error',
-    }, status=500)
+    return simple_message(request, 'Server Error', 'Sorry, something went very wrong on the server and we were not able to display the requested document.', 500)
 
 
 def external_error(request, code):
@@ -57,17 +53,11 @@ def external_error(request, code):
         request.META.get('REMOTE_ADDR'),
     ))
     send_mail(email_subject, email_body, email_from, [email_to])
-    error = {
-        '400': 'Bad Request',
-        '403': 'Forbidden',
-        '404': 'Page Not Found',
-        '500': 'Server Error',
-    }.get(code, 'Unknown error')
-    return render(request, 'nhkstories/{}.html'.format(code), {
-        'title': error,
-        'header': error,
-    }, status=int(code))
-
+    return {
+        '400': handler400,
+        '403': handler403,
+        '404': handler404,
+    }.get(code, handler500)(request)
 
 
 def archive(request, year=None, month=None, day=None):
