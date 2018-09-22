@@ -12,36 +12,28 @@ from .models import Story
 
 
 def handler400(request):
-    url = request.build_absolute_uri()
     return render(request, 'nhkstories/400.html', {
-        'url': url,
         'title': 'Bad Request',
         'header': 'Bad Request',
     }, status=400)
 
 
 def handler403(request):
-    url = request.build_absolute_uri()
     return render(request, 'nhkstories/403.html', {
-        'url': url,
         'title': 'Forbidden',
         'header': 'Forbidden',
     }, status=400)
 
 
 def handler404(request):
-    url = request.build_absolute_uri()
     return render(request, 'nhkstories/404.html', {
-        'url': url,
         'title': 'Page Not Found',
         'header': 'Page Fot Found',
     }, status=404)
 
 
 def handler500(request):
-    url = request.build_absolute_uri()
     return render(request, 'nhkstories/500.html', {
-        'url': url,
         'title': 'Server Error',
         'header': 'Server Error',
     }, status=500)
@@ -65,7 +57,6 @@ def external_error(request, code):
         request.META.get('REMOTE_ADDR'),
     ))
     send_mail(email_subject, email_body, email_from, [email_to])
-    url = request.build_absolute_uri()
     error = {
         '400': 'Bad Request',
         '403': 'Forbidden',
@@ -73,7 +64,6 @@ def external_error(request, code):
         '500': 'Server Error',
     }.get(code, 'Unknown error')
     return render(request, 'nhkstories/{}.html'.format(code), {
-        'url': url,
         'title': error,
         'header': error,
     }, status=int(code))
@@ -99,7 +89,6 @@ def archive(request, year=None, month=None, day=None):
     previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
     next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
     date_info = (day.year, '{:02}'.format(day.month), '{:02}'.format(day.day))
-    url = request.build_absolute_uri(reverse('nhkstories:archive', args=date_info))
 
     # take the image of one of the story as page illustration, if any
     illustrated_story = stories.exclude(image='').first()
@@ -109,7 +98,6 @@ def archive(request, year=None, month=None, day=None):
         image = None
 
     return render(request, 'nhkstories/index.html', {
-        'url': url,
         'title': 'Easier Japanese Practice',
         'header': header,
         'description':
@@ -139,13 +127,11 @@ def story(request, id):
     previous_story = previous_stories.order_by('-published', '-id').first()
     next_stories = Story.objects.filter(published__date=story.published.date(), id__gt=story.id) | Story.objects.filter(published__date__gt=story.published.date())
     next_story = next_stories.order_by('published', 'id').first()
-    url = request.build_absolute_uri(reverse('nhkstories:story', args=(id,)))
 
     # take the image of the story as page illustration, if any
     image = request.build_absolute_uri(story.image.url) if story.image else None
 
     return render(request, 'nhkstories/story.html', {
-        'url': url,
         'title': story.title,
         'header': 'Single Story',
         'description': remove_all_html(story.content),
@@ -157,9 +143,7 @@ def story(request, id):
 
 
 def about(request):
-    url = request.build_absolute_uri(reverse('nhkstories:about'))
     return render(request, 'nhkstories/about.html', {
-        'url': url,
         'title': 'About',
         'header': 'About',
     })

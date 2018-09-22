@@ -8,7 +8,7 @@
 <title>{{ title }} | NHK News Web Easier</title>
 <meta property="og:title" content="{{ title }}" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="{{ url }}" />
+<meta property="og:url" content="{{ request.build_absolute_uri }}" />
 {% if description %}
     <meta name="description" content="{{ description }}">
     <meta property="og:description" content="{{ description }}" />
