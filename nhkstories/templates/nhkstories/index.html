@@ -10,11 +10,11 @@ and laptops) or touching them (smartphones and tablets). You can also subscribe 
 <a href="{% url 'nhkstories:feed' %}">RSS feed<img src="{% static 'nhkstories/feed-icon.svg' %}" alt="RSS feed" class="feed-icon"></a>.
 </p>
 </article>
-{% include 'nhkstories/componentpagination.html' %}
+{% include 'nhkstories/widgets/nav_day.html' %}
 {% for story in stories %}
-{% include 'nhkstories/componentstory.html' %}
+{% include 'nhkstories/widgets/story.html' %}
 {% endfor %}
-{% include 'nhkstories/componentpagination.html' %}
+{% include 'nhkstories/widgets/nav_day.html' %}
 <script>
 var edict_filename = '{{ day|date:'Y-m-d' }}.dat';
 </script>
