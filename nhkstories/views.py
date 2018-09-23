@@ -5,10 +5,11 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
 
 from .models import Story
+from .forms import ContactForm
 
 
 def simple_message(request, title, message, status=200):
@@ -137,3 +138,26 @@ def about(request):
         'title': 'About',
         'header': 'About',
     })
+
+
+def contact(request):
+    if request.method == 'GET':
+        form = ContactForm()
+    else:
+        form = ContactForm(request.POST)
+    if form.is_valid():
+        from_email = form.cleaned_data['from_email']
+        subject = '[NHKEasier] {}'.format(form.cleaned_data['subject'])
+        message = form.cleaned_data['message']
+        if send_mail(subject, message, from_email, ['contact@nhkeasier.com']) != 1:
+            return simple_message(request, 'Message Not Sent', 'Sorry, there was en error while sending your message. Please try again later. You should be return to the form using the “Back” button of your web browser without', 500)
+        return redirect('nhkstories:contact_sent')
+    else:
+        return render(request, 'nhkstories/contact.html', {
+            'title': 'Contact',
+            'header': 'Contact',
+            'form': form,
+        })
+
+def contact_sent(request):
+    return simple_message(request, 'Message Sent', 'Thank you for your feedback. We will take your message under consideration as soon as possible.')
