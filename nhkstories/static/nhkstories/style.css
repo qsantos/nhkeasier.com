@@ -1,17 +1,17 @@
 /* general */
 * { box-sizing:border-box; }
 body { margin:0; font:14px sans-serif;}
-a { color:#0d182b; }
+a { color:#0d182b; text-decoration:underline; }
 
 /* header */
 header {
     background-color:#0d182b;
     display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
 }
-header a { color:white; text-decoration:none; outline:none; }
+header a, header a:hover { color:white; text-decoration:none; outline:none; }
 header h1 { margin:0; font:28px sans-serif; letter-spacing:2px; word-spacing:2px; flex-grow:4; }
 /* margin atop <a> (not padding in <h1>) for cross-browser consistency */
-header h1 a { display:inline-block; margin:10px 0 10px; padding:0 14px 18px; }
+header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; padding:0 14px 18px; }
 header nav { flex-basis:100px; flex-grow:1; font-size:20px; }
 header nav ul { list-style-type:none; margin:0; padding:0; display:flex; justify-content:space-around; }
 header nav li { display:inline-block; padding:10px; }
@@ -32,7 +32,7 @@ main nav ul { list-style-type:none; padding:0; }
 
 /* content */
 main { display:block; max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
-main h2 { font-size:28px; color:#24447a; letter-spacing:4px; word-spacing:4px; }
+main h2 { font-size:28px; color:#24447a; font-weight:bold; letter-spacing:4px; word-spacing:4px; margin:32px 0; }
 @-moz-document url-prefix() {
     /* Only Mozilla Firefox does proper hyphenation */
     @media (min-width:30em) { main {text-align:justify;hyphens:auto;} }
@@ -67,6 +67,7 @@ aside section {
     background-color:#f7f9fd;  padding:0 10px;
     border:1px solid #eee; border-radius:3px; box-shadow:0 1px 1px #0d182b;
 }
+aside h3 { font-weight:bold; font-size:16px; margin:16px 0; }
 @media (max-width:1279px), (max-height:499px) {
     #rikai-container {
         position:fixed; top:0; width:100%; height:100%; z-index:1;

@@ -15,6 +15,7 @@
 {% endif %}
 {% if image %}<meta property="og:image" content="{{ image }}" />{% endif %}
 <link rel="icon" href="{% static 'nhkstories/favicon.png' %}">
+<link rel="stylesheet" href="{% static 'nhkstories/bootstrap.min.css' %}">
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" type="application/rss+xml">
 </head>
