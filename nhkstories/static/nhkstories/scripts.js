@@ -358,15 +358,17 @@ function append_sense(html, sense, reason) {
         html.push(sense.kanji);
         html.push('">');
         html.push(sense.kanji);
-        html.push('</a></dt><dt>');
+        html.push('</a></dt>');
     }
+    html.push('<dt>');
     html.push(sense.kana);
+    html.push('</dt>');
     if (reason && reason.length) {
         html.push(' (');
         html.push(reason.join(' '));
         html.push(')');
     }
-    html.push('</dt><dd>');
+    html.push('<dd>');
     html.push(sense.glosses);
     html.push('</dd>');
 }
