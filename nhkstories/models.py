@@ -22,6 +22,7 @@ def video_reencoded_filename(instance, filename):
     return 'mp4/{}.reencoded.mp4'.format(instance.story_id)
 
 
+# kept for migrations
 @deconstructible
 class NameByStoryID:
     def __init__(self, extension):
