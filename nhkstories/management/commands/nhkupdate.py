@@ -168,9 +168,14 @@ def fetch_story_video(story, info):
 
     print('Download video %s' % video_url)
     _, temp_name = tempfile.mkstemp()
-    res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
-                         stderr=subprocess.DEVNULL)
-    if res.returncode in (0, 2):  # some videos trigger a partial download
+    # some download complete partially, so we try several times
+    for _ in range(2):
+        res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
+                             stderr=subprocess.DEVNULL)
+        if res.returncode != 2:
+            break
+    # some videos always trigger a partial download so we keep what we have
+    if res.returncode in (0, 2)
         with open(temp_name, 'rb') as f:
             story.video_original.save('', f)
     else:
