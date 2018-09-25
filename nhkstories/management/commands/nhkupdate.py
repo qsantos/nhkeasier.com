@@ -22,10 +22,11 @@ DuplicateStoryID = DuplicateStoryIDType()
 
 BASE_URL = 'http://www3.nhk.or.jp/news/easy/'
 story_list_url = BASE_URL + 'news-list.json'
+replace_voice_url = BASE_URL + 'player/voice_replace/voice_replace.json'
 webpage_url_pattern = BASE_URL + '{news_id}/{news_id}.html'
 image_url_pattern = BASE_URL + '{news_id}/{news_easy_image_uri}'
-voice_url_pattern = BASE_URL + '{news_id}/{news_easy_voice_uri}'
-fragmented_voice_url_pattern = 'https://nhks-vh.akamaihd.net/i/news/easy/{news_id}.mp4/master.m3u8'
+voice_url_pattern = BASE_URL + '{voice_id}/{news_easy_voice_uri}'
+fragmented_voice_url_pattern = 'https://nhks-vh.akamaihd.net/i/news/easy/{voice_id}.mp4/master.m3u8'
 video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}'
 
 
@@ -34,6 +35,22 @@ def fetch_story_list():
     with urlopen(story_list_url) as f:
         data = f.read()
     return json.loads(data.decode('utf-8-sig'))[0]
+
+
+def fetch_replace_voice():
+    '''Return a dictionary mapping story_id to amended voice filename'''
+    with urlopen(replace_voice_url) as f:
+        data = f.read()
+    amendments = json.loads(data.decode())
+    return {
+        amendment['news_id']: amendment['voice_id']
+        for amendment in amendments
+    }
+
+
+def set_voice_id(info, replace_voice):
+    news_id = info['news_id']
+    info['voice_id'] = replace_voice.get(news_id, news_id)
 
 
 def clean_up_content(content):
@@ -190,7 +207,8 @@ def convert_story_video(story):
     os.remove(temp_name)
 
 
-def fetch_story(info):
+def fetch_story(info, replace_voice):
+    set_voice_id(info, replace_voice)
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
     fetch_story_image(story, info)
@@ -204,8 +222,9 @@ def fetch_story(info):
 
 def fetch_stories():
     stories_per_day = fetch_story_list()
+    replace_voice = fetch_replace_voice()
     new_stories_count = sum(
-        fetch_story(story)
+        fetch_story(story, replace_voice)
         for day in sorted(stories_per_day)
         for story in stories_per_day[day]
     )
