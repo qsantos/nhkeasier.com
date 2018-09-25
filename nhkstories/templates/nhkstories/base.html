@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 <meta name="flattr:id" content="w150z0">
 <title>{{ title }} | NHK News Web Easier</title>
+<meta property="og:site_name" content="NHKEasier" />
 <meta property="og:title" content="{{ title }}" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{{ request.build_absolute_uri }}" />
@@ -13,7 +14,12 @@
     <meta name="description" content="{{ description }}">
     <meta property="og:description" content="{{ description }}" />
 {% endif %}
-{% if image %}<meta property="og:image" content="{{ image }}" />{% endif %}
+{% if image %}
+    <meta property="og:image" content="{{ image }}" />
+    <meta property="og:image:width" content="640" />
+    <meta property="og:image:height" content="360" />
+    <meta name="twitter:card" content="summary_large_image" />
+{% endif %}
 <link rel="icon" href="{% static 'nhkstories/favicon.png' %}">
 <link rel="stylesheet" href="{% static 'nhkstories/bootstrap.min.css' %}">
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
