@@ -176,14 +176,6 @@ def get_news_list():
     return json.loads(data.decode('utf-8-sig'))
 
 
-def fetch_story(story_id, story_url, image_url, voice_url):
-    success = True
-    success &= fetch(story_url, pathlib.Path('files', story_id + '.html'))
-    success &= fetch(image_url, pathlib.Path('files', story_id + '.jpg'))
-    success &= fetch(voice_url, pathlib.Path('files', story_id + '.mp3'))
-    return success
-
-
 def create_subedicts():
     stories = Story.objects.filter(subedict_created=False)
 
