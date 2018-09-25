@@ -19,12 +19,19 @@ class DuplicateStoryIDType(Exception):
 
 
 DuplicateStoryID = DuplicateStoryIDType()
-base_url = 'http://www3.nhk.or.jp/news/easy'
+
+BASE_URL = 'http://www3.nhk.or.jp/news/easy/'
+story_list_url = BASE_URL + 'news-list.json'
+webpage_url_pattern = BASE_URL + '{news_id}/{news_id}.html'
+image_url_pattern = BASE_URL + '{news_id}/{news_easy_image_uri}'
+voice_url_pattern = BASE_URL + '{news_id}/{news_easy_voice_uri}'
+fragmented_voice_url_pattern = 'https://nhks-vh.akamaihd.net/i/news/easy/{news_id}.mp4/master.m3u8'
+video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}'
 
 
 def fetch_story_list():
     '''Return a dictionary mapping days to stories published this day'''
-    with urlopen(news_url) as f:
+    with urlopen(story_list_url) as f:
         data = f.read()
     return json.loads(data.decode('utf-8-sig'))[0]
 
@@ -72,7 +79,7 @@ def story_from_info(info):
 def fetch_story_webpage(story, info):
     if story.webpage:
         return
-    webpage_url = '%s/%s/%s.html' % (base_url, story_id, story_id)
+    webpage_url = webpage_url_pattern.format(**info)
     print('Download %s' % webpage_url)
     with urlopen(webpage_url) as f:
         story.webpage.save('', f)
@@ -85,8 +92,7 @@ def fetch_story_image(story, info):
     if info['has_news_web_image']:
         image_url = info['news_web_image_uri']
     elif info['has_news_easy_image']:  # rare
-        filename = info['news_easy_image_uri']
-        image_url = '/'.join([base_url, story_id, filename])
+        image_url = image_url_pattern.format(**info)
     else:
         return
 
@@ -108,14 +114,13 @@ def fetch_story_voice(story, info):
         return
 
     if info['has_news_easy_voice']:
-        filename = info['news_easy_voice_uri']
-        voice_url = '/'.join([base_url, story_id, filename])
+        voice_url = voice_url_pattern.format(**info)
     else:
         return
 
     if voice_url.endswith('.mp4'):
         # fragmented MP4 using HTTP Live Streaming
-        voice_url = 'https://nhks-vh.akamaihd.net/i/news/easy/{}.mp4/master.m3u8'.format(story_id)
+        voice_url = fragmented_voice_url_pattern.format(**info)
         print('Download voice (fragmented MP4) %s' % voice_url)
         _, temp_name = tempfile.mkstemp(suffix='.mp3')
         res = subprocess.run(['ffmpeg', '-y', '-i', voice_url, temp_name],
@@ -135,14 +140,12 @@ def fetch_story_voice(story, info):
             print('Failed')
 
 
-def fetch_story_video(story, video):
+def fetch_story_video(story, info):
     if story.video_original:
         return
 
-    stream_base_url = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/'
     if info['has_news_web_movie']:
-        filename = info['news_web_movie_uri']
-        video_url = stream_base_url + filename
+        video_url = video_url_pattern.format(**info)
     else:
         return
 
