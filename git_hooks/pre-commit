@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+TEMPDIR=$(mktemp -d)
+trap "rm -Rf $TEMPDIR" SIGINT SIGTERM EXIT
+git checkout-index -af --prefix=$TEMPDIR/
+find $TEMPDIR -name '*.py' -print0 | xargs -0 python3 -m py_compile
