@@ -216,9 +216,10 @@ def fetch_story(info, replace_voice):
     set_voice_id(info, replace_voice)
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
-    fetch_story_image(story, info)
     fetch_story_voice(story, info)
-    fetch_story_video(story, info)
+    if (datetime.date.today() - story.published.date()).days <= 7:
+        fetch_story_image(story, info)
+        fetch_story_video(story, info)
     extract_story_content(story)
     convert_story_video(story)
     story.save()
