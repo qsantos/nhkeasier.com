@@ -140,6 +140,10 @@ def about(request):
     })
 
 
+def tools(request):
+    return redirect('nhkstories:about')
+
+
 def contact(request):
     if request.method == 'GET':
         form = ContactForm()
