@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.deconstruct import deconstructible
+from django.urls import reverse
 
 
 def webpage_filename(instance, filename):
@@ -51,3 +52,6 @@ class Story(models.Model):
 
     def __str__(self):
         return '{}: {}'.format(self.id, self.title)
+
+    def get_absolute_url(self):
+        return reverse('nhkstories:story', kwargs={'id': self.id})
