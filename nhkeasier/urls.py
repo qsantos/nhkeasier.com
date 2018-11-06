@@ -11,7 +11,8 @@ from nhkstories.sitemaps import sitemaps
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + '/nhkstories/favicon.ico')),
+    url(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'nhkstories/favicon.ico')),
+    url(r'^robots.txt$', RedirectView.as_view(url=settings.STATIC_URL + 'nhkstories/robots.txt')),
     url(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     url(r'^', include('nhkstories.urls')),
 ]
