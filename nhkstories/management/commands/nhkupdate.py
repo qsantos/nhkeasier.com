@@ -105,6 +105,8 @@ def fetch_story_image(story, info):
     if story.image:
         return
 
+    assert not (info['has_news_web_image'] and info['has_news_easy_image'])
+
     if info['has_news_web_image']:
         image_url = info['news_web_image_uri']
     elif info['has_news_easy_image']:  # rare
