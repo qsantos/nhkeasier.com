@@ -1,10 +1,6 @@
 import re
 from datetime import date
 
-from django.http import HttpResponse
-from django.urls import reverse
-from django.utils import timezone
-from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
 

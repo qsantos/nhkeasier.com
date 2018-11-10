@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.deconstruct import deconstructible
 from django.urls import reverse
 
 

@@ -1,6 +1,5 @@
 from django.contrib.syndication.views import Feed
 from django.urls import reverse
-from django.contrib.staticfiles.templatetags.staticfiles import static
 from .models import Story
 
 

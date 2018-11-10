@@ -1,14 +1,12 @@
 import re
 import os
 import json
-import datetime
-import tempfile
-import subprocess
+from datetime import datetime, timedelta, date, timezone
+from tempfile import mkstemp
+from subprocess import run, DEVNULL
 from urllib.request import urlopen, HTTPError
 
 from django.core.management.base import BaseCommand
-from django.core.files import File
-from django.core.files.base import ContentFile
 from django.conf import settings
 from nhkstories.models import Story
 from nhkstories.edict.subedict import create_subedict, create_subenamdict, save_subedict
@@ -75,8 +73,8 @@ def remove_ruby(content):
 
 
 def parse_datetime_nhk(s):
-    dt = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
-    jst = datetime.timezone(datetime.timedelta(hours=9))
+    dt = datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+    jst = timezone(timedelta(hours=9))
     return dt.replace(tzinfo=jst)
 
 
@@ -119,11 +117,9 @@ def fetch_story_image(story, info):
             story.image.save('', f)
     except HTTPError:
         print('Failed')
-    else:
-        subprocess.run(
-            ['mogrify', '-interlace', 'plane', story.image.file.name],
-            check=True
-        )
+        return
+
+    run(['mogrify', '-interlace', 'plane', story.image.file.name], check=True)
 
 
 def fetch_story_voice(story, info):
@@ -139,9 +135,8 @@ def fetch_story_voice(story, info):
         # fragmented MP4 using HTTP Live Streaming
         voice_url = fragmented_voice_url_pattern.format(**info)
         print('Download voice (fragmented MP4) %s' % voice_url)
-        _, temp_name = tempfile.mkstemp(suffix='.mp3')
-        res = subprocess.run(['ffmpeg', '-y', '-i', voice_url, temp_name],
-                             stderr=subprocess.DEVNULL)
+        _, temp_name = mkstemp(suffix='.mp3')
+        res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL)
         if res.returncode == 0:
             with open(temp_name, 'rb') as f:
                 story.voice.save('', f)
@@ -167,20 +162,19 @@ def fetch_story_video(story, info):
         return
 
     print('Download video %s' % video_url)
-    _, temp_name = tempfile.mkstemp()
+    _, temp = mkstemp()
     # some download complete partially, so we try several times
     for _ in range(2):
-        res = subprocess.run(['rtmpdump', '-r', video_url, '-o', temp_name],
-                             stderr=subprocess.DEVNULL)
+        res = run(['rtmpdump', '-r', video_url, '-o', temp], stderr=DEVNULL)
         if res.returncode != 2:
             break
     # some videos always trigger a partial download so we keep what we have
     if res.returncode in (0, 2):
-        with open(temp_name, 'rb') as f:
+        with open(temp, 'rb') as f:
             story.video_original.save('', f)
     else:
         print('Failed')
-    os.remove(temp_name)
+    os.remove(temp)
 
 
 def extract_story_content(story):
@@ -200,16 +194,13 @@ def convert_story_video(story):
 
     if not story.video_original:
         return
-
     print('Converting %s' % story.video_original.name)
-    _, temp_name = tempfile.mkstemp(suffix='.mp4')
-    subprocess.run(
-        ['ffmpeg', '-y', '-i', story.video_original.file.name, '-b:v', '500k', temp_name],
-        stderr=subprocess.DEVNULL, check=True
-    )
-    with open(temp_name, 'rb') as f:
+    original = story.video_original.file.name
+    _, temp = mkstemp(suffix='.mp4')
+    run(['ffmpeg', '-y', '-i', original, '-b:v', '500k', temp], stderr=DEVNULL, check=True)
+    with open(temp, 'rb') as f:
         story.video_reencoded.save('', f)
-    os.remove(temp_name)
+    os.remove(temp)
 
 
 def fetch_story(info, replace_voice):
@@ -217,7 +208,7 @@ def fetch_story(info, replace_voice):
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
     fetch_story_voice(story, info)
-    if (datetime.date.today() - story.published.date()).days <= 7:
+    if (date.today() - story.published.date()).days <= 7:
         fetch_story_image(story, info)
         fetch_story_video(story, info)
     extract_story_content(story)
