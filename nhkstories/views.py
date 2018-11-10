@@ -45,11 +45,12 @@ def external_error(request, code):
         'Requested URL: {}\r\n'
         'User agent: {}\r\n'
         'IP address: {}\r\n'.format(
-        request.META.get('HTTP_REFERER'),
-        request.META.get('REQUEST_URI'),
-        request.META.get('HTTP_USER_AGENT'),
-        request.META.get('REMOTE_ADDR'),
-    ))
+            request.META.get('HTTP_REFERER'),
+            request.META.get('REQUEST_URI'),
+            request.META.get('HTTP_USER_AGENT'),
+            request.META.get('REMOTE_ADDR'),
+        )
+    )
     send_mail(email_subject, email_body, email_from, [email_to])
     return {
         '400': handler400,
