@@ -23,16 +23,6 @@ def video_reencoded_filename(instance, filename):
     return 'mp4/{}.reencoded.mp4'.format(instance.story_id)
 
 
-# kept for migrations
-@deconstructible
-class NameByStoryID:
-    def __init__(self, extension):
-        self.extension = extension
-
-    def __call__(self, instance, filename):
-        return '{1}/{0}.{1}'.format(instance.story_id, self.extension)
-
-
 class Story(models.Model):
     story_id = models.CharField(max_length=200)
     published = models.DateTimeField(null=True)

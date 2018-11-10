@@ -80,7 +80,6 @@ def archive(request, year=None, month=None, day=None):
     # information for links (canonical URL, links to previous and next days)
     previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
     next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
-    date_info = (day.year, '{:02}'.format(day.month), '{:02}'.format(day.day))
 
     # take the image of one of the story as page illustration, if any
     illustrated_story = stories.exclude(image='').first()
