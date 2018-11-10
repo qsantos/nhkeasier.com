@@ -37,7 +37,8 @@ def handler500(request):
 
 
 def external_error(request, code):
-    if request.META.get('REQUEST_URI') == '/.well-known/assetlinks.json':
+    # skip meaningless 404 errors
+    if request.META.get('REQUEST_URI').startswith('/.well-known/'):
         return handler404(request)
 
     email_from = 'bugs@nhkeasier.com'
