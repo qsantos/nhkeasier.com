@@ -159,5 +159,6 @@ def contact(request):
             'form': form,
         })
 
+
 def contact_sent(request):
     return simple_message(request, 'Message Sent', 'Thank you for your feedback. We will take your message under consideration as soon as possible.')

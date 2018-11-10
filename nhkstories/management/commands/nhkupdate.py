@@ -8,6 +8,7 @@ from urllib.request import urlopen, HTTPError
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
+
 from nhkstories.models import Story
 from nhkstories.edict.subedict import create_subedict, create_subenamdict, save_subedict
 
