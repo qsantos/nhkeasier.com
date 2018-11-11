@@ -72,6 +72,9 @@ aside section {
     background-color:#f7f9fd;  padding:0 10px;
     border:1px solid #eee; border-radius:3px; box-shadow:0 1px 1px #0d182b;
 }
+aside dt {
+    font-size:large; font-weight:normal;
+}
 aside h3 { font-weight:bold; font-size:16px; margin:16px 0; }
 @media (max-width:1279px), (max-height:499px) {
     #rikai-container {

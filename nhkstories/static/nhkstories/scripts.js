@@ -25,13 +25,16 @@ if (!NodeList.prototype.forEach) {
         }
     }
 }
+if (!String.prototype.startsWith) {
+    /* Internet Explorer... */
+    String.prototype.startsWith = function(search) {
+        return this.substring(0, search.length) === search;
+    };
+}
 if (!String.prototype.endsWith) {
     /* Internet Explorer... */
-    String.prototype.endsWith = function(search, this_len) {
-        if (this_len === undefined || this_len > this.length) {
-            this_len = this.length;
-        }
-        return this.substring(this_len - search.length, this_len) === search;
+    String.prototype.endsWith = function(search) {
+        return this.substring(this.length - search.length) === search;
     };
 }
 
@@ -336,22 +339,53 @@ function iter_deinflections(word, callback) {
 
 function append_sense(html, sense, reason) {
     if (sense.kana != sense.kanji) {
-        html.push('<dt><a href="https://jisho.org/search/%23kanji%20');
+        html.push('<dt><ruby>');
         html.push(sense.kanji);
-        html.push('">');
-        html.push(sense.kanji);
-        html.push('</a></dt>');
+        html.push('<rt>');
+        html.push(sense.kana);
+        html.push('</rt>');
+        html.push('</ruby></dt>');
+    } else {
+        html.push('<dt>');
+        html.push(sense.kana);
+        html.push('</dt>');
     }
-    html.push('<dt>');
-    html.push(sense.kana);
-    html.push('</dt>');
     if (reason && reason.length) {
         html.push(' (');
         html.push(reason.join(' '));
         html.push(')');
     }
     html.push('<dd>');
-    html.push(sense.glosses);
+
+    // extract meanings
+    let meanings = [];
+    let last_meaning = [];
+    sense.glosses.split('; ').forEach(function(gloss) {
+        if (gloss == '(P)' || gloss.startsWith('EntL')) {
+            return;
+        }
+
+        let match = /^(?:\(([^0-9]\S?)\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/.exec(gloss);
+        let nature = match[1];
+        let meaning_id = match[2];
+        let meaning = match[3];
+        if (meaning_id !== undefined && last_meaning.length !== 0) {
+            meanings.push(last_meaning.join('; '));
+            last_meaning = [];
+        }
+        last_meaning.push(meaning)
+    });
+    meanings.push(last_meaning.join('; '));
+
+    // list meanings
+    html.push('<ol>');
+    meanings.forEach(function(meaning) {
+        html.push('<li>');
+        html.push(meaning);
+        html.push('</li>');
+    })
+    html.push('</ol>');
+
     html.push('</dd>');
 }
 
