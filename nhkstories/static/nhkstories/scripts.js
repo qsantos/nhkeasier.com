@@ -89,11 +89,6 @@ let edict = {};
 let enamdict = {};
 let deinflect = [];
 
-/* Start downloading data */
-fetch('/static/nhkstories/deinflect.dat', load_deinflect);
-fetch('/media/subedict/' + edict_filename, load_edict);
-fetch('/media/subenamdict/' + edict_filename, load_enamdict);
-
 function fetch(url, callback) {
     let req = new XMLHttpRequest();
     req.addEventListener('load', function(event) {
@@ -394,6 +389,15 @@ function rikai_html(text) {
 }
 
 function main() {
+    if (edict_filename == '.dat') {
+        return;
+    }
+
+    /* Start downloading data */
+    fetch('/static/nhkstories/deinflect.dat', load_deinflect);
+    fetch('/media/subedict/' + edict_filename, load_edict);
+    fetch('/media/subenamdict/' + edict_filename, load_enamdict);
+
     let rikai = document.createElement('div');
     rikai.id = 'rikai';
     document.body.appendChild(rikai);

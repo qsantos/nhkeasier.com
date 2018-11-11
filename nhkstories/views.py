@@ -60,23 +60,36 @@ def external_error(request, code):
 
 
 def archive(request, year=None, month=None, day=None):
+    stories = Story.objects.filter(subedict_created=True)
+
     if year is not None and month is not None and day is not None:
         try:
             day = date(int(year), int(month), int(day))
         except ValueError:
             return handler400(request)
         header = 'Stories on {}'.format(day)
-    else:
-        day = Story.objects.order_by('-published').first().published.date()
+    elif stories.count():
+        day = stories.order_by('-published').first().published.date()
         header = 'Latest Stories'
+    else:
+        return render(request, 'nhkstories/index.html', {
+            'title': 'Easier Japanese Practice',
+            'header': 'Japanese stories here soon!',
+            'description':
+                'Come practice reading and listening to Japanese with recent news '
+                'stories! Simple vocabulary, simple kanji and simple sentence '
+                'structures, as well as kanji readings (furigana) and an '
+                'integrated dictionary will let you train until you get more '
+                'comfortable for harder materials.',
+        })
 
-    stories = Story.objects.filter(subedict_created=True).filter(published__date=day).order_by('-published', '-id')
+    stories = stories.filter(published__date=day).order_by('-published', '-id')
     if not stories:
         return handler404(request)
 
     # information for links (canonical URL, links to previous and next days)
-    previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
-    next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
+    previous_day = stories.order_by('-published').first()
+    next_day = stories.order_by('published').first()
 
     # take the image of one of the story as page illustration, if any
     illustrated_story = stories.exclude(image='').first()
