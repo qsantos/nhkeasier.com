@@ -88,48 +88,11 @@ if (!String.prototype.endsWith) {
 let edict = {};
 let enamdict = {};
 let deinflect = [];
-let rikai_container = $('#rikai-container');
-let rikai_edict = $('#rikai-edict', rikai_container);
-let rikai_names = $('#rikai-names', rikai_container);
-let rikai_mask = $('#rikai-mask', rikai_container);
-
-hide_rikai();
 
 /* Start downloading data */
 fetch('/static/nhkstories/deinflect.dat', load_deinflect);
 fetch('/media/subedict/' + edict_filename, load_edict);
 fetch('/media/subenamdict/' + edict_filename, load_enamdict);
-
-/* Event binding */
-window.addEventListener('mousemove', autorikai);
-window.addEventListener('click', manualrikai);
-rikai_edict.addEventListener('click', ignore_event);
-rikai_edict.addEventListener('touchstart', ignore_event);
-rikai_names.addEventListener('click', ignore_event);
-rikai_names.addEventListener('touchstart', ignore_event);
-rikai_mask.addEventListener('click', hide_rikai);
-
-/* Event handlers */
-function autorikai(event) {
-    set_rikai_from_point(event.clientX, event.clientY);
-}
-function manualrikai(event) {
-    if (event.button === 0) {
-        set_rikai_from_point(event.clientX, event.clientY);
-    }
-}
-function ignore_event(event) {
-    event.stopPropagation();
-}
-function show_rikai(event) {
-    rikai_container.classList.remove('hidden');
-}
-function hide_rikai(event) {
-    rikai_container.classList.add('hidden');
-    if (event) {
-        ignore_event(event);
-    }
-}
 
 function fetch(url, callback) {
     let req = new XMLHttpRequest();
@@ -166,8 +129,8 @@ function parse_edict(dst, data) {
 
             kanjis.forEach(function(kanji) {
                 dict_set_or_append(dst, kanji, {
-                    'kanji': kanji,
-                    'kana': kanas[0],
+                    'kanjis': [kanji],
+                    'kanas': kanas,
                     'glosses': glosses,
                     'type': type,
                 });
@@ -175,8 +138,8 @@ function parse_edict(dst, data) {
 
             kanas.forEach(function(kana) {
                 dict_set_or_append(dst, kana, {
-                    'kanji': kanjis[0],
-                    'kana': kana,
+                    'kanjis': kanjis,
+                    'kanas': [kana],
                     'glosses': glosses,
                     'type': type,
                 });
@@ -185,8 +148,8 @@ function parse_edict(dst, data) {
             let kanas = match[1].replace(common_marker, '').split(';');
             kanas.forEach(function(kana) {
                 dict_set_or_append(dst, kana, {
-                    'kanji': kana,
-                    'kana': kana,
+                    'kanjis': [],
+                    'kanas': [kana],
                     'glosses': glosses,
                     'type': type,
                 });
@@ -286,7 +249,7 @@ function get_text_at_point(x, y) {
         }
         text += treeWalker.currentNode.data;
     }
-    return text;
+    return [text, range, target];
 }
 
 function iter_subfragments(text, callback) {
@@ -345,18 +308,18 @@ function iter_deinflections(word, callback) {
 }
 
 function append_sense(html, sense, reason) {
-    if (sense.kana != sense.kanji) {
-        html.push('<dt><ruby>');
-        html.push(sense.kanji);
-        html.push('<rt>');
-        html.push(sense.kana);
-        html.push('</rt>');
-        html.push('</ruby></dt>');
-    } else {
-        html.push('<dt>');
-        html.push(sense.kana);
-        html.push('</dt>');
-    }
+    html.push('<dt>')
+    sense.kanjis.forEach(function(kanji) {
+        html.push('<span class="kanji">');
+        html.push(kanji);
+        html.push('</span>');
+    });
+    sense.kanas.forEach(function(kana) {
+        html.push('<span class="kana">');
+        html.push(kana);
+        html.push('</span>');
+    });
+    html.push('</dt>');
     if (reason && reason.length) {
         html.push(' (');
         html.push(reason.join(' '));
@@ -396,9 +359,7 @@ function append_sense(html, sense, reason) {
     html.push('</dd>');
 }
 
-function set_rikai_from_point(x, y) {
-    let text = get_text_at_point(x, y);
-
+function rikai_html(text) {
     let edict_html = [];
     let added_words = [];
     iter_subfragments(text, function(subfragment) {
@@ -415,21 +376,102 @@ function set_rikai_from_point(x, y) {
         });
     });
 
+    if (edict_html.length) {
+        return '<dl>' + edict_html.join('') + '</dl>';
+    }
+
     let names_html = [];
     iter_subfragments(text, function(candidate) {
         let infos = enamdict[candidate] || [];
         infos.forEach(function(info) { return append_sense(names_html, info); });
     });
 
-    if (edict_html.length || names_html.length) {
-        $('dl', rikai_edict).innerHTML = edict_html.join('');
-        $('dl', rikai_names).innerHTML = names_html.join('');
-        show_rikai();
-        return true;
-    } else {
-        hide_rikai();
-        return false;
+    if (names_html.length) {
+        return '<dl>' + names_html.join('') + '</dl>';
     }
+
+    return '';
 }
 
+function main() {
+    let rikai = document.createElement('div');
+    rikai.id = 'rikai';
+    document.body.appendChild(rikai);
+
+    let last_click = 0;
+    function update_rikai(cursorX, cursorY) {
+        let now = new Date().getTime();
+        if (now - last_click < 1000) {  // 1 second
+            return;
+        }
+
+        let r = get_text_at_point(cursorX, cursorY);
+        let text = r[0];
+        let range = r[1];
+        let target = r[2];
+
+        let html = rikai_html(text);
+        if (html.length == 0) {
+            rikai.style.display = 'none';
+        } else {
+            rikai.innerHTML = html;
+            rikai.style.display = 'block';
+            let rect;
+            if (range.getClientRect !== undefined) {  // Mozilla
+                rect = range.getClientRect();
+            } else {  // Webkit
+                rect = range.getClientRects()[0];
+            }
+            let x = rect.left;
+            let y = rect.bottom + 5;
+
+            // fix edge case where caret is at the end of previous line
+            // we detect this by comparing to the cursor position
+            let dx = x - cursorX;
+            let dy = y - cursorY;
+            let d2 = dx*dx + dy*dy;
+            if (d2 > 10000) {  // more than 100px away
+                x = target.parentNode.getBoundingClientRect().left;
+                y += 39;  // line-height + interline
+            }
+
+            // avoid overflow
+            rect = rikai.getBoundingClientRect();
+            // avoid right overflow
+            x = Math.max(0, Math.min(x, document.documentElement.clientWidth - rect.width));
+            // avoid bottom overflow
+            if (y + rect.height > document.documentElement.clientHeight) {
+                if (y - (39 + rect.height) > 0) {  // no point in clipping the top
+                    y -= 39 + rect.height;
+                }
+            }
+
+            x += document.documentElement.scrollLeft;
+            y += document.documentElement.scrollTop;
+            rikai.style.left = x + 'px';
+            rikai.style.top = y + 'px';
+        }
+    }
+
+    function on_mousemove(event) {
+        update_rikai(event.clientX, event.clientY);
+    }
+
+    function on_click(event) {
+        last_click = new Date().getTime();
+        update_rikai(event.clientX, event.clientY);
+    }
+
+    function ignore_event(event) {
+        event.stopPropagation();
+    }
+
+    /* Event binding */
+    window.addEventListener('mousemove', on_mousemove);
+    window.addEventListener('click', on_click);
+    rikai.addEventListener('mousemove', ignore_event);
+    rikai.addEventListener('click', ignore_event);
+}
+
+main();
 })();
