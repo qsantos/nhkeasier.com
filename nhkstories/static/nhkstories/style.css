@@ -64,6 +64,7 @@ article h4 { font-size:large; margin:0 0 10px; }
 article h4 a { font-family:mono; }
 article .permalink { float:right; font-variant:uppercase; }
 article { margin-bottom:100px; font-size:20px; overflow-wrap:break-word; }
+article img { margin-bottom: 12px; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
 
