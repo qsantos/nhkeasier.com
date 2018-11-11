@@ -140,7 +140,7 @@ function fetch(url, callback) {
     req.send();
 }
 
-function defaultdict_append(dict, key, value) {
+function dict_set_or_append(dict, key, value) {
     dict[key] = dict[key] || [];
     dict[key].push(value);
 }
@@ -149,40 +149,47 @@ function parse_edict(dst, data) {
     let edict_line_pattern = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
     while ((match = edict_line_pattern.exec(data))) {
+        let glosses = match[3].replace(/\//g, '; ');
+
         let type = 1<<7;
-        if (match[3].search('v1') >= 0)    { type |= 1<<0; }
-        if (match[3].search('v5') >= 0)    { type |= 1<<1; }
-        if (match[3].search('adj-i') >= 0) { type |= 1<<2; }
-        if (match[3].search('vk') >= 0)    { type |= 1<<3; }
-        if (match[3].search('vs') >= 0)    { type |= 1<<4; }
+        if (glosses.search('v1') >= 0)    { type |= 1<<0; }
+        if (glosses.search('v5') >= 0)    { type |= 1<<1; }
+        if (glosses.search('adj-i') >= 0) { type |= 1<<2; }
+        if (glosses.search('vk') >= 0)    { type |= 1<<3; }
+        if (glosses.search('vs') >= 0)    { type |= 1<<4; }
 
-        let kanjis = match[1];
-        let kanas = match[2];
         let common_marker = /\([^)]*\)/gm;
-        kanjis = kanjis.replace(common_marker, '');
-        kanas = kanas !== undefined ? kanas.replace(common_marker, '') : undefined;
 
-        if (kanas) {  // kanjis and kanas are given
-            let kana = kanas.split(';')[0];
-            kanjis.split(';').forEach(function(kanji) {
-                let info = {
+        if (match[2]) {  // kanjis and kanas are given
+            let kanjis = match[1].replace(common_marker, '').split(';');
+            let kanas = match[2].replace(common_marker, '').split(';');
+
+            kanjis.forEach(function(kanji) {
+                dict_set_or_append(dst, kanji, {
                     'kanji': kanji,
-                    'kana': kana,
-                    'glosses': match[3].replace(/\//g, '; '),
+                    'kana': kanas[0],
+                    'glosses': glosses,
                     'type': type,
-                };
-                defaultdict_append(dst, kanji, info);
-                defaultdict_append(dst, kana, info);
+                });
+            });
+
+            kanas.forEach(function(kana) {
+                dict_set_or_append(dst, kana, {
+                    'kanji': kanjis[0],
+                    'kana': kana,
+                    'glosses': glosses,
+                    'type': type,
+                });
             });
         } else {  // only kanas
-            kanjis.split(';').forEach(function(kanji) {
-                let info = {
-                    'kanji': kanji,
-                    'kana': kanji,
-                    'glosses': match[3].replace(/\//g, '; '),
+            let kanas = match[1].replace(common_marker, '').split(';');
+            kanas.forEach(function(kana) {
+                dict_set_or_append(dst, kana, {
+                    'kanji': kana,
+                    'kana': kana,
+                    'glosses': glosses,
                     'type': type,
-                };
-                defaultdict_append(dst, kanji, info);
+                });
             });
         }
     }
