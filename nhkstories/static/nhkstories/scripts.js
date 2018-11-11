@@ -89,7 +89,6 @@ let rikai_container = $('#rikai-container');
 let rikai_edict = $('#rikai-edict', rikai_container);
 let rikai_names = $('#rikai-names', rikai_container);
 let rikai_mask = $('#rikai-mask', rikai_container);
-let autorikai_checkbox = $('#rikai_auto');
 
 hide_rikai();
 
@@ -101,33 +100,19 @@ fetch('/media/subenamdict/' + edict_filename, load_enamdict);
 /* Event binding */
 window.addEventListener('mousemove', autorikai);
 window.addEventListener('click', manualrikai);
-window.addEventListener('touchstart', disable_autorikai);
 rikai_edict.addEventListener('click', ignore_event);
 rikai_edict.addEventListener('touchstart', ignore_event);
 rikai_names.addEventListener('click', ignore_event);
 rikai_names.addEventListener('touchstart', ignore_event);
 rikai_mask.addEventListener('click', hide_rikai);
 
-let enabled = localStorage.getItem('autorikai') === 'true';
-if (enabled === undefined) {
-    enabled = true;
-}
-autorikai_checkbox.checked = enabled;
-
 /* Event handlers */
 function autorikai(event) {
-    if (autorikai_checkbox.checked) {
-        set_rikai_from_point(event.clientX, event.clientY);
-        localStorage.setItem('autorikai', true);
-    } else {
-        localStorage.setItem('autorikai', false);
-    }
+    set_rikai_from_point(event.clientX, event.clientY);
 }
 function manualrikai(event) {
     if (event.button === 0) {
-        if (set_rikai_from_point(event.clientX, event.clientY)) {
-            disable_autorikai();
-        }
+        set_rikai_from_point(event.clientX, event.clientY);
     }
 }
 function ignore_event(event) {
@@ -141,9 +126,6 @@ function hide_rikai(event) {
     if (event) {
         ignore_event(event);
     }
-}
-function disable_autorikai() {
-    autorikai_checkbox.checked = false;
 }
 
 function fetch(url, callback) {

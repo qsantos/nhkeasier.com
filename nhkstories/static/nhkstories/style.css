@@ -3,17 +3,36 @@
 body { margin:0; font:14px sans-serif;}
 a { color:#0d182b; text-decoration:underline; }
 
+/* ruby */
+ruby>rt { visibility:hidden; }
+ruby:hover>rt { visibility:inherit; }
+.ruby-never ruby:hover>rt { visibility:hidden; }
+.ruby-always ruby>rt { visibility:inherit; }
+
 /* header */
 header {
     background-color:#0d182b;
     display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
 }
 header a, header a:hover { color:white; text-decoration:none; outline:none; }
-header h1 { margin:0; font:28px sans-serif; letter-spacing:2px; word-spacing:2px; flex-grow:4; }
+header h1 { margin:0; font:28px sans-serif; letter-spacing:2px; word-spacing:2px; }
 /* margin atop <a> (not padding in <h1>) for cross-browser consistency */
 header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; padding:0 14px 18px; }
-header nav { flex-basis:100px; flex-grow:1; font-size:20px; }
-header nav ul { list-style-type:none; margin:0; padding:0; display:flex; justify-content:space-around; }
+/* ruby toggle */
+#ruby-toggles {
+    list-style-type:none; margin:0; padding:0;
+    display:flex; justify-content:space-between; width:20em;
+}
+#ruby-toggles input { display:none; }
+#ruby-toggles img { height:60px; width:60px; padding:5px; border-radius:3px; }
+#ruby-toggles :checked + img { padding:4px; border:1px solid white; }
+#ruby-toggles :hover + img { padding:4px; border:1px solid #a1b9e8; }
+/* navigation */
+header nav { flex-basis:100px; font-size:20px; }
+header nav ul {
+    list-style-type:none; margin:0; padding:0;
+    display:flex; justify-content:space-between; width:20em;
+}
 header nav li { display:inline-block; padding:10px; }
 header nav a { color: #ccc; }
 
@@ -47,20 +66,6 @@ article .permalink { float:right; font-variant:uppercase; }
 article { margin-bottom:100px; font-size:20px; overflow-wrap:break-word; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
-
-/* rubies */
-ruby>rt { visibility:hidden; }
-ruby:hover>rt { visibility:inherit; }
-.ruby-never ruby:hover>rt { visibility:hidden; }
-.ruby-always ruby>rt { visibility:inherit; }
-#ruby-toggles {
-    list-style-type:none; margin-top:10px; padding:0;
-    display:flex; flex-direction:row; justify-content:space-around;
-}
-#ruby-toggles input { display:none; }
-#ruby-toggles img { height:60px; width:60px; padding:5px; border-radius:3px; }
-#ruby-toggles :checked + img { padding:4px; border:1px solid black; }
-#ruby-toggles :hover + img { padding:4px; border:1px solid #a1b9e8; }
 
 /* asides */
 aside section {
