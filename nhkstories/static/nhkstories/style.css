@@ -82,6 +82,7 @@ article>p { cursor:default; margin-bottom:40px; }
     border-radius:5px; box-shadow: 2px 2px 1px #64646464;
     box-sizing: border-box;
 }
+#rikai dl { margin:0; }
 #rikai dt { font-size:18px; font-weight:normal; margin-bottom:5px; }
 #rikai dt .kanji { color:#b7e7ff; margin-right:0.7em; }
 #rikai dt .kana { color:#c0ffc0; margin-right:0.7em; }
