@@ -8,6 +8,10 @@ ruby>rt { visibility:hidden; }
 ruby:hover>rt { visibility:inherit; }
 .ruby-never ruby:hover>rt { visibility:hidden; }
 .ruby-always ruby>rt { visibility:inherit; }
+/* Internet Explorer */
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    ruby>rt { position:relative; bottom:5px; }
+}
 
 /* header */
 header {
