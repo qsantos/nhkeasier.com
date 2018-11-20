@@ -25,7 +25,7 @@ header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; paddi
 /* ruby toggle */
 #ruby-toggles {
     list-style-type:none; margin:0; padding:0;
-    display:flex; justify-content:space-between; width:20em;
+    display:flex; justify-content:space-between; width:15em;
 }
 #ruby-toggles input { display:none; }
 #ruby-toggles img { height:60px; width:60px; padding:5px; border-radius:3px; }
@@ -35,7 +35,7 @@ header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; paddi
 header nav { font-size:20px; }
 header nav ul {
     list-style-type:none; margin:0; padding:0;
-    display:flex; justify-content:space-between; width:20em;
+    display:flex; justify-content:space-around; width:20em;
 }
 header nav li { display:inline-block; padding:10px; }
 header nav a { color: #ccc; }
