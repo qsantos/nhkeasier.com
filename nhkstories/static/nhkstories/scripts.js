@@ -450,8 +450,13 @@ function main() {
                 }
             }
 
-            x += document.documentElement.scrollLeft;
-            y += document.documentElement.scrollTop;
+            if (window.scrollX === undefined) {  // MSIE
+                x += document.documentElement.scrollLeft;
+                y += document.documentElement.scrollTop;
+            } else {  // necessary for Microsoft Edge
+                x += scrollX;
+                y += scrollY;
+            }
             rikai.style.left = x + 'px';
             rikai.style.top = y + 'px';
         }
