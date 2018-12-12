@@ -27,6 +27,7 @@ image_url_pattern = BASE_URL + '{news_id}/{news_easy_image_uri}'
 voice_url_pattern = BASE_URL + '{voice_id}/{news_easy_voice_uri}'
 fragmented_voice_url_pattern = 'https://nhks-vh.akamaihd.net/i/news/easy/{voice_id}.mp4/master.m3u8'
 video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}'
+nhk_video_pattern = 'https://www3.nhk.or.jp/news/contents/easy/easy_{}.json'
 
 
 def fetch_story_list():
@@ -191,6 +192,48 @@ def extract_story_content(story):
     story.content = remove_ruby(story.content_with_ruby)
 
 
+def fetch_story_nhk_video(story):
+    content = story.content_with_ruby
+
+    # extract iframe URL
+    html_match = re.search(r'(?s)<div.*?src="(.*?)".*?</div>\s*', content)
+    if not html_match:
+        return
+    iframe_url = html_match.group(1)
+
+    if story.video_original:
+        raise Exception('Story already has both regular and NHK videos!')
+
+    # parse URL
+    url_match = re.match(r'https://www3\.nhk\.or\.jp/news/contents/easy/easy_([0-9]+)\.html', iframe_url)
+    if not url_match:
+        raise Exception('Unexpected content media URL "{}"'.format(iframe_url))
+    video_id = url_match.group(1)
+
+    # fetch metadata with video URL
+    json_url = nhk_video_pattern.format(video_id)
+    with urlopen(json_url) as f:
+        data = f.read()
+    info = json.loads(data.decode())
+    video_url = info['mediaResource']['url']
+
+    # fetch video
+    print('Fetching nhk video {}'.format(video_url))
+    _, temp_name = mkstemp(suffix='.mp4')
+    res = run(['ffmpeg', '-y', '-i', video_url, temp_name], stderr=DEVNULL)
+    if res.returncode != 0:
+        print('Failed')
+        os.remove(temp_name)
+        return
+    with open(temp_name, 'rb') as f:
+        story.video_reencoded.save('', f)
+
+    # remove HTML object
+    story.content_with_ruby = content[:html_match.start()] + content[html_match.end():]
+    story.content = remove_ruby(story.content_with_ruby)
+    story.save()
+
+
 def convert_story_video(story):
     if story.video_reencoded:
         return
@@ -215,6 +258,7 @@ def fetch_story(info, replace_voice):
         fetch_story_image(story, info)
         fetch_story_video(story, info)
     extract_story_content(story)
+    fetch_story_nhk_video(story)
     convert_story_video(story)
     story.save()
     return created
