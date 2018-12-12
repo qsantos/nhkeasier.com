@@ -205,7 +205,7 @@ def fetch_story_nhk_video(story):
         raise Exception('Story already has both regular and NHK videos!')
 
     # parse URL
-    url_match = re.match(r'https://www3\.nhk\.or\.jp/news/contents/easy/easy_([0-9]+)\.html', iframe_url)
+    url_match = re.match(r'https://www3\.nhk\.or\.jp/news/contents/easy/easy_([0-9]+)(?:_[0-9]+)?\.html', iframe_url)
     if not url_match:
         raise Exception('Unexpected content media URL "{}"'.format(iframe_url))
     video_id = url_match.group(1)
