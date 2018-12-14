@@ -54,7 +54,7 @@ main nav ul { list-style-type:none; padding:0; }
 }
 
 /* content */
-main { display:block; max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; }
+main { display:block; max-width:660px; margin:0 auto; padding:0 10px; line-height:1.75; font-size:20px; }
 main h2 { font-size:28px; color:#24447a; font-weight:bold; letter-spacing:4px; word-spacing:4px; margin:32px 0; }
 @-moz-document url-prefix() {
     /* Only Mozilla Firefox does proper hyphenation */
@@ -63,11 +63,11 @@ main h2 { font-size:28px; color:#24447a; font-weight:bold; letter-spacing:4px; w
 .feed-icon { max-width:20px; }
 
 /* stories */
+article { margin-bottom:100px; overflow-wrap:break-word; }
 article h3 { font:24px sans-serif; margin:0; color:#24447a; }
 article h4 { font-size:large; margin:0 0 10px; }
 article h4 a { font-family:mono; }
 article .permalink { float:right; font-variant:uppercase; }
-article { margin-bottom:100px; font-size:20px; overflow-wrap:break-word; }
 article img { margin-bottom: 12px; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
