@@ -83,13 +83,13 @@ def archive(request, year=None, month=None, day=None):
                 'comfortable for harder materials.',
         })
 
+    # information for links (canonical URL, links to previous and next days)
+    previous_day = stories.filter(published__date__lt=day).order_by('-published').first()
+    next_day = stories.filter(published__date__gt=day).order_by('published').first()
+
     stories = stories.filter(published__date=day).order_by('-published', '-id')
     if not stories:
         return handler404(request)
-
-    # information for links (canonical URL, links to previous and next days)
-    previous_day = Story.objects.filter(published__date__lt=day).order_by('-published').first()
-    next_day = Story.objects.filter(published__date__gt=day).order_by('published').first()
 
     # take the image of one of the story as page illustration, if any
     illustrated_story = stories.exclude(image='').first()
