@@ -193,6 +193,9 @@ def extract_story_content(story):
 
 
 def fetch_story_nhk_video(story):
+    if story.video_reencoded:
+        return
+
     content = story.content_with_ruby
 
     # extract iframe URL
