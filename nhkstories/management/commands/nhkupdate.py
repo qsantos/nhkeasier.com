@@ -231,28 +231,18 @@ def fetch_story_video(story, info):
     os.remove(temp)
 
 
-def parse_story_content(data):
-    logger.debug('Parsing {} characters'.format(len(data)))
-    m = re.search(r'(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>', data)
-    if m is not None:
-        return m.group(1)
-    logger.debug('First pattern failed')
-
-    m = re.search(r'(?s)<div id="newsarticle">(.*?)</div>', data)
-    if m is not None:
-        return m.group(1)
-    logger.debug('Second pattern failed')
-
-    logger.error('Could not find content')
-    raise ContentNotFound
-
-
 def extract_story_content(story):
     logger.debug('Extracting content')
     data = story.webpage.read().decode()
     story.webpage.seek(0)  # the webpage might be read when updating story
 
-    raw_content = parse_story_content(data)
+    logger.debug('Parsing {} characters'.format(len(data)))
+    m = re.search(r'(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>', data)
+    if m is None:
+        logger.error('Could not find content')
+        raise ContentNotFound
+
+    raw_content = m.group(1)
     logger.debug('Parsed content ({} characters)'.format(len(raw_content)))
     story.content_with_ruby = clean_up_content(raw_content)
     logger.debug('Cleaned up ({} characters)'.format(len(story.content_with_ruby)))
