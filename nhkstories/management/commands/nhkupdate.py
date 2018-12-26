@@ -306,11 +306,11 @@ def fetch_story_nhk_video(story):
     # remove HTML object
     logger.debug('Replacing NHK video iframe')
     new_ruby = content[:html_match.start()] + content[html_match.end():]
-    delta = new_ruby - len(story.content_with_ruby)
+    delta = len(new_ruby) - len(story.content_with_ruby)
     logger.debug('Updating content ({:+} characters)'.format(delta))
     story.content_with_ruby = new_ruby
     new_content = remove_ruby(story.content_with_ruby)
-    delta2 = new_content - story.content
+    delta2 = len(new_content) - len(story.content)
     assert delta == delta2
     story.content = remove_ruby(story.content_with_ruby)
     story.save()
