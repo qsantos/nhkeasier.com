@@ -426,10 +426,17 @@ def create_subedicts():
     logger.debug('Subedicts created')
 
 
+def main():
+    init_logging()
+    logger.debug('Start of NHKUpdate command')
+    fetch_stories()
+    create_subedicts()
+    logger.debug('End of NHKUpdate command')
+
+
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        init_logging()
-        logger.debug('Start of NHKUpdate command')
-        fetch_stories()
-        create_subedicts()
-        logger.debug('End of NHKUpdate command')
+        try:
+            main()
+        except Exception:
+            logger.exception('NHKUPDATE GENERAL FAILURE')
