@@ -232,6 +232,10 @@ def fetch_story_video(story, info):
 
 
 def extract_story_content(story):
+    if story.content_with_ruby:
+        logger.debug('Content already present')
+        return
+
     logger.debug('Extracting content')
     data = story.webpage.read().decode()
     story.webpage.seek(0)  # the webpage might be read when updating story
