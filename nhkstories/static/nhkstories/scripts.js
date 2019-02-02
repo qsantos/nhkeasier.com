@@ -81,6 +81,46 @@ if (!String.prototype.endsWith) {
         event.preventDefault();
     }
 
+    // try to immediately detect touch devices
+    if ('ontouchstart' in window) {
+        set_touchdevice_helper_message();
+    }
+    let tap_start = null;
+    let triple_tap = false;
+    document.addEventListener('touchstart', function(event) {
+        set_touchdevice_helper_message();
+        // double-finger tap
+        if (event.touches.length >= 2) {
+            tap_start = new Date().getTime();
+            // tripler-finger tap
+            triple_tap = event.touches.length >= 3;
+        }
+    });
+    document.addEventListener('touchend', function(event) {
+        if (event.touches.length != 0) {
+            return;
+        }
+        let now = new Date().getTime();
+        if (now - tap_start > 300) {
+            return;
+        }
+        if (triple_tap) {
+            set_mode('hover');
+        } else {
+            let mode = get_mode();
+            if (mode == 'always') {
+                set_mode('never');
+            } else {
+                set_mode('always');
+            }
+        }
+        tap_start = null;
+        event.preventDefault();
+    });
+    function set_touchdevice_helper_message() {
+        $('#ruby-toggles-helper').innerHTML = 'Double-finger tap to toggle furigana';
+    }
+
     function set_mode(mode) {
         last_mode = get_mode();
         let input_element = $('[value=' + mode + ']', toggles)
