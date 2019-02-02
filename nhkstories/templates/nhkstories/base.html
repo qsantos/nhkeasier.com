@@ -27,26 +27,31 @@
 <body>
 <header>
     <h1><a href="{% url 'nhkstories:home' %}">NHK News Web <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
-    <ul id="ruby-toggles">
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="always">
-                <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
-            </label>
-        </li>
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="hover" checked>
-                <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
-            </label>
-        </li>
-        <li>
-            <label>
-                <input type="radio" name="ruby-toggle" value="never">
-                <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
-            </label>
-        </li>
-    </ul>
+    <div id="ruby-toggles">
+        <ul>
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="always">
+                    <img src="/static/nhkstories/always.svg" alt="Always show furigana" title="Always show furigana">
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="hover" checked>
+                    <img src="/static/nhkstories/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
+                </label>
+            </li>
+            <li>
+                <label>
+                    <input type="radio" name="ruby-toggle" value="never">
+                    <img src="/static/nhkstories/never.svg" alt="Never show furigana" title="Never show furigana">
+                </label>
+            </li>
+        </ul>
+        <div id="ruby-toggles-helper">
+            Press <span class="key">F</span> to toggle furigana
+        </div>
+    </div>
     <nav>
         <ul>
             <li><a href="{% url 'nhkstories:home' %}">Home</a></li>

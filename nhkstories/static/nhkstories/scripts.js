@@ -55,18 +55,40 @@ if (!String.prototype.endsWith) {
 /* Toggle <rt> in <ruby> elements depending on <input type="radio"> */
 (function(){
     let toggles = $('#rubby-toggles');
+    let last_mode = null;
     $$('input', toggles).forEach(function(element) {
         element.addEventListener('click', update);
     });
     set_mode(localStorage.getItem('ruby-toggle') || 'hover');
-    update();
 
-    function set_mode(mode) {
-        let input_element = $('[value=' + mode + ']', toggles)
-        input_element.checked = true;
+    document.addEventListener('keyup', mousekey_toggler);
+    $('#ruby-toggles-helper .key').addEventListener('click', mousekey_toggler);
+
+    function mousekey_toggler(event) {
+        if (event.key !== undefined && event.key != 'f' && event.key != 'F') {
+            return;
+        }
+        if (event.shiftKey) {
+            set_mode('hover');
+        } else {
+            let mode = get_mode();
+            if (mode == 'always') {
+                set_mode('never');
+            } else {
+                set_mode('always');
+            }
+        }
+        event.preventDefault();
     }
 
-    function get_mode(mode) {
+    function set_mode(mode) {
+        last_mode = get_mode();
+        let input_element = $('[value=' + mode + ']', toggles)
+        input_element.checked = true;
+        update();
+    }
+
+    function get_mode() {
         return $(':checked', toggles).value;
     }
 
