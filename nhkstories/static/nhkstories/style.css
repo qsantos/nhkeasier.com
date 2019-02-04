@@ -63,7 +63,7 @@ main { display:block; max-width:660px; margin:0 auto; padding:0 10px; line-heigh
 main h2 { font-size:28px; color:#24447a; font-weight:bold; letter-spacing:4px; word-spacing:4px; margin:32px 0; }
 @-moz-document url-prefix() {
     /* Only Mozilla Firefox does proper hyphenation */
-    @media (min-width:30em) { main {text-align:justify;hyphens:auto;} }
+    @media (min-width:30em) { p {text-align:justify;hyphens:auto;} }
 }
 .feed-icon { max-width:20px; }
 
