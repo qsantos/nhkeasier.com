@@ -94,7 +94,7 @@ article>p { cursor:default; margin-bottom:40px; }
 #rikai ol { padding-left:18px; }
 
 .key {
-    display:inline-block; width:20px; height:16px;
+    display:inline-block; width:20px; height:18px;
     position: relative; top: -2px;
     margin-top: .5em; padding-top: 1px;
     color: #333; background-color: #eee;
