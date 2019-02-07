@@ -11,14 +11,20 @@
 {{ story.content_with_ruby|safe }}
 {% if story.voice %}<audio src="{{ story.voice.url }}" controls preload="none"></audio>{% endif %}
 
-<ul class="links">
-    {% if story.r_nhkeasynews_link %}
-        <li><a href="{{ story.r_nhkeasynews_link }}">/r/NHKEasyNews</a></li>
-    {% endif %}
+<table class="links">
+    <td>
+        {% if story.r_nhkeasynews_link %}
+            <a href="{{ story.r_nhkeasynews_link }}">/r/NHKEasyNews</a></td>
+        {% endif %}
+    </td>
+    <td>
     {% if story.published.year > 2017 or story.published.year == 2017 and story.published.month == 12 and story.published.day >= 5 %}
-        <li><a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html">Original</a></li>
+        <a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html">Original</a>
     {% endif %}
-    <li><a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a></li>
-</ul>
+    </td>
+    <td>
+        <a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a>
+    </td>
+</table>
 
 </article>

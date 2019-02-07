@@ -75,10 +75,10 @@ article h4 a { font-family:mono; }
 article img { margin-bottom: 12px; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
-article .links { list-style-type:none; margin:0; padding:0; display:flex; }
-article .links li { width:100em; text-align:center; }
-article .links li:first-child { width:100em; text-align:left; }
-article .links li:last-child { width:100em; text-align:right; }
+article .links { width:100%; }
+article .links td { width:33.33%; text-align:center; }
+article .links td:first-child { text-align:left; }
+article .links td:last-child { text-align:right; }
 
 /* rikai */
 #rikai {
