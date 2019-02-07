@@ -5,9 +5,10 @@ import logging
 from datetime import datetime, timedelta, date, timezone
 from tempfile import mkstemp
 from subprocess import run, DEVNULL
-from urllib.request import urlopen, HTTPError
+from urllib.request import Request, urlopen, HTTPError
 
 from django.core.management.base import BaseCommand
+from django.core.files.base import ContentFile
 from django.conf import settings
 
 from nhkstories.logging import init_logging
@@ -42,11 +43,16 @@ video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}
 nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 
 
+def fetch(url):
+    request = Request(url, headers={'User-Agent': 'NHKEasier Crawler'})
+    with urlopen(request) as f:
+        return f.read()
+
+
 def fetch_story_list():
     '''Return a dictionary mapping days to stories published this day'''
     logger.debug('Fetching list of stories')
-    with urlopen(story_list_url) as f:
-        data = f.read()
+    data = fetch(story_list_url)
     stories_per_day = json.loads(data.decode('utf-8-sig'))[0]
 
     n_stories = sum(len(stories_per_day[day]) for day in stories_per_day)
@@ -58,8 +64,7 @@ def fetch_story_list():
 def fetch_replace_voice():
     '''Return a dictionary mapping story_id to amended voice filename'''
     logger.debug('Fetching voice amendments')
-    with urlopen(replace_voice_url) as f:
-        data = f.read()
+    data = fetch(replace_voice_url)
     amendments = json.loads(data.decode())
     logger.debug('{} voice amendments found'.format(len(amendments)))
     return {
@@ -131,8 +136,7 @@ def fetch_story_webpage(story, info):
     logger.debug('Fetching webpage')
     webpage_url = webpage_url_pattern.format(**info)
     logger.info('Download %s' % webpage_url)
-    with urlopen(webpage_url) as f:
-        story.webpage.save('', f)
+    story.webpage.save('', ContentFile(fetch(webpage_url)))
 
 
 def fetch_story_image(story, info):
@@ -155,8 +159,7 @@ def fetch_story_image(story, info):
 
     logger.info('Download image %s' % image_url)
     try:
-        with urlopen(image_url) as f:
-            story.image.save('', f)
+        story.image.save('', ContentFile(fetch(image_url)))
     except HTTPError:
         logger.warning('Failed to fetch image')
         return
@@ -194,8 +197,7 @@ def fetch_story_voice(story, info):
     else:
         logger.info('Download voice %s' % voice_url)
         try:
-            with urlopen(voice_url) as f:
-                story.voice.save('', f)
+            story.voice.save('', ContentFile(fetch(voice_url)))
         except HTTPError:
             logger.warning('Failed to download voice')
         else:
@@ -275,8 +277,7 @@ def fetch_story_nhk_video(story):
         raise RegularAndNHKVideos
 
     # extract JSON URL
-    with urlopen(iframe_url) as f:
-        data = f.read()
+    data = fetch(iframe_url)
     json_match = re.search(r'player\("(.*?)"\)', data.decode())
     if not json_match:
         logger.error('Failed to find JSON filename of NHK video')
@@ -286,9 +287,7 @@ def fetch_story_nhk_video(story):
 
     # fetch JSON
     json_url = nhk_contents + json_filename
-    with urlopen(json_url) as f:
-        data = f.read()
-    info = json.loads(data.decode())
+    info = json.loads(fetch(json_url).decode())
     video_url = info['mediaResource']['url']
     logger.debug('Found NHK video URL ({})'.format(video_url))
 
