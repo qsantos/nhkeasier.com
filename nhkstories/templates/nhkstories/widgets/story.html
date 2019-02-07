@@ -2,13 +2,23 @@
 <article lang=ja>
 <h3>{{ story.title_with_ruby|safe }}</h3>
 <h4><a href="{% url 'nhkstories:story' story.id %}"><time datetime="{{ story.published|date:'c' }}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</time></a></h4>
+
 {% if story.video_reencoded %}
-<video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+    <video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
 {% elif story.image %}
     <img src="{{ story.image.url }}" alt="Story illustration">
 {% endif %}
 {{ story.content_with_ruby|safe }}
 {% if story.voice %}<audio src="{{ story.voice.url }}" controls preload="none"></audio>{% endif %}
-<a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html">See on NHK News Web Easy</a> (if still available)
-<a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a>
+
+<ul class="links">
+    {% if story.r_nhkeasynews_link %}
+        <li><a href="{{ story.r_nhkeasynews_link }}">/r/NHKEasyNews</a></li>
+    {% endif %}
+    {% if story.published.year > 2017 or story.published.year == 2017 and story.published.month == 12 and story.published.day >= 5 %}
+        <li><a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html">Original</a></li>
+    {% endif %}
+    <li><a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a></li>
+</ul>
+
 </article>

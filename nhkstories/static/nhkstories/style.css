@@ -72,10 +72,13 @@ article { margin-bottom:100px; overflow-wrap:break-word; }
 article h3 { font:24px sans-serif; margin:0; color:#24447a; }
 article h4 { font-size:large; margin:0 0 10px; }
 article h4 a { font-family:mono; }
-article .permalink { float:right; font-variant:uppercase; }
 article img { margin-bottom: 12px; }
 article img, audio, video { width:100%; }
 article>p { cursor:default; margin-bottom:40px; }
+article .links { list-style-type:none; margin:0; padding:0; display:flex; }
+article .links li { width:100em; text-align:center; }
+article .links li:first-child { width:100em; text-align:left; }
+article .links li:last-child { width:100em; text-align:right; }
 
 /* rikai */
 #rikai {
