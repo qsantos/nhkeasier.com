@@ -273,8 +273,8 @@ function get_text_at_point(x, y) {
     if (!target || target.nodeType != Node.TEXT_NODE) {
         return '';
     }
-    if (target.parentNode.nodeName == 'LABEL') {
-        // label for toggling auto rikai
+    if (target.parentNode.nodeName == 'RT') {
+        // furigana
         return '';
     }
     // check that the cursor is actually within target
