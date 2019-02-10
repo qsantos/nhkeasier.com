@@ -36,6 +36,7 @@ class Story(models.Model):
     video_reencoded = models.FileField(upload_to=video_reencoded_filename, null=True)
     subedict_created = models.BooleanField(default=False)
     r_nhkeasynews_link = models.CharField(max_length=200, null=True)
+    twitter_post_id = models.CharField(max_length=200, null=True)
 
     class Meta:
         verbose_name_plural = 'stories'
