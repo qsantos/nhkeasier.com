@@ -1,8 +1,10 @@
 import json
 import logging
+from time import sleep
 
 import requests
 from django.urls import reverse
+from django.db.utils import OperationalError
 from django.core.management.base import BaseCommand
 
 from nhkeasier import settings
@@ -52,7 +54,14 @@ def post_story_to_facebook(story, page_access_token):
         exit(1)
 
     story.facebook_post_id = res.json()['id']
-    story.save()
+    while True:
+        try:
+            story.save()
+        except OperationalError:
+            logger.debug('Failed to update story.facebook_post_if')
+            sleep(1)
+        else:
+            break
     logger.debug('Story {} posted to Facebook'.format(story.id))
 
 
