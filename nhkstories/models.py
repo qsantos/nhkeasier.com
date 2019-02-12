@@ -37,6 +37,7 @@ class Story(models.Model):
     subedict_created = models.BooleanField(default=False)
     r_nhkeasynews_link = models.CharField(max_length=200, null=True)
     twitter_post_id = models.CharField(max_length=200, null=True)
+    facebook_post_id = models.CharField(max_length=200, null=True)
 
     class Meta:
         verbose_name_plural = 'stories'
