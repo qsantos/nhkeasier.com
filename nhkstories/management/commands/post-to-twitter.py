@@ -1,4 +1,3 @@
-import re
 import os
 import json
 import logging
@@ -17,7 +16,6 @@ from nhkstories.models import Story
 logger = logging.getLogger(__name__)
 
 NHKEASIER_BASE = 'https://nhkeasier.com'
-GET_TIMELINE_URL = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
 POST_TWEET_URL = 'https://api.twitter.com/1.1/statuses/update.json'
 UPLOAD_MEDIA_URL = 'https://upload.twitter.com/1.1/media/upload.json'
 
@@ -152,46 +150,10 @@ def upload(client, f, mimetype, category):
     return media_id
 
 
-def fetch_tweets(client, screen_name, count=None):
-    params = {
-        'screen_name': screen_name,
-        'count': 200,
-    }
-
-    # fetch tweet batches until we have what we want
-    tweets = []
-    max_id = None
-    while count is None or len(tweets) < count:
-        # update params
-        if count is not None:
-            params['count'] = min(200, count - len(tweets))
-        if max_id is not None:
-            params['max_id'] = max_id
-
-        res = client.get(GET_TIMELINE_URL, params=params)
-        if res.status_code != 200:
-            print('TIMELINE returned {}: {}'.format(res, res.text))
-            exit(1)
-        new_tweets = res.json()
-
-        # append new tweets
-        if max_id is not None:
-            assert new_tweets[0]['id'] == max_id
-            new_tweets.pop(0)
-        if not new_tweets:
-            break
-        tweets += new_tweets
-        max_id = tweets[-1]['id']
-
-    return tweets
-
-
-def tweet(client, message, media_ids=None, reply_to=None):
+def tweet(client, message, media_ids=None):
     params = {'status': message}
     if media_ids:
         params['media_ids'] = ','.join(media_ids),
-    if reply_to:
-        params['in_reply_to_status_id'] = reply_to
 
     res = client.post(POST_TWEET_URL, data=params)
     if res.status_code != 200:
@@ -202,20 +164,7 @@ def tweet(client, message, media_ids=None, reply_to=None):
     return id
 
 
-def fetch_nhk_easy_tweets(client, count=None):
-    tweets = fetch_tweets(client, 'nhk_easy', count)
-    for tweet in tweets:
-        for url in tweet['entities']['urls']:
-            m = re.match(STORY_URL_PATTERN, url['expanded_url'])
-            if m is None:
-                print(tweet['id'], url['expanded_url'])
-                continue
-            story_id = m.group(1)
-            yield story_id, tweet['id']
-            break
-
-
-def post_story_to_twitter(story, client, nhk_easy_tweets):
+def post_story_to_twitter(story, client):
     print(story.id)
 
     # status
@@ -242,10 +191,7 @@ def post_story_to_twitter(story, client, nhk_easy_tweets):
     else:
         media_ids = []
 
-    # reply to
-    reply_to = nhk_easy_tweets.get(story.story_id)
-
-    story.twitter_post_id = tweet(client, status, media_ids, reply_to)
+    story.twitter_post_id = tweet(client, status, media_ids)
     story.save()
 
 
@@ -255,13 +201,8 @@ def post_stories_to_twitter(stories):
         oauth_settings = json.load(f)
     client = OAuth1Session(**oauth_settings)
 
-    # preload @nhk_easy tweets
-    # count = 200 if len(stories) < 100 else None
-    # nhk_easy_tweets = dict(fetch_nhk_easy_tweets(client, count=count))
-    nhk_easy_tweets = {}
-
     for story in stories:
-        post_story_to_twitter(story, client, nhk_easy_tweets)
+        post_story_to_twitter(story, client)
 
 
 def main(archive):
