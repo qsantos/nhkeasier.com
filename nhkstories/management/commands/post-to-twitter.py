@@ -51,7 +51,7 @@ def escape_ffmpeg_option(option):
 
 
 def video_truncate(input_filename, output_filename, duration):
-    print('Truncating video')
+    logger.debug('Truncating video')
 
     message = 'Truncated for Twitter. Visit NHKEasier for full video.'
     drawtext_options = {
@@ -82,7 +82,7 @@ def video_truncate(input_filename, output_filename, duration):
 
 def upload(client, f, mimetype, category):
     size = filesize(f)
-    print('Uploading {:,} bytes ({})'.format(size, mimetype))
+    logger.debug('Uploading {:,} bytes ({})'.format(size, mimetype))
 
     # INIT
     res = client.post(UPLOAD_MEDIA_URL, data={
@@ -92,10 +92,10 @@ def upload(client, f, mimetype, category):
         'media_category': category,
     })
     if res.status_code != 202:
-        print('INIT returned {}: {}'.format(res, res.text))
+        logger.error('INIT returned {}: {}'.format(res, res.text))
         exit(1)
     media_id = res.json()['media_id_string']
-    print(media_id, end='')
+    logger.debug('Created media {}'.format(media_id))
 
     sent_bytes = 0
     chunks = iter(lambda: f.read(2**22), b'')
@@ -109,7 +109,7 @@ def upload(client, f, mimetype, category):
             'media': chunk,
         })
         if res.status_code != 204:
-            print('APPEND {} returned {}: {}'.format(segment_index, res, res.text))
+            logger.error('APPEND {} returned {}: {}'.format(segment_index, res, res.text))
             exit(1)
 
         sent_bytes += len(chunk)
@@ -124,7 +124,7 @@ def upload(client, f, mimetype, category):
         'media_id': media_id,
     })
     if res.status_code not in (200, 201):
-        print('FINALIZE returned {}: {}'.format(res, res.text))
+        logger.error('FINALIZE returned {}: {}'.format(res, res.text))
         exit(1)
 
     while res.status_code != 201:
@@ -132,7 +132,7 @@ def upload(client, f, mimetype, category):
         if info['state'] == 'succeeded':
             break
         elif info['state'] == 'failed':
-            print('\nMedia upload failed: {}'.format(res.text))
+            logger.error('\nMedia upload failed: {}'.format(res.text))
             exit(1)
         print('\r\x1b[2K{} {} s...'.format(media_id, info['check_after_secs']), end='')
         sleep(info['check_after_secs'])
@@ -143,10 +143,11 @@ def upload(client, f, mimetype, category):
             'media_id': media_id,
         })
         if res.status_code != 200:
-            print('STATUS returned {}: {}'.format(res, res.text))
+            logger.error('STATUS returned {}: {}'.format(res, res.text))
             exit(1)
 
-    print('\r\x1b[2K{} uploaded'.format(media_id))
+    print('\r\x1b[2K')
+    logger.debug('Uploaded media {}'.format(media_id))
     return media_id
 
 
@@ -157,15 +158,15 @@ def tweet(client, message, media_ids=None):
 
     res = client.post(POST_TWEET_URL, data=params)
     if res.status_code != 200:
-        print('TWEET returned {}: {}'.format(res, res.text))
+        logger.error('TWEET returned {}: {}'.format(res, res.text))
         exit(1)
     id = res.json()['id']
-    print('Tweeted https://twitter.com/NHKEasier/status/{}'.format(id))
+    logger.info('Tweeted https://twitter.com/NHKEasier/status/{}'.format(id))
     return id
 
 
 def post_story_to_twitter(story, client):
-    print(story.id)
+    logger.info('Posting story {} to Twitter'.format(story.id))
 
     # status
     url = NHKEASIER_BASE + reverse('nhkstories:story', args=[story.id])
@@ -174,6 +175,7 @@ def post_story_to_twitter(story, client):
 
     # media
     if story.video_reencoded:
+        logger.debug('Joining video')
         if video_duration(story.video_reencoded.file.name) >= 139:
             with NamedTemporaryFile(suffix='.mp4') as f:
                 video_truncate(story.video_reencoded.file.name, f.name, 139)
@@ -185,14 +187,17 @@ def post_story_to_twitter(story, client):
                 upload(client, story.video_reencoded, 'video/mp4', 'tweet_video'),
             ]
     elif story.image:
+        logger.debug('Joining image')
         media_ids = [
             upload(client, story.image, 'image/jpeg', 'tweet_image'),
         ]
     else:
+        logger.debug('Joining no media')
         media_ids = []
 
     story.twitter_post_id = tweet(client, status, media_ids)
     story.save()
+    logger.debug('Story {} posted to Twitter'.format(story.id))
 
 
 def post_stories_to_twitter(stories):
