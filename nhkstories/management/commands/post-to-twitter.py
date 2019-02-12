@@ -220,7 +220,7 @@ def post_story_to_twitter(story, client, nhk_easy_tweets):
 
     # status
     url = NHKEASIER_BASE + reverse('nhkstories:story', args=[story.id])
-    refs = '#nhkeasier #nhk_news #nhk_easy #日本 #日本語'
+    refs = '#nhk_easier #nhk_news #nhk_easy #日本 #日本語'
     status = '{}\n（{}） [{:%Y-%m-%d}] {{{}}}'.format(story.title, url, story.published, refs)
 
     # media
