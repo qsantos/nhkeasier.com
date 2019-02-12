@@ -122,6 +122,8 @@ def remove_all_html(content):
 
 def story(request, id):
     story = get_object_or_404(Story, pk=id)
+    if not story.subedict_created:
+        return handler404(request)
 
     # information for links (canonical URL, links to previous and next stories)
     previous_stories = Story.objects.filter(published__date=story.published.date(), id__lt=story.id) | Story.objects.filter(published__date__lt=story.published.date())
