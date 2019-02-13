@@ -8,6 +8,6 @@ body {
     height:100vh; display:flex; justify-content:center; align-items:center; }
 video { width:100vw; max-height:100vh; height:auto; display:block; }
 </style>
-<video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+<video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls{% if autoplay %} autoplay{% endif %}></video>
 </body>
 </html>

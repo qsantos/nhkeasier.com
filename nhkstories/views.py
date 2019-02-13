@@ -152,7 +152,11 @@ def player(request, id):
     if not story.video_reencoded:
         return handler404(request)
 
-    return render(request, 'nhkstories/player.html', {'story': story})
+    autoplay = bool(request.GET.get('autoplay'))
+    return render(request, 'nhkstories/player.html', {
+        'story': story,
+        'autoplay': autoplay,
+    })
 
 
 def about(request):
