@@ -69,16 +69,7 @@ def post_stories_to_facebook(stories):
     # auth
     with open(settings.BASE_DIR + '/facebook-oauth.json') as f:
         oauth_settings = json.load(f)
-    user_access_token = oauth_settings['access_token']
-    PAGE_URL = 'https://graph.facebook.com/{}'.format(1040161449507630)
-    res = requests.get(PAGE_URL, params={
-        'fields': 'access_token',
-        'access_token': user_access_token,
-    })
-    if res.status_code != 200:
-        print('AUTH returned {}: {}'.format(res, res.text))
-        exit(1)
-    page_access_token = res.json()['access_token']
+    page_access_token = oauth_settings['access_token']
 
     for story in stories:
         post_story_to_facebook(story, page_access_token)
