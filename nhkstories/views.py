@@ -93,17 +93,19 @@ def archive(request, year=None, month=None, day=None):
     if not stories:
         return handler404(request)
 
+    # select interesting story
+    story = stories.exclude(video_reencoded='').first()
+    if story is None:
+        story = stories.exclude(image='').first()
     # media for OpenGraph and such
-    story_with_image = stories.exclude(image='').first()
-    if story_with_image is not None:
-        image = request.build_absolute_uri(story_with_image.image.url)
-    else:
-        image = None
-    story_with_video = stories.exclude(video_reencoded='').first()
-    if story_with_video is not None:
-        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story_with_video.id]))
+    if story is not None and story.video_reencoded:
+        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story.id]))
     else:
         player = None
+    if story is not None and story.image:
+        image = request.build_absolute_uri(story.image.url)
+    else:
+        image = None
 
     return render(request, 'nhkstories/index.html', {
         'title': 'Easier Japanese Practice',
