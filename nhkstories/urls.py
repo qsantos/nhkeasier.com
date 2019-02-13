@@ -6,6 +6,7 @@ from . import feed
 app_name = 'nhkstories'
 urlpatterns = [
     url(r'^story/(?P<id>[0-9]*)/$', views.story, name='story'),
+    url(r'^player/(?P<id>[0-9]*)/$', views.player, name='player'),
     url(r'^contact/$', views.contact, name='contact'),
     url(r'^contact/sent/$', views.contact_sent, name='contact_sent'),
     url(r'^about/$', views.about, name='about'),

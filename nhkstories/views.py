@@ -1,8 +1,9 @@
 import re
 from datetime import date
 
-from django.shortcuts import render, get_object_or_404, redirect
 from django.core.mail import send_mail
+from django.shortcuts import render, get_object_or_404, redirect
+from django.views.decorators.clickjacking import xframe_options_exempt
 
 from .models import Story
 from .forms import ContactForm
@@ -143,6 +144,15 @@ def story(request, id):
         'previous_story': previous_story,
         'next_story': next_story,
     })
+
+
+@xframe_options_exempt
+def player(request, id):
+    story = get_object_or_404(Story, pk=id)
+    if not story.video_reencoded:
+        return handler404(request)
+
+    return render(request, 'nhkstories/player.html', {'story': story})
 
 
 def about(request):

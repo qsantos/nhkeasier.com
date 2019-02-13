@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang=en>
+<meta charset="utf-8">
+<body>
+<style>
+body {
+    margin:0; background-color:black;
+    height:100vh; display:flex; justify-content:center; align-items:center; }
+video { width:100vw; max-height:100vh; height:auto; display:block; }
+</style>
+<video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+</body>
+</html>
