@@ -20,6 +20,12 @@
     <meta property="og:image:height" content="360" />
     <meta name="twitter:card" content="summary_large_image" />
 {% endif %}
+{% if player %}
+    <meta name="twitter:card" content="player">
+    <meta name="twitter:player" content="{{ player }}">
+    <meta name="twitter:player:width" content="640">
+    <meta name="twitter:player:height" content="360">
+{% endif %}
 <link rel="icon" href="{% static 'nhkstories/favicon.png' %}">
 <link rel="stylesheet" href="{% static 'nhkstories/style.css' %}">
 <link rel="alternate" href="{% url 'nhkstories:feed' %}" title="NHKEasier Stories" type="application/rss+xml">

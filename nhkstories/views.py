@@ -1,6 +1,7 @@
 import re
 from datetime import date
 
+from django.urls import reverse
 from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -92,12 +93,17 @@ def archive(request, year=None, month=None, day=None):
     if not stories:
         return handler404(request)
 
-    # take the image of one of the story as page illustration, if any
-    illustrated_story = stories.exclude(image='').first()
-    if illustrated_story is not None:
-        image = request.build_absolute_uri(illustrated_story.image.url)
+    # media for OpenGraph and such
+    story_with_image = stories.exclude(image='').first()
+    if story_with_image is not None:
+        image = request.build_absolute_uri(story_with_image.image.url)
     else:
         image = None
+    story_with_video = stories.exclude(video_reencoded='').first()
+    if story_with_video is not None:
+        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story_with_video.id]))
+    else:
+        player = None
 
     return render(request, 'nhkstories/index.html', {
         'title': 'Easier Japanese Practice',
@@ -109,6 +115,7 @@ def archive(request, year=None, month=None, day=None):
             'integrated dictionary will let you train until you get more '
             'comfortable for harder materials.',
         'image': image,
+        'player': player,
         'stories': stories,
         'previous_day': previous_day,
         'day': day,
@@ -132,14 +139,22 @@ def story(request, id):
     next_stories = Story.objects.filter(published__date=story.published.date(), id__gt=story.id) | Story.objects.filter(published__date__gt=story.published.date())
     next_story = next_stories.order_by('published', 'id').first()
 
-    # take the image of the story as page illustration, if any
-    image = request.build_absolute_uri(story.image.url) if story.image else None
+    # media for OpenGraph and such
+    if story.image:
+        image = request.build_absolute_uri(story.image.url)
+    else:
+        image = None
+    if story.video_reencoded:
+        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story.id]))
+    else:
+        player = None
 
     return render(request, 'nhkstories/story.html', {
         'title': story.title,
         'header': 'Single Story',
         'description': remove_all_html(story.content),
         'image': image,
+        'player': player,
         'story': story,
         'previous_story': previous_story,
         'next_story': next_story,
