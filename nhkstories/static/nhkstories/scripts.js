@@ -480,6 +480,9 @@ function main() {
         if (html.length == 0) {
             rikai.style.display = 'none';
         } else {
+            let lineheight = 39;
+            let vertical_margin = 5;
+
             rikai.innerHTML = html;
             rikai.style.display = 'block';
             let rect;
@@ -489,7 +492,7 @@ function main() {
                 rect = range.getClientRects()[0];
             }
             let x = rect.left;
-            let y = rect.bottom + 5;
+            let y = rect.bottom + vertical_margin;
 
             // fix edge case where caret is at the end of previous line
             // we detect this by comparing to the cursor position
@@ -498,7 +501,7 @@ function main() {
             let d2 = dx*dx + dy*dy;
             if (d2 > 10000) {  // more than 100px away
                 x = target.parentNode.getBoundingClientRect().left;
-                y += 39;  // line-height + interline
+                y += lineheight;
             }
 
             // avoid overflow
@@ -507,8 +510,9 @@ function main() {
             x = Math.max(0, Math.min(x, document.documentElement.clientWidth - rect.width));
             // avoid bottom overflow
             if (y + rect.height > document.documentElement.clientHeight) {
-                if (y - (39 + rect.height) > 0) {  // no point in clipping the top
-                    y -= 39 + rect.height;
+                let offset = 2*vertical_margin + lineheight + rect.height;
+                if (y - offset > 0) {  // no point in clipping the top
+                    y -= offset;
                 }
             }
 
