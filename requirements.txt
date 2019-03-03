@@ -1,0 +1,5 @@
+wheel
+django
+django-debug-toolbar
+django-widget-tweaks
+authlib
