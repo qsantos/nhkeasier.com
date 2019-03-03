@@ -1,4 +1,4 @@
-{% extends 'nhkstories/base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block content %}
 <p>
@@ -6,18 +6,18 @@ Practice Japanese on real news from <a
 href="https://www3.nhk.or.jp/news/easy/">NHK News Web Easy</a> even more
 easily. Just try moving your cursor above kanji and difficult words (desktop
 and laptops) or touching them (smartphones and tablets). You can also subscribe to the
-<a href="{% url 'nhkstories:feed' %}">RSS feed<img src="{% static 'nhkstories/feed-icon.svg' %}" alt="RSS feed" class="feed-icon"></a>.
+<a href="{% url 'feed' %}">RSS feed<img src="{% static 'feed-icon.svg' %}" alt="RSS feed" class="feed-icon"></a>.
 </p>
 <p>
 For some more stories, visit <a href="https://slow-communication.jp/">Slow Communication</a>.
 </p>
-{% include 'nhkstories/widgets/nav_day.html' %}
+{% include 'widgets/nav_day.html' %}
 {% for story in stories %}
-{% include 'nhkstories/widgets/story.html' %}
+{% include 'widgets/story.html' %}
 {% endfor %}
-{% include 'nhkstories/widgets/nav_day.html' %}
+{% include 'widgets/nav_day.html' %}
 <script>
 var edict_filename = '{{ day|date:'Y-m-d' }}.dat';
 </script>
-<script src="{% static 'nhkstories/scripts.js' %}"></script>
+<script src="{% static 'scripts.js' %}"></script>
 {% endblock %}

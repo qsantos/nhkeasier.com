@@ -40,10 +40,10 @@ class LatestStoriesFeed(Feed):
             html += '<li><a href="{}">/r/NHKEasyNews</a></li>'.format(story.r_nhkeasynews_link)
         if story.published.date() >= date(2017, 12, 5):
             html += '<li><a href="https://www3.nhk.or.jp/news/easy/{0}/{0}.html">Original</a></li>'.format(story.story_id)
-        html += '<li><a href="{}" class="permalink">Permalink</a></li>'.format(reverse('nhkstories:story', args=[story.id]))
+        html += '<li><a href="{}" class="permalink">Permalink</a></li>'.format(reverse('story', args=[story.id]))
         html += '</ul>'
 
         return html
 
     def item_link(self, item):
-        return reverse('nhkstories:story', args=[item.id])
+        return reverse('story', args=[item.id])

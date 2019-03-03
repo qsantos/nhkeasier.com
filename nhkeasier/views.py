@@ -11,7 +11,7 @@ from .forms import ContactForm
 
 
 def simple_message(request, title, message, status=200):
-    return render(request, 'nhkstories/message.html', {
+    return render(request, 'message.html', {
         'title': title,
         'header': title,
         'message': message,
@@ -74,7 +74,7 @@ def archive(request, year=None, month=None, day=None):
         day = stories.order_by('-published').first().published.date()
         header = 'Latest Stories'
     else:
-        return render(request, 'nhkstories/index.html', {
+        return render(request, 'index.html', {
             'title': 'Easier Japanese Practice',
             'header': 'Japanese stories here soon!',
             'description':
@@ -99,7 +99,7 @@ def archive(request, year=None, month=None, day=None):
         story = stories.exclude(image='').first()
     # media for OpenGraph and such
     if story is not None and story.video_reencoded:
-        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story.id]))
+        player = request.build_absolute_uri(reverse('player', args=[story.id]))
     else:
         player = None
     if story is not None and story.image:
@@ -107,7 +107,7 @@ def archive(request, year=None, month=None, day=None):
     else:
         image = None
 
-    return render(request, 'nhkstories/index.html', {
+    return render(request, 'index.html', {
         'title': 'Easier Japanese Practice',
         'header': header,
         'description':
@@ -147,11 +147,11 @@ def story(request, id):
     else:
         image = None
     if story.video_reencoded:
-        player = request.build_absolute_uri(reverse('nhkstories:player', args=[story.id]))
+        player = request.build_absolute_uri(reverse('player', args=[story.id]))
     else:
         player = None
 
-    return render(request, 'nhkstories/story.html', {
+    return render(request, 'story.html', {
         'title': story.title,
         'header': 'Single Story',
         'description': remove_all_html(story.content),
@@ -170,21 +170,21 @@ def player(request, id):
         return handler404(request)
 
     autoplay = bool(request.GET.get('autoplay'))
-    return render(request, 'nhkstories/player.html', {
+    return render(request, 'player.html', {
         'story': story,
         'autoplay': autoplay,
     })
 
 
 def about(request):
-    return render(request, 'nhkstories/about.html', {
+    return render(request, 'about.html', {
         'title': 'About',
         'header': 'About',
     })
 
 
 def tools(request):
-    return redirect('nhkstories:about')
+    return redirect('about')
 
 
 def contact(request):
@@ -198,9 +198,9 @@ def contact(request):
         message = form.cleaned_data['message']
         if send_mail(subject, message, from_email, ['contact@nhkeasier.com']) != 1:
             return simple_message(request, 'Message Not Sent', 'Sorry, there was en error while sending your message. Please try again later. You should be return to the form using the “Back” button of your web browser without', 500)
-        return redirect('nhkstories:contact_sent')
+        return redirect('contact_sent')
     else:
-        return render(request, 'nhkstories/contact.html', {
+        return render(request, 'contact.html', {
             'title': 'Contact',
             'header': 'Contact',
             'form': form,

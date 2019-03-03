@@ -46,4 +46,4 @@ class Story(models.Model):
         return '{}: {}'.format(self.id, self.title)
 
     def get_absolute_url(self):
-        return reverse('nhkstories:story', kwargs={'id': self.id})
+        return reverse('story', kwargs={'id': self.id})

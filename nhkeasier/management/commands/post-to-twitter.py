@@ -10,8 +10,8 @@ from django.urls import reverse
 from django.core.management.base import BaseCommand
 
 from nhkeasier import settings
-from nhkstories.logging import init_logging
-from nhkstories.models import Story
+from ...logging import init_logging
+from ...models import Story
 
 logger = logging.getLogger(__name__)
 
@@ -169,7 +169,7 @@ def post_story_to_twitter(story, client):
     logger.info('Posting story {} to Twitter'.format(story.id))
 
     # status
-    url = NHKEASIER_BASE + reverse('nhkstories:story', args=[story.id])
+    url = NHKEASIER_BASE + reverse('story', args=[story.id])
     refs = '#nhk_easier #nhk_news #nhk_easy #日本 #日本語'
     status = '{}\n（{}） [{:%Y-%m-%d}] {{{}}}'.format(story.title, url, story.published, refs)
 

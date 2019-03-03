@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% include 'widgets/nav_story.html' %}
+{% include 'widgets/story.html' %}
+{% include 'widgets/nav_story.html' %}
+<script>
+var edict_filename = '{{ story.id|stringformat:"05d" }}.dat';
+</script>
+<script src="{% static 'scripts.js' %}"></script>
+{% endblock %}

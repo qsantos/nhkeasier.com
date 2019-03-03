@@ -11,9 +11,9 @@ from django.core.management.base import BaseCommand
 from django.core.files.base import ContentFile
 from django.conf import settings
 
-from nhkstories.logging import init_logging
-from nhkstories.models import Story
-from nhkstories.edict.subedict import create_subedict, create_subenamdict, save_subedict
+from ...logging import init_logging
+from ...models import Story
+from ...edict.subedict import create_subedict, create_subenamdict, save_subedict
 
 logger = logging.getLogger(__name__)
 

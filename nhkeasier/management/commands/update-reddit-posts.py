@@ -6,8 +6,8 @@ from urllib.parse import urlencode
 
 from django.core.management.base import BaseCommand
 
-from nhkstories.logging import init_logging
-from nhkstories.models import Story
+from ...logging import init_logging
+from ...models import Story
 
 logger = logging.getLogger(__name__)
 

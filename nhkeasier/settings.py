@@ -41,7 +41,7 @@ IGNORABLE_404_URLS = [
 
 # Application definition
 INSTALLED_APPS = [
-    'nhkstories.apps.NHKStoriesConfig',
+    'nhkeasier.apps.NHKEasierConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

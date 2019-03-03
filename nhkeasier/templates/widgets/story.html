@@ -1,7 +1,7 @@
 {% load tz %}
 <article lang=ja>
 <h3>{{ story.title_with_ruby|safe }}</h3>
-<h4><a href="{% url 'nhkstories:story' story.id %}"><time datetime="{{ story.published|date:'c' }}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</time></a></h4>
+<h4><a href="{% url 'story' story.id %}"><time datetime="{{ story.published|date:'c' }}">{{ story.published|timezone:'Asia/Tokyo'|date:'Y-m-d H:i:s O (e)' }}</time></a></h4>
 
 {% if story.video_reencoded %}
     <video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
@@ -23,7 +23,7 @@
     {% endif %}
     </td>
     <td>
-        <a href="{% url 'nhkstories:story' story.id %}" class="permalink">Permalink</a>
+        <a href="{% url 'story' story.id %}" class="permalink">Permalink</a>
     </td>
 </table>
 

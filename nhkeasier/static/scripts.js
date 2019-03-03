@@ -456,7 +456,7 @@ function main() {
     }
 
     /* Start downloading data */
-    fetch('/static/nhkstories/deinflect.dat', load_deinflect);
+    fetch('/static/deinflect.dat', load_deinflect);
     fetch('/media/subedict/' + edict_filename, load_edict);
     fetch('/media/subenamdict/' + edict_filename, load_enamdict);
 

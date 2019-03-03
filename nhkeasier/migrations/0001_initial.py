@@ -3,7 +3,11 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import nhkstories.models
+
+from ..models import (
+    webpage_filename, image_filename, voice_filename, video_original_filename,
+    video_reencoded_filename,
+)
 
 
 class Migration(migrations.Migration):
@@ -24,11 +28,11 @@ class Migration(migrations.Migration):
                 ('title', models.CharField(max_length=200, null=True)),
                 ('content_with_ruby', models.TextField(null=True)),
                 ('content', models.TextField(null=True)),
-                ('webpage', models.FileField(null=True, upload_to=nhkstories.models.webpage_filename)),
-                ('image', models.FileField(null=True, upload_to=nhkstories.models.image_filename)),
-                ('voice', models.FileField(null=True, upload_to=nhkstories.models.voice_filename)),
-                ('video_original', models.FileField(null=True, upload_to=nhkstories.models.video_original_filename)),
-                ('video_reencoded', models.FileField(null=True, upload_to=nhkstories.models.video_reencoded_filename)),
+                ('webpage', models.FileField(null=True, upload_to=webpage_filename)),
+                ('image', models.FileField(null=True, upload_to=image_filename)),
+                ('voice', models.FileField(null=True, upload_to=voice_filename)),
+                ('video_original', models.FileField(null=True, upload_to=video_original_filename)),
+                ('video_reencoded', models.FileField(null=True, upload_to=video_reencoded_filename)),
                 ('subedict_created', models.BooleanField(default=False)),
             ],
             options={

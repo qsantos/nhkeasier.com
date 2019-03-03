@@ -8,8 +8,8 @@ from django.db.utils import OperationalError
 from django.core.management.base import BaseCommand
 
 from nhkeasier import settings
-from nhkstories.logging import init_logging
-from nhkstories.models import Story
+from ...logging import init_logging
+from ...models import Story
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def post_story_to_facebook(story, page_access_token):
     logger.info('Posting story {} to Facebook'.format(story.id))
 
     # status
-    url = NHKEASIER_BASE + reverse('nhkstories:story', args=[story.id])
+    url = NHKEASIER_BASE + reverse('story', args=[story.id])
     refs = '#nhk_easier #nhk_news #nhk_easy #日本 #日本語'
     status = '{}\n{}\n{:%Y-%m-%d}\n{}'.format(story.title, url, story.published, refs)
 
