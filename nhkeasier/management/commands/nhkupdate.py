@@ -270,7 +270,7 @@ def fetch_story_nhk_video(story):
         logger.debug('No NHK video found')
         return
     iframe_url = html_match.group(1)
-    logger.debug('Found iframe (URL={})', iframe_url)
+    logger.debug('Found iframe (URL={})'.format(iframe_url))
 
     if story.video_original:
         logger.error('Story has both regular and NHK videos')
