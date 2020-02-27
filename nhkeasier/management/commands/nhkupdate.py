@@ -276,10 +276,12 @@ def fetch_story_nhk_video(story: Story) -> None:
         return
 
     logger.debug('Fetching NHK video')
-    content = story.content_with_ruby
 
     # extract iframe URL
-    html_match = re.search(r'(?s)<div.*?src="(.*?)".*?</div>\s*', content)
+    html_match = re.search(
+        r'(?s)<div.*?src="(.*?)".*?</div>\s*',
+        story.content_with_ruby,
+    )
     if not html_match:
         logger.debug('No NHK video found')
         return
@@ -322,14 +324,11 @@ def fetch_story_nhk_video(story: Story) -> None:
 
     # remove HTML object
     logger.debug('Replacing NHK video iframe')
-    new_ruby = content[:html_match.start()] + content[html_match.end():]
-    delta = len(new_ruby) - len(story.content_with_ruby)
-    logger.debug(f'Updating content ({delta:+} characters)')
+    old_ruby = story.content_with_ruby
+    new_ruby = old_ruby[:html_match.start()] + old_ruby[html_match.end():]
+    logger.debug(f'Updating content')
     story.content_with_ruby = new_ruby
-    new_content = remove_ruby(story.content_with_ruby)
-    delta2 = len(new_content) - len(story.content)
-    assert delta == delta2
-    story.content = remove_ruby(story.content_with_ruby)
+    story.content = remove_ruby(new_ruby)
     story.save()
     logger.debug('Content updated')
 
