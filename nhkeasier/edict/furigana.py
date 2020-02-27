@@ -1,30 +1,32 @@
-# encoding: utf-8
 from collections import deque
+from typing import Deque, Iterator, List, Tuple
 
 from .kanji import load_kanjidic
 
 kanjidic = None
 
+FuriganaMatch = List[Tuple[str, str]]
 
-def furigana_from_kanji_kana(kanji, kana, make_default=True):
+
+def furigana_from_kanji_kana(kanji: str, kana: str) -> str:
     matches = list(match_from_kanji_kana(kanji, kana))
     if len(matches) == 0:
-        return u'{}[{}]'.format(kanji, kana) if make_default else None
+        return f'{kanji}[{kana}]'
     return furigana_from_match(matches[0])
 
 
-def match_from_kanji_kana(kanji, kana):
+def match_from_kanji_kana(kanji: str, kana: str) -> Iterator[FuriganaMatch]:
     """Match kanji against kana
 
     Return a generators that yields all possible matches of kanji with the kana
-    based on their known readings. For instance, for u'牛肉' and u'ぎゅうにく',
-    it yields the single match [(u'牛', u'ぎゅう'), (u'肉', u'にく')].
+    based on their known readings. For instance, for '牛肉' and 'ぎゅうにく',
+    it yields the single match [('牛', 'ぎゅう'), ('肉', 'にく')].
     """
     global kanjidic
     if kanjidic is None:
         kanjidic = load_kanjidic()
 
-    q = deque([([], kanji, kana)])
+    q: Deque[Tuple[FuriganaMatch, str, str]] = deque([([], kanji, kana)])
     while q:
         match_prefix, kanji, kana = q.popleft()
         if not kanji and not kana:
@@ -32,15 +34,14 @@ def match_from_kanji_kana(kanji, kana):
         if not kanji or not kana:
             continue
         c = kanji[0]
-        if c == u'々' and match_prefix:
-            readings = [match_prefix[-1][1]]  # TODO: dakuten
+
+        if c == '々' and match_prefix:
+            readings = {match_prefix[-1][1]}  # TODO: dakuten
+        elif c in kanjidic:
+            readings = kanjidic[c].readings
         else:
-            try:
-                kanjiinfo = kanjidic[c]
-            except KeyError:
-                readings = c
-            else:
-                readings = kanjiinfo.readings
+            readings = {c}
+
         for reading in readings:
             if kana.startswith(reading):
                 new_prefixes = match_prefix + [(c, reading)]
@@ -50,20 +51,20 @@ def match_from_kanji_kana(kanji, kana):
                 q.append(new_element)
 
 
-def furigana_from_match(match):
+def furigana_from_match(match: FuriganaMatch) -> str:
     """Transform a kanji-kana match into Anki-compatible furigana
 
-    For instance, for [(u'牛', u'ぎゅう'), (u'肉', u'にく')], it returns
-    u'牛[ぎゅう]肉[にく]'.
+    For instance, for [('牛', 'ぎゅう'), ('肉', 'にく')], it returns
+    '牛[ぎゅう]肉[にく]'.
     """
-    def _():
+    def _() -> Iterator[str]:
         last_was_kana = False
         for kanji, kana in match:
             if kanji == kana:
                 yield kana
             else:
                 if last_was_kana:
-                    yield u' '
-                yield u'{}[{}]'.format(kanji, kana)
+                    yield ' '
+                yield f'{kanji}[{kana}]'
             last_was_kana = kanji == kana
-    return u''.join(_())
+    return ''.join(_())

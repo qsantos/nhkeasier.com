@@ -1,4 +1,5 @@
 __pycache__/
+.mypy_cache/
 /db.sqlite3
 /media/
 /static/

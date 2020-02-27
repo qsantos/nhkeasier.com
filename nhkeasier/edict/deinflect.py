@@ -1,10 +1,23 @@
-# encoding: utf-8
 import os.path
 from collections import defaultdict
+from typing import DefaultDict, Iterator, List, NamedTuple, Set
 
-from .search import search_edict
+from .search import Word, search_edict
 
 default_deinflect = os.path.join(os.path.dirname(__file__), 'deinflect.dat')
+
+
+class Rule(NamedTuple):
+    from_: str
+    to: str
+    type_: int
+    reason: str
+
+
+class Candidate(NamedTuple):
+    word: str
+    type_: int
+    reasons: List[str]
 
 
 # deinflect.dat countains instructions to remove inflections from words
@@ -29,16 +42,16 @@ default_deinflect = os.path.join(os.path.dirname(__file__), 'deinflect.dat')
 # thus, the new word has type wtype = rtyle >> 8
 class Deinflector:
     """A Deinflector instance applies deinflection rules to normalize a word"""
-    def __init__(self, deinflect_data_filename=default_deinflect):
+    def __init__(self, deinflect_data_filename: str = default_deinflect):
         """Populate deinflecting rules from given file"""
         with open(deinflect_data_filename, 'rb') as f:
             lines = iter(f)
             next(lines)  # skip header
             reasons = []  # collect the string array for later resolution
-            self.rules = []
-            for line in lines:
-                line = line.decode('utf-8')
-                fields = line.strip().split(u'\t')
+            self.rules: List[Rule] = []
+            for byte_line in lines:
+                line = byte_line.decode()
+                fields = line.strip().split('\t')
                 # the header does not indicate the size of the array string; it
                 # is simplest to differentiate between the array string and the
                 # actual rules by counting the numbers of fields
@@ -47,34 +60,35 @@ class Deinflector:
                     reasons.append(fields[0])
                 else:
                     # rule
-                    from_, to, type_, reason = fields
-                    type_ = int(type_)
+                    from_, to, stype_, reason = fields
+                    type_ = int(stype_)
                     reason = reasons[int(reason)]  # resolve string
-                    self.rules.append((from_, to, type_, reason))
+                    self.rules.append(Rule(from_, to, type_, reason))
 
-    def __call__(self, word):
+    def __call__(self, word: str) -> List[Candidate]:
         """Iterate through possible deinflections of word (including word)
 
         Each value is a triplet whose first element is the deinflected word,
         the second element is a mask of possible grammatical classes for the
         word, and the third element is the corresponding reasonning for the
         inflection"""
-        candidates = [(word, 0xff, [])]
+        candidates = [Candidate(word, 0xff, [])]
         i = 0
         while i < len(candidates):
-            word, wtype, wreason = candidates[i]
-            for rfrom, rto, rtype, rreason in self.rules:
+            candidate = candidates[i]
+            for rule in self.rules:
                 # check types match
-                if wtype & rtype == 0:
+                if candidate.type_ & rule.type_ == 0:
                     continue
                 # check suffix matches
-                if not word.endswith(rfrom):
+                if not candidate.word.endswith(rule.from_):
                     continue
                 # append new candidate
-                new_word = word[:-len(rfrom)] + rto  # replace suffix
-                new_type = rtype >> 8
-                new_reason = wreason + [rreason]
-                candidates.append((new_word, new_type, new_reason))
+                candidates.append(Candidate(
+                    word=candidate.word[:-len(rule.to)] + rule.to,  # replace suffix,
+                    type_=rule.type_ >> 8,
+                    reasons=candidate.reasons + [rule.reason],
+                ))
                 # NOTE: could check that new_word is already in candidates
                 # Rikaikun merges with previous candidate; if this candidate
                 # has already been processed, the new type is ignored
@@ -82,9 +96,9 @@ class Deinflector:
             i += 1
         return candidates
 
-    def search_edict(self, fragment):
+    def search_edict(self, fragment: str) -> Iterator[Word]:
         candidates = list(self(fragment))
-        subedict = defaultdict(set)
+        subedict: DefaultDict[str, Set[Word]] = defaultdict(set)
         for candidate, _, _ in candidates:
             for word in search_edict(candidate):
                 for k in word.readings + word.writings:

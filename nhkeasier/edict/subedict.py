@@ -1,30 +1,29 @@
-# encoding: utf-8
 import re
-import sys
+from typing import Iterator, Set
 
-from .search import search_enamdict
 from .deinflect import Deinflector
+from .search import search_enamdict
 
 ranges = [
-    u'々',  # IDEOGRAPHIC ITERATION MARK (U+3005)
-    u'\u3040-\u30ff',  # Hiragana, Katakana
-    u'\u3400-\u4dbf',  # CJK Unified Ideographs Extension A
-    u'\u4e00-\u9fff',  # CJK Unified Ideographs
-    u'\uf900-\ufaff',  # CJK Compatibility Ideographs
-    u'\uff66-\uff9f',  # Halfwidth and Fullwidth Forms Block (hiragana and katakana)
+    '々',  # IDEOGRAPHIC ITERATION MARK (U+3005)
+    '\u3040-\u30ff',  # Hiragana, Katakana
+    '\u3400-\u4dbf',  # CJK Unified Ideographs Extension A
+    '\u4e00-\u9fff',  # CJK Unified Ideographs
+    '\uf900-\ufaff',  # CJK Compatibility Ideographs
+    '\uff66-\uff9f',  # Halfwidth and Fullwidth Forms Block (hiragana and katakana)
 ]
-fragment_pattern = re.compile(u'[{}]+'.format(u''.join(ranges)))
+fragment_pattern = re.compile('[' + ''.join(ranges) + ']+')
 
 
-def japanese_text_substrings(text):
-    for fragment in fragment_pattern.finditer(text):
-        fragment = fragment.group()
+def japanese_text_substrings(text: str) -> Iterator[str]:
+    for match in fragment_pattern.finditer(text):
+        fragment = match.group()
         for start in range(0, len(fragment)):
-            for stop in reversed(range(start+1, len(fragment)+1)):
+            for stop in reversed(range(start + 1, len(fragment) + 1)):
                 yield fragment[start:stop]
 
 
-def create_subedict(text):
+def create_subedict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
     deinflector = Deinflector()
     # we directly store the set of EDICT entries (text lines), so that
@@ -38,7 +37,7 @@ def create_subedict(text):
     return items
 
 
-def create_subenamdict(text):
+def create_subenamdict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
     items = set()
     for substring in japanese_text_substrings(text):
@@ -47,13 +46,13 @@ def create_subenamdict(text):
     return items
 
 
-def save_subedict(subedict, filename):
+def save_subedict(subedict: Set[str], filename: str) -> None:
     with open(filename, 'wb') as f:
-        content = u'\n'.join(sorted(subedict)) + u'\n'
+        content = '\n'.join(sorted(subedict)) + '\n'
         f.write(content.encode('utf-8'))
 
 
-def main():
+def main() -> None:
     import argparse
 
     # parse arguments

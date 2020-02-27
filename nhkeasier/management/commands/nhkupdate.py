@@ -1,21 +1,26 @@
-import re
-import os
 import json
 import logging
-from datetime import datetime, timedelta, date, timezone
+import os
+import re
+from datetime import date, datetime, timedelta, timezone
+from subprocess import DEVNULL, run
 from tempfile import mkstemp
-from subprocess import run, DEVNULL
-from urllib.request import Request, urlopen, HTTPError
+from typing import Any, Dict, List, NewType, Tuple
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
-from django.core.management.base import BaseCommand
-from django.core.files.base import ContentFile
 from django.conf import settings
+from django.core.files.base import ContentFile
+from django.core.management.base import BaseCommand
 
+from ...edict.subedict import (
+    create_subedict, create_subenamdict, save_subedict,
+)
 from ...logging import init_logging
 from ...models import Story
-from ...edict.subedict import create_subedict, create_subenamdict, save_subedict
 
 logger = logging.getLogger(__name__)
+StoryInfo = NewType('StoryInfo', Dict)
 
 
 class DuplicateStoryIDType(Exception):
@@ -43,48 +48,48 @@ video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}
 nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 
 
-def fetch(url):
+def fetch(url: str) -> bytes:
     request = Request(url, headers={'User-Agent': 'NHKEasier Crawler'})
     with urlopen(request) as f:
-        return f.read()
+        return f.read()  # type: ignore
 
 
-def fetch_story_list():
-    '''Return a dictionary mapping days to stories published this day'''
+def fetch_story_list() -> Dict[str, List[StoryInfo]]:
+    """Return a dictionary mapping days to stories published this day"""
     logger.debug('Fetching list of stories')
     data = fetch(story_list_url)
     stories_per_day = json.loads(data.decode('utf-8-sig'))[0]
 
     n_stories = sum(len(stories_per_day[day]) for day in stories_per_day)
     n_days = len(stories_per_day)
-    logger.debug('{} stories over {} days found'.format(n_stories, n_days))
-    return stories_per_day
+    logger.debug(f'{n_stories} stories over {n_days} days found')
+    return stories_per_day  # type: ignore
 
 
-def fetch_replace_voice():
-    '''Return a dictionary mapping story_id to amended voice filename'''
+def fetch_replace_voice() -> Dict[str, str]:
+    """Return a dictionary mapping story_id to amended voice filename"""
     logger.debug('Fetching voice amendments')
     data = fetch(replace_voice_url)
     amendments = json.loads(data.decode())
-    logger.debug('{} voice amendments found'.format(len(amendments)))
+    logger.debug(f'{len(amendments)} voice amendments found')
     return {
         amendment['news_id']: amendment['voice_id']
         for amendment in amendments
     }
 
 
-def set_voice_id(info, replace_voice):
+def set_voice_id(info: StoryInfo, replace_voice: Dict[str, str]) -> None:
     news_id = info['news_id']
     if news_id in replace_voice:
         info['voice_id'] = replace_voice[news_id]
-        logger.debug('Amending voice_id ({})'.format(info['voice_id']))
+        logger.debug(f'Amending voice_id ({info["voice_id"]})')
     else:
         info['voice_id'] = news_id
-        logger.debug('Copying voice_id ({})'.format(info['voice_id']))
+        logger.debug(f'Copying voice_id ({info["voice_id"]})')
 
 
-def clean_up_content(content):
-    content = re.sub("<a.*?>", '', content)
+def clean_up_content(content: str) -> str:
+    content = re.sub('<a.*?>', '', content)
     content = re.sub('<span.*?>', '', content)
     content = content.replace('</a>', '')
     content = content.replace('</span>', '')
@@ -93,7 +98,7 @@ def clean_up_content(content):
     return content
 
 
-def remove_ruby(content):
+def remove_ruby(content: str) -> str:
     content = re.sub('<rp>.*?</rp>', '', content)
     content = re.sub('<rt>.*?</rt>', '', content)
     content = re.sub('<rtc>.*?</rtc>', '', content)
@@ -101,19 +106,19 @@ def remove_ruby(content):
     return content
 
 
-def parse_datetime_nhk(s):
+def parse_datetime_nhk(s: str) -> datetime:
     dt = datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
     jst = timezone(timedelta(hours=9))
     return dt.replace(tzinfo=jst)
 
 
-def story_from_info(info):
+def story_from_info(info: StoryInfo) -> Tuple[Story, bool]:
     logger.debug('Extracting story info')
     story, created = Story.objects.get_or_create(story_id=info['news_id'])
     if created:
-        logger.debug('Inserted into database (id={})'.format(story.id))
+        logger.debug(f'Inserted into database (id={story.id})')
     else:
-        logger.debug('Retrieved from database (id={})'.format(story.id))
+        logger.debug(f'Retrieved from database (id={story.id})')
 
     published = parse_datetime_nhk(info['news_prearranged_time'])
     if story.published and abs(story.published - published).days > 2:
@@ -126,17 +131,17 @@ def story_from_info(info):
     return story, created
 
 
-def fetch_story_webpage(story, info):
+def fetch_story_webpage(story: Story, info: StoryInfo) -> None:
     if story.webpage:
         logger.debug('Webpage already present')
         return
     logger.debug('Fetching webpage')
     webpage_url = webpage_url_pattern.format(**info)
-    logger.info('Download %s' % webpage_url)
+    logger.info(f'Download {webpage_url}')
     story.webpage.save('', ContentFile(fetch(webpage_url)))
 
 
-def fetch_story_image(story, info):
+def fetch_story_image(story: Story, info: StoryInfo) -> None:
     if story.image:
         logger.debug('Image already present')
         return
@@ -154,7 +159,7 @@ def fetch_story_image(story, info):
         logger.debug('No image')
         return
 
-    logger.info('Download image %s' % image_url)
+    logger.info(f'Download image {image_url}')
     try:
         story.image.save('', ContentFile(fetch(image_url)))
     except HTTPError:
@@ -166,7 +171,7 @@ def fetch_story_image(story, info):
     run(['mogrify', '-interlace', 'plane', story.image.file.name], check=True)
 
 
-def fetch_story_voice(story, info):
+def fetch_story_voice(story: Story, info: StoryInfo) -> None:
     if story.voice:
         logger.debug('Voice already present')
         return
@@ -180,7 +185,7 @@ def fetch_story_voice(story, info):
     if voice_url.endswith('.mp4'):
         # fragmented MP4 using HTTP Live Streaming
         voice_url = fragmented_voice_url_pattern.format(**info)
-        logger.info('Download voice (fragmented MP4) %s' % voice_url)
+        logger.info(f'Download voice (fragmented MP4) {voice_url}')
         _, temp_name = mkstemp(suffix='.mp3')
         res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL)
         if res.returncode == 0:
@@ -192,7 +197,7 @@ def fetch_story_voice(story, info):
             logger.warning('Failed to download fragmented voice')
         os.remove(temp_name)
     else:
-        logger.info('Download voice %s' % voice_url)
+        logger.info(f'Download voice {voice_url}')
         try:
             story.voice.save('', ContentFile(fetch(voice_url)))
         except HTTPError:
@@ -201,7 +206,7 @@ def fetch_story_voice(story, info):
             logger.debug('Voice saved')
 
 
-def fetch_story_video(story, info):
+def fetch_story_video(story: Story, info: StoryInfo) -> None:
     if story.video_original:
         logger.debug('Original video already present')
         return
@@ -211,7 +216,7 @@ def fetch_story_video(story, info):
         return
 
     video_url = video_url_pattern.format(**info)
-    logger.info('Download video %s' % video_url)
+    logger.info(f'Download video {video_url}')
     _, temp = mkstemp()
     # some download complete partially, so we try several times
     for _ in range(2):
@@ -230,7 +235,7 @@ def fetch_story_video(story, info):
     os.remove(temp)
 
 
-def extract_story_content(story):
+def extract_story_content(story: Story) -> None:
     if story.content_with_ruby:
         logger.debug('Content already present')
         return
@@ -239,21 +244,24 @@ def extract_story_content(story):
     data = story.webpage.read().decode()
     story.webpage.seek(0)  # the webpage might be read when updating story
 
-    logger.debug('Parsing {} characters'.format(len(data)))
-    m = re.search(r'(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>', data)
+    logger.debug(f'Parsing {len(data)} characters')
+    m = re.search(
+        r'(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>',
+        data,
+    )
     if m is None:
         logger.error('Could not find content')
         raise ContentNotFound
 
     raw_content = m.group(1)
-    logger.debug('Parsed content ({} characters)'.format(len(raw_content)))
+    logger.debug(f'Parsed content ({len(raw_content)} characters)')
     story.content_with_ruby = clean_up_content(raw_content)
-    logger.debug('Cleaned up ({} characters)'.format(len(story.content_with_ruby)))
+    logger.debug(f'Cleaned up ({len(story.content_with_ruby)} characters)')
     story.content = remove_ruby(story.content_with_ruby)
-    logger.debug('Removed ruby ({} characters)'.format(len(story.content)))
+    logger.debug(f'Removed ruby ({len(story.content)} characters)')
 
 
-def fetch_story_nhk_video(story):
+def fetch_story_nhk_video(story: Story) -> None:
     if story.video_reencoded:
         logger.debug('Web video already present')
         return
@@ -267,7 +275,7 @@ def fetch_story_nhk_video(story):
         logger.debug('No NHK video found')
         return
     iframe_url = html_match.group(1)
-    logger.debug('Found iframe (URL={})'.format(iframe_url))
+    logger.debug(f'Found iframe (URL={iframe_url})')
 
     if story.video_original:
         logger.error('Story has both regular and NHK videos')
@@ -280,16 +288,16 @@ def fetch_story_nhk_video(story):
         logger.error('Failed to find JSON filename of NHK video')
         return
     json_filename = json_match.group(1)
-    logger.debug('Found JSON filename ({})'.format(json_filename))
+    logger.debug(f'Found JSON filename ({json_filename})')
 
     # fetch JSON
     json_url = nhk_contents + json_filename
     info = json.loads(fetch(json_url).decode())
     video_url = info['mediaResource']['url']
-    logger.debug('Found NHK video URL ({})'.format(video_url))
+    logger.debug(f'Found NHK video URL ({video_url})')
 
     # fetch video
-    logger.info('Fetching NHK video {}'.format(video_url))
+    logger.info(f'Fetching NHK video {video_url}')
     _, temp_name = mkstemp(suffix='.mp4')
     res = run(['ffmpeg', '-y', '-i', video_url, temp_name], stderr=DEVNULL)
     if res.returncode != 0:
@@ -307,7 +315,7 @@ def fetch_story_nhk_video(story):
     logger.debug('Replacing NHK video iframe')
     new_ruby = content[:html_match.start()] + content[html_match.end():]
     delta = len(new_ruby) - len(story.content_with_ruby)
-    logger.debug('Updating content ({:+} characters)'.format(delta))
+    logger.debug(f'Updating content ({delta:+} characters)')
     story.content_with_ruby = new_ruby
     new_content = remove_ruby(story.content_with_ruby)
     delta2 = len(new_content) - len(story.content)
@@ -317,7 +325,7 @@ def fetch_story_nhk_video(story):
     logger.debug('Content updated')
 
 
-def convert_story_video(story):
+def convert_story_video(story: Story) -> None:
     if story.video_reencoded:
         logger.debug('Web video already present')
         return
@@ -326,7 +334,7 @@ def convert_story_video(story):
         logger.debug('No video')
         return
 
-    logger.info('Converting %s' % story.video_original.name)
+    logger.info(f'Converting {story.video_original.name}')
     original = story.video_original.file.name
     _, temp = mkstemp(suffix='.mp4')
     run(['ffmpeg', '-y', '-i', original, '-b:v', '500k', temp], stderr=DEVNULL, check=True)
@@ -337,8 +345,8 @@ def convert_story_video(story):
     os.remove(temp)
 
 
-def fetch_story(info, replace_voice):
-    logger.debug('Fetching story {} ({})'.format(info['news_id'], info['title']))
+def fetch_story(info: StoryInfo, replace_voice: Dict[str, str]) -> bool:
+    logger.debug(f'Fetching story {info["news_id"]} ({info["title"]})')
     set_voice_id(info, replace_voice)
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
@@ -360,7 +368,7 @@ def fetch_story(info, replace_voice):
     return created
 
 
-def fetch_stories():
+def fetch_stories() -> None:
     logger.debug('Fetching stories')
     stories_per_day = fetch_story_list()
     replace_voice = fetch_replace_voice()
@@ -375,35 +383,35 @@ def fetch_stories():
     elif new_stories_count == 1:
         logger.info('1 new story')
     else:
-        logger.info('%i new stories' % new_stories_count)
+        logger.info(f'{new_stories_count} new stories')
 
 
-def subedict_from_content(filename, content):
+def subedict_from_content(filename: str, content: str) -> None:
     subedict_dir = os.path.join(settings.BASE_DIR, 'media', 'subedict')
     os.makedirs(subedict_dir, exist_ok=True)
     path = os.path.join(subedict_dir, filename)
     save_subedict(create_subedict(content), path)
 
 
-def subenamdict_from_content(filename, content):
+def subenamdict_from_content(filename: str, content: str) -> None:
     subenamdict_dir = os.path.join(settings.BASE_DIR, 'media', 'subenamdict')
     os.makedirs(subenamdict_dir, exist_ok=True)
     path = os.path.join(subenamdict_dir, filename)
     save_subedict(create_subenamdict(content), path)
 
 
-def create_subedicts():
+def create_subedicts() -> None:
     logger.debug('Creating subedicts')
     stories = Story.objects.filter(subedict_created=False)
-    logger.debug('Stories without subedicts: {}'.format(len(stories)))
+    logger.debug(f'Stories without subedicts: {len(stories)}')
 
     # create sub EDICT files for stories and list days that must be updated
     logger.debug('Creating story subedicts')
     new_days = set()
     for story in stories:
-        logger.debug('Considering story id={}'.format(story.id))
+        logger.debug(f'Considering story id={story.id}')
         new_days.add(story.published.date())
-        filename = '{:05}.dat'.format(story.id)
+        filename = f'{story.id:05}.dat'
         subedict_from_content(filename, story.content)
         subenamdict_from_content(filename, story.content)
         logger.info(filename)
@@ -412,10 +420,10 @@ def create_subedicts():
     # update sub EDICT files for days
     logger.debug('Creating day subedicts')
     for day in sorted(new_days):
-        logger.debug('Considering day {}'.format(day))
+        logger.debug(f'Considering day {day}')
         day_stories = Story.objects.filter(published__date=day)
         content = ''.join(story.content for story in day_stories)
-        filename = '{}.dat'.format(day)
+        filename = f'{day}.dat'
         subedict_from_content(filename, content)
         subenamdict_from_content(filename, content)
         logger.info(filename)
@@ -426,7 +434,7 @@ def create_subedicts():
     logger.debug('Subedicts created')
 
 
-def main():
+def main() -> None:
     init_logging()
     logger.debug('Start of NHKUpdate command')
     fetch_stories()
@@ -435,7 +443,7 @@ def main():
 
 
 class Command(BaseCommand):
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         try:
             main()
         except Exception:

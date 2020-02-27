@@ -1,24 +1,26 @@
+from __future__ import annotations
+
 from django.db import models
 from django.urls import reverse
 
 
-def webpage_filename(instance, filename):
+def webpage_filename(instance: Story, filename: str) -> str:
     return 'html/{}.html'.format(instance.story_id)
 
 
-def image_filename(instance, filename):
+def image_filename(instance: Story, filename: str) -> str:
     return 'jpg/{}.jpg'.format(instance.story_id)
 
 
-def voice_filename(instance, filename):
+def voice_filename(instance: Story, filename: str) -> str:
     return 'mp3/{}.mp3'.format(instance.story_id)
 
 
-def video_original_filename(instance, filename):
+def video_original_filename(instance: Story, filename: str) -> str:
     return 'mp4/{}.mp4'.format(instance.story_id)
 
 
-def video_reencoded_filename(instance, filename):
+def video_reencoded_filename(instance: Story, filename: str) -> str:
     return 'mp4/{}.reencoded.mp4'.format(instance.story_id)
 
 
@@ -42,8 +44,8 @@ class Story(models.Model):
     class Meta:
         verbose_name_plural = 'stories'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '{}: {}'.format(self.id, self.title)
 
-    def get_absolute_url(self):
-        return reverse('story', kwargs={'id': self.id})
+    def get_absolute_url(self) -> str:
+        return reverse('story', kwargs={'id': self.id})  # type: ignore
