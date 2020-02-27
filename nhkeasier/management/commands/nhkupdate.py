@@ -8,6 +8,7 @@ from tempfile import mkstemp
 from typing import Any, Dict, List, NewType, Tuple
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from urllib.parse import urljoin
 
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -48,7 +49,15 @@ video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}
 nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 
 
+def normalize_url(url: str) -> str:
+    if url.endswith('/'):
+        return urljoin(url, '.')
+    else:
+        return urljoin(url + '/', '.').rstrip('/')
+
+
 def fetch(url: str) -> bytes:
+    url = normalize_url(url)
     request = Request(url, headers={'User-Agent': 'NHKEasier Crawler'})
     with urlopen(request) as f:
         return f.read()  # type: ignore
