@@ -292,11 +292,11 @@ def fetch_story_nhk_video(story: Story) -> None:
 
     # extract JSON URL
     data = fetch(iframe_url)
-    json_match = re.search(r'player\("(.*?)"\)', data.decode())
+    json_match = re.search(r'[^"\']*.json', data.decode())
     if not json_match:
         logger.error('Failed to find JSON filename of NHK video')
         return
-    json_filename = json_match.group(1)
+    json_filename = json_match.group()
     logger.debug(f'Found JSON filename ({json_filename})')
 
     # fetch JSON
