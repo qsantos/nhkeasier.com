@@ -1,8 +1,8 @@
-import re
 import json
 import logging
-from urllib.request import Request, urlopen
+import re
 from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from django.core.management.base import BaseCommand
 

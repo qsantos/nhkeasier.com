@@ -1,16 +1,16 @@
 import re
 from datetime import date
 
-from django.urls import reverse
 from django.core.mail import send_mail
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .models import Story
 from .forms import ContactForm
+from .models import Story
 
 
-def simple_message(request, title, message, status=200):
+def simple_message(request, title: str, message: str, status: int = 200):
     return render(request, 'message.html', {
         'title': title,
         'header': title,
@@ -126,7 +126,7 @@ def archive(request, year=None, month=None, day=None):
 
 
 def remove_all_html(content):
-    content = re.sub("<.*?>", '', content)
+    content = re.sub('<.*?>', '', content)
     return content
 
 

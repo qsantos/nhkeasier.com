@@ -7,9 +7,9 @@ from .models import Story
 
 
 class LatestStoriesFeed(Feed):
-    title = "NHK News Web Easier"
-    link = "/"
-    description = "Latest stories from NHK News Web easy"
+    title = 'NHK News Web Easier'
+    link = '/'
+    description = 'Latest stories from NHK News Web easy'
 
     def items(self):
         return Story.objects.filter(subedict_created=True).order_by('-published', '-id')[:50]

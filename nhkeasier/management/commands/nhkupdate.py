@@ -7,8 +7,8 @@ from subprocess import DEVNULL, run
 from tempfile import mkstemp
 from typing import Any, Dict, List, NewType, Tuple
 from urllib.error import HTTPError
-from urllib.request import Request, urlopen
 from urllib.parse import urljoin
+from urllib.request import Request, urlopen
 
 from django.conf import settings
 from django.core.files.base import ContentFile
