@@ -1,6 +1,40 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 
+from django.core.mail import send_mail
+
+
+class DjangoMailHandler(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        msg = self.format(record)
+        send_mail(
+            subject=f'[{record.levelname}] {record.msg}',
+            message=f'{record.pathname}:{record.lineno}\n{msg}',
+            from_email='logs@nhkeasier.com',
+            recipient_list=['contact@nhkeasier.com']
+        )
+
+
+def log_to_console(logger: logging.Logger, level: int, formatter: logging.Formatter) -> None:
+    handler = logging.StreamHandler()
+    handler.setLevel(level)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
+def log_to_file(logger: logging.Logger, level: int, formatter: logging.Formatter) -> None:
+    handler = TimedRotatingFileHandler('nhkeasier.com.log', when='D')
+    handler.setLevel(level)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
+def log_to_mail(logger: logging.Logger, level: int, formatter: logging.Formatter) -> None:
+    handler = DjangoMailHandler()
+    handler.setLevel(level)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
 
 def init_logging() -> None:
     logger = logging.getLogger()
@@ -10,15 +44,9 @@ def init_logging() -> None:
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     )
 
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    thandler = TimedRotatingFileHandler('nhkeasier.com.log', when='D')
-    thandler.setLevel(logging.DEBUG)
-    thandler.setFormatter(formatter)
-    logger.addHandler(thandler)
+    log_to_console(logger, logging.INFO, formatter)
+    log_to_file(logger, logging.DEBUG, formatter)
+    log_to_mail(logger, logging.WARNING, formatter)
 
     logger = logging.getLogger(__name__)
     logger.debug('Logging initialized')
