@@ -85,7 +85,7 @@ class Deinflector:
                     continue
                 # append new candidate
                 candidates.append(Candidate(
-                    word=candidate.word[:-len(rule.to)] + rule.to,  # replace suffix,
+                    word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
                     reasons=candidate.reasons + [rule.reason],
                 ))
