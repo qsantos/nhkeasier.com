@@ -240,7 +240,7 @@ def fetch_story_video(story: Story, info: StoryInfo) -> None:
             story.video_original.save('', f)
         logger.debug('Video saved')
     else:
-        logger.warning('Failed to fetch video')
+        logger.info('Failed to fetch video')
     os.remove(temp)
 
 
