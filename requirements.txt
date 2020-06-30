@@ -1,5 +1,6 @@
-wheel
-django
-django-debug-toolbar
-django-widget-tweaks
-authlib
+Authlib==0.14.3
+django==1.11
+django-debug-toolbar==2.2
+django-widget-tweaks==1.4.8
+flake8==3.8.3
+flake8-isort==3.0.0
