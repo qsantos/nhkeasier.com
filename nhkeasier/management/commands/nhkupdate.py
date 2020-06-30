@@ -185,7 +185,7 @@ def fetch_story_image(story: Story, info: StoryInfo) -> None:
     try:
         story.image.save('', ContentFile(fetch(image_url)))
     except HTTPError:
-        logger.warning('Failed to fetch image')
+        logger.warning('Failed to fetch image', exc_info=True)
         return
     logger.debug('Image saved')
 
@@ -223,7 +223,7 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
         try:
             story.voice.save('', ContentFile(fetch(voice_url)))
         except HTTPError:
-            logger.warning('Failed to download voice')
+            logger.warning('Failed to download voice', exc_info=True)
         else:
             logger.debug('Voice saved')
 
