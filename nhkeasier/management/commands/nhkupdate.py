@@ -7,7 +7,7 @@ from subprocess import DEVNULL, run
 from tempfile import mkstemp
 from typing import Any, Dict, List, NewType, Tuple
 from urllib.error import HTTPError
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 from django.conf import settings
@@ -49,15 +49,28 @@ video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}
 nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 
 
-def normalize_url(url: str) -> str:
-    if url.endswith('/'):
-        return urljoin(url, '.')
-    else:
-        return urljoin(url + '/', '.').rstrip('/')
+def remove_extra_dots(url: str) -> str:
+    # inspired from https://stackoverflow.com/a/27950825
+    parsed = urlparse(url)
+    dirs = []
+    for name in parsed.path.split('/'):
+        if name == '..':
+            if len(dirs) > 1:
+                dirs.pop()
+        else:
+            dirs.append(name)
+    new_path = '/'.join(dirs)
+    return urlunparse(parsed._replace(path=new_path))
+
+
+assert remove_extra_dots('http://example.com/a/../b') == 'http://example.com//b'
+assert remove_extra_dots('http://example.com/a/../b/') == 'http://example.com//b/'
+assert remove_extra_dots('http://example.com/a/../b/c.jpg') == 'http://example.com//b/c.jpg'
+assert remove_extra_dots('http://example.com/a/../b/c.jpg?aze') == 'http://example.com//b/c.jpg?aze'
 
 
 def fetch(url: str) -> bytes:
-    url = normalize_url(url)
+    url = remove_extra_dots(url)
     request = Request(url, headers={'User-Agent': 'NHKEasier Crawler'})
     with urlopen(request) as f:
         return f.read()  # type: ignore
