@@ -1,5 +1,6 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from time import sleep
 
 from django.core.mail import send_mail
 
@@ -7,12 +8,20 @@ from django.core.mail import send_mail
 class DjangoMailHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         msg = self.format(record)
-        send_mail(
-            subject=f'[{record.levelname}] {record.msg}',
-            message=f'{record.pathname}:{record.lineno}\n{msg}',
-            from_email='logs@nhkeasier.com',
-            recipient_list=['contact@nhkeasier.com']
-        )
+        for _ in range(10):  # try sending the error several times
+            try:
+                send_mail(
+                    subject=f'[{record.levelname}] {record.msg}',
+                    message=f'{record.pathname}:{record.lineno}\n{msg}',
+                    from_email='logs@nhkeasier.com',
+                    recipient_list=['contact@nhkeasier.com']
+                )
+            except OSError:
+                logging.debug('FAILED TO SEND MAIL ALERT', exc_info=True)
+                sleep(5)
+                continue
+            else:
+                break
 
 
 def log_to_console(logger: logging.Logger, level: int, formatter: logging.Formatter) -> None:
