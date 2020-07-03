@@ -63,10 +63,10 @@ def remove_extra_dots(url: str) -> str:
     return urlunparse(parsed._replace(path=new_path))
 
 
-assert remove_extra_dots('http://example.com/a/../b') == 'http://example.com//b'
-assert remove_extra_dots('http://example.com/a/../b/') == 'http://example.com//b/'
-assert remove_extra_dots('http://example.com/a/../b/c.jpg') == 'http://example.com//b/c.jpg'
-assert remove_extra_dots('http://example.com/a/../b/c.jpg?aze') == 'http://example.com//b/c.jpg?aze'
+assert remove_extra_dots('http://example.com/a/../b') == 'http://example.com/b'
+assert remove_extra_dots('http://example.com/a/../b/') == 'http://example.com/b/'
+assert remove_extra_dots('http://example.com/a/../b/c.jpg') == 'http://example.com/b/c.jpg'
+assert remove_extra_dots('http://example.com/a/../b/c.jpg?aze') == 'http://example.com/b/c.jpg?aze'
 
 
 def fetch(url: str) -> bytes:
