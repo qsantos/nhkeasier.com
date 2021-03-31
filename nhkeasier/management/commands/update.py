@@ -292,7 +292,7 @@ def fetch_story_nhk_video(story: Story) -> None:
 
     # extract iframe URL
     html_match = re.search(
-        r'(?s)<div.*?src="(.*?)".*?</div>\s*',
+        r'(?s)<div[^>]*?src="(.*?)".*?</div>\s*',
         story.content_with_ruby,
     )
     if not html_match:
