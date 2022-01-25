@@ -52,7 +52,7 @@ def normalize_readings(readings: Iterable[str]) -> Set[str]:
     }
     # remove "-"
     readings = {reading.replace('-', '') for reading in readings}
-    # convert to hirgana
+    # convert to hiragana
     readings = {katakana_to_hiragana(reading) for reading in readings}
     return readings
 
