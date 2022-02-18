@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from .forms import ContactForm
 from .models import Story
 
 
@@ -185,27 +184,3 @@ def about(request):
 
 def tools(request):
     return redirect('about')
-
-
-def contact(request):
-    if request.method == 'GET':
-        form = ContactForm()
-    else:
-        form = ContactForm(request.POST)
-    if form.is_valid():
-        from_email = form.cleaned_data['from_email']
-        subject = '[NHKEasier] {}'.format(form.cleaned_data['subject'])
-        message = form.cleaned_data['message']
-        if send_mail(subject, message, from_email, ['contact@nhkeasier.com']) != 1:
-            return simple_message(request, 'Message Not Sent', 'Sorry, there was en error while sending your message. Please try again later. You should be return to the form using the “Back” button of your web browser without', 500)
-        return redirect('contact_sent')
-    else:
-        return render(request, 'contact.html', {
-            'title': 'Contact',
-            'header': 'Contact',
-            'form': form,
-        })
-
-
-def contact_sent(request):
-    return simple_message(request, 'Message Sent', 'Thank you for your feedback. We will take your message under consideration as soon as possible.')
