@@ -143,7 +143,7 @@ def story_from_info(info: StoryInfo) -> Tuple[Story, bool]:
         logger.debug(f'Retrieved from database (id={story.id})')
 
     published = parse_datetime_nhk(info['news_prearranged_time'])
-    if story.published and abs(story.published - published).days > 2:
+    if story.published and abs(story.published - published).days > 2 and story.title != info['title']:
         # probably a reused story_id, not implemented yet
         raise DuplicateStoryID
     story.published = published
