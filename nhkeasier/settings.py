@@ -17,7 +17,7 @@ import sys
 from .secrets import SECRET_KEY, EMAIL_HOST_PASSWORD
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com', 'nhkeasier-preprod.sinon.org']
+ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com', 'nhkeasier-preprod.qsantos.fr']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
 # fix result of Django's get_script_name() when apache2 has DocumentRoot
