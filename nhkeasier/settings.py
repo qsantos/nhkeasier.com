@@ -14,8 +14,9 @@ import os
 import re
 import sys
 
+from .secrets import SECRET_KEY, EMAIL_HOST_PASSWORD
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SECRET_KEY = '8w@pj1*b1nn@epg(%m3tcq+$kq=4i54cd$qkju6&z=bmlr2)5e'
 ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com', 'nhkeasier-preprod.sinon.org']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
 
@@ -30,7 +31,6 @@ EMAIL_USE_SSL = True
 EMAIL_HOST = 'ssl0.ovh.net'
 EMAIL_PORT = 465
 EMAIL_HOST_USER = 'bugs@nhkeasier.com'
-EMAIL_HOST_PASSWORD = '6ju7lnw7zSMyxcQuma0hQOh7Ydx6GO'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 
