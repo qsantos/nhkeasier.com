@@ -52,7 +52,7 @@ def external_error(request, code):
             request.META.get('REMOTE_ADDR'),
         )
     )
-    send_mail(email_subject, email_body, email_from, [email_to])
+    # send_mail(email_subject, email_body, email_from, [email_to])
     return {
         '400': handler400,
         '403': handler403,
