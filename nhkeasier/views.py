@@ -17,15 +17,15 @@ def simple_message(request, title: str, message: str, status: int = 200):
     }, status=status)
 
 
-def handler400(request):
+def handler400(request, exception):
     return simple_message(request, 'Bad Request', 'Sorry, we were not able to handle the request you sent us. Please check that it is formatted correctly.', 400)
 
 
-def handler403(request):
+def handler403(request, exception):
     return simple_message(request, 'Forbidden', 'Sorry, the permissions of this document are not configured properly to let you access it.', 403)
 
 
-def handler404(request):
+def handler404(request, exception):
     return simple_message(request, 'Page Not Found', 'Sorry, we could not find the page you requested. Maybe the URL you followed is incomplete, or the document has been moved.', 404)
 
 
@@ -36,7 +36,7 @@ def handler500(request):
 def external_error(request, code):
     # skip meaningless 404 errors
     if request.META.get('REQUEST_URI').startswith('/.well-known/'):
-        return handler404(request)
+        return handler404(request, None)
 
     email_from = 'bugs@nhkeasier.com'
     email_to = 'contact@nhkeasier.com'
