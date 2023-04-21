@@ -14,7 +14,7 @@ import os
 import re
 import sys
 
-from .secrets import SECRET_KEY, EMAIL_HOST_PASSWORD
+from .secrets import EMAIL_HOST_PASSWORD, SECRET_KEY
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com', 'nhkeasier-preprod.qsantos.fr']

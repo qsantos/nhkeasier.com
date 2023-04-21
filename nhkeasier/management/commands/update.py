@@ -7,7 +7,7 @@ from subprocess import DEVNULL, run
 from tempfile import mkstemp
 from typing import Any, Dict, List, NewType, Tuple
 from urllib.error import HTTPError
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import urlparse, urlunparse
 from urllib.request import Request, urlopen
 
 from django.conf import settings
@@ -339,7 +339,7 @@ def fetch_story_nhk_video(story: Story) -> None:
     logger.debug('Replacing NHK video iframe')
     old_ruby = story.content_with_ruby
     new_ruby = old_ruby[:html_match.start()] + old_ruby[html_match.end():]
-    logger.debug(f'Updating content')
+    logger.debug('Updating content')
     story.content_with_ruby = new_ruby
     story.content = remove_ruby(new_ruby)
     story.save()

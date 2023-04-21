@@ -1,7 +1,6 @@
 import re
 from datetime import date
 
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -38,21 +37,6 @@ def external_error(request, code):
     if request.META.get('REQUEST_URI').startswith('/.well-known/'):
         return handler404(request, None)
 
-    email_from = 'bugs@nhkeasier.com'
-    email_to = 'contact@nhkeasier.com'
-    email_subject = '[Django] Broken EXTERNAL link ({}) on {}'.format(code, request.META.get('SERVER_NAME'))
-    email_body = (
-        'Referrer: {}\r\n'
-        'Requested URL: {}\r\n'
-        'User agent: {}\r\n'
-        'IP address: {}\r\n'.format(
-            request.META.get('HTTP_REFERER'),
-            request.META.get('REQUEST_URI'),
-            request.META.get('HTTP_USER_AGENT'),
-            request.META.get('REMOTE_ADDR'),
-        )
-    )
-    # send_mail(email_subject, email_body, email_from, [email_to])
     return {
         '400': handler400,
         '403': handler403,
