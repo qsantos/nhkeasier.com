@@ -90,7 +90,7 @@ def archive(request, year=None, month=None, day=None):
 
     stories = stories.filter(published__date=day).order_by('-published', '-id')
     if not stories:
-        return handler404(request)
+        return handler404(request, None)
 
     # select interesting story
     story = stories.exclude(video_reencoded='').first()
@@ -132,7 +132,7 @@ def remove_all_html(content):
 def story(request, id):
     story = get_object_or_404(Story, pk=id)
     if not story.subedict_created:
-        return handler404(request)
+        return handler404(request, None)
 
     # information for links (canonical URL, links to previous and next stories)
     previous_stories = Story.objects.filter(published__date=story.published.date(), id__lt=story.id) | Story.objects.filter(published__date__lt=story.published.date())
@@ -166,7 +166,7 @@ def story(request, id):
 def player(request, id):
     story = get_object_or_404(Story, pk=id)
     if not story.video_reencoded:
-        return handler404(request)
+        return handler404(request, None)
 
     autoplay = bool(request.GET.get('autoplay'))
     return render(request, 'player.html', {
