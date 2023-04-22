@@ -33,15 +33,16 @@ def handler500(request):
 
 
 def external_error(request, code):
-    # skip meaningless 404 errors
-    if request.META.get('REQUEST_URI').startswith('/.well-known/'):
-        return handler404(request, None)
-
-    return {
-        '400': handler400,
-        '403': handler403,
-        '404': handler404,
-    }.get(code, handler500)(request)
+    try:
+        handler = {
+            '400': handler400,
+            '403': handler403,
+            '404': handler404,
+        }[code]
+    except KeyError:
+        return handler500(request)
+    else:
+        return handler(request, None)
 
 
 def archive(request, year=None, month=None, day=None):
