@@ -51,8 +51,8 @@ def archive(request, year=None, month=None, day=None):
     if year is not None and month is not None and day is not None:
         try:
             day = date(int(year), int(month), int(day))
-        except ValueError:
-            return handler400(request)
+        except ValueError as e:
+            return handler400(request, e)
         header = 'Stories on {}'.format(day)
     elif stories.count():
         day = stories.order_by('-published').first().published.date()
