@@ -4,3 +4,4 @@ __pycache__/
 /media/
 /static/
 nhkeasier/secrets.py
+/venv/
