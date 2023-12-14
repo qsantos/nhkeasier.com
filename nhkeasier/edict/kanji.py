@@ -79,10 +79,10 @@ def load_kanjidic(filename: str = default_kanjidic) -> Dict[str, Kanji]:
         r'(?m)^(.) (?:[0-9A-F]{4}) (?:(?:[A-Z]\S*) )*([^{]*?) (?:T[^{]*?)?((?:\{.*?\} )*\{.*?\})',
     )
     meaning_pattern = re.compile(r'{(.*?)}')
-    for character, readings, meanings in line_pattern.findall(edict_data):
+    for character, readings_str, meanings_str in line_pattern.findall(edict_data):
         # gather kanji information
-        meanings = meaning_pattern.findall(meanings)
-        readings = normalize_readings(readings.split())
+        meanings = meaning_pattern.findall(meanings_str)
+        readings = normalize_readings(readings_str.split())
         readings |= compound_readings(readings)
         kanji = Kanji(character, readings, meanings)
 
