@@ -57,6 +57,11 @@ select = [
     "W",  # pycodestyle Warning
     "YTT",  # flake8-2020
 ]
+ignore = [
+    "FA100",  #  Missing `from __future__ import annotations`, but uses `typing.*`
+    "G004",  # Logging statement uses f-string
+    "PERF203",  # `try`-`except` within a loop incurs performance overhead
+]
 line-length = 119
 
 [tool.ruff.flake8-quotes]

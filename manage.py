@@ -20,7 +20,7 @@ if __name__ == '__main__':
             )
             raise ImportError(
                 msg,
-            )
+            ) from None
         else:
             _ = django
         raise
