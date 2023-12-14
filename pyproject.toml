@@ -11,6 +11,8 @@ dependencies = [
 dev = [
     "pip-tools",
     "ruff",
+    "mypy",
+    "django-types",
     "django-debug-toolbar==4.0.0",
 ]
 
