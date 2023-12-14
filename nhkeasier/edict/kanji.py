@@ -1,5 +1,6 @@
 import os.path
 import re
+from functools import lru_cache
 from typing import Dict, Iterable, NamedTuple, Set
 
 default_kanjidic = os.path.join(os.path.dirname(__file__), 'kanjidic')
@@ -70,6 +71,7 @@ def compound_readings(readings: Set[str]) -> Set[str]:
     return gemination | rendaku
 
 
+@lru_cache
 def load_kanjidic(filename: str = default_kanjidic) -> Dict[str, Kanji]:
     with open(filename, mode='rb') as f:
         edict_data = f.read().decode('euc_jp')

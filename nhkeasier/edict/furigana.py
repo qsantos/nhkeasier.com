@@ -3,8 +3,6 @@ from typing import Deque, Iterator, List, Tuple
 
 from .kanji import load_kanjidic
 
-kanjidic = None
-
 FuriganaMatch = List[Tuple[str, str]]
 
 
@@ -22,9 +20,7 @@ def match_from_kanji_kana(kanji: str, kana: str) -> Iterator[FuriganaMatch]:
     based on their known readings. For instance, for '牛肉' and 'ぎゅうにく',
     it yields the single match [('牛', 'ぎゅう'), ('肉', 'にく')].
     """
-    global kanjidic
-    if kanjidic is None:
-        kanjidic = load_kanjidic()
+    kanjidic = load_kanjidic()
 
     q: Deque[Tuple[FuriganaMatch, str, str]] = deque([([], kanji, kana)])
     while q:
