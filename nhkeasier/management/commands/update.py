@@ -48,7 +48,7 @@ nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 def remove_extra_dots(url: str) -> str:
     # inspired from https://stackoverflow.com/a/27950825
     parsed = urlparse(url)
-    dirs = []
+    dirs: List[str] = []
     for name in parsed.path.split('/'):
         if name == '..':
             if len(dirs) > 1:

@@ -83,7 +83,7 @@ def load_kanjidic(filename: str = default_kanjidic) -> Dict[str, Kanji]:
     meaning_pattern = re.compile(r'{(.*?)}')
     for character, readings_str, meanings_str in line_pattern.findall(edict_data):
         # gather kanji information
-        meanings = meaning_pattern.findall(meanings_str)
+        meanings = set(meaning_pattern.findall(meanings_str))
         readings = normalize_readings(readings_str.split())
         readings |= compound_readings(readings)
         kanji = Kanji(character, readings, meanings)
