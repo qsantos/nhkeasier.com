@@ -206,7 +206,7 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
         if res.returncode == 0:
             logger.debug('Fragmented voice fetched successfully')
             with open(temp_name, 'rb') as f:
-                story.voice.save('', f)
+                story.voice.save('', f)  # type: ignore
             logger.debug('Voice saved')
         else:
             logger.warning('Failed to download fragmented voice')
@@ -243,7 +243,7 @@ def fetch_story_video(story: Story, info: StoryInfo) -> None:
     if res.returncode in (0, 2):
         logger.debug('Stream read successfully')
         with open(temp, 'rb') as f:
-            story.video_original.save('', f)
+            story.video_original.save('', f)  # type: ignore
         logger.debug('Video saved')
     else:
         logger.info('Failed to fetch video')
@@ -325,7 +325,7 @@ def fetch_story_nhk_video(story: Story) -> None:
 
     # save video
     with open(temp_name, 'rb') as f:
-        story.video_reencoded.save('', f)
+        story.video_reencoded.save('', f)  # type: ignore
     logger.debug('Video saved')
 
     # remove HTML object
@@ -354,7 +354,7 @@ def convert_story_video(story: Story) -> None:
     run(['ffmpeg', '-y', '-i', original, '-b:v', '500k', temp], stderr=DEVNULL, check=True)
     logger.debug('Video converted')
     with open(temp, 'rb') as f:
-        story.video_reencoded.save('', f)
+        story.video_reencoded.save('', f)  # type: ignore
     logger.debug('Video saved')
     os.remove(temp)
 
