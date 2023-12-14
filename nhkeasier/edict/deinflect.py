@@ -87,7 +87,7 @@ class Deinflector:
                 candidates.append(Candidate(
                     word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
-                    reasons=candidate.reasons + [rule.reason],
+                    reasons=[*candidate.reasons, rule.reason],
                 ))
                 # NOTE: could check that new_word is already in candidates
                 # Rikaikun merges with previous candidate; if this candidate
@@ -103,7 +103,7 @@ class Deinflector:
             for word in search_edict(candidate):
                 for k in word.readings + word.writings:
                     subedict[k].add(word)
-        for candidate, type_, reason in candidates:
+        for candidate, type_, _reason in candidates:
             for word in subedict[candidate]:
                 if word.get_type() & type_:
                     yield word

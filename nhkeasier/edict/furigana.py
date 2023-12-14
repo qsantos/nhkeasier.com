@@ -44,7 +44,7 @@ def match_from_kanji_kana(kanji: str, kana: str) -> Iterator[FuriganaMatch]:
 
         for reading in readings:
             if kana.startswith(reading):
-                new_prefixes = match_prefix + [(c, reading)]
+                new_prefixes = [*match_prefix, (c, reading)]
                 new_kanji = kanji[1:]
                 new_kana = kana[len(reading):]
                 new_element = (new_prefixes, new_kanji, new_kana)

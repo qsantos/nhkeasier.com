@@ -30,7 +30,7 @@ def create_subedict(text: str) -> Set[str]:
     # duplicates are naturally eliminated
     items = set()
     for substring in japanese_text_substrings(text):
-        for candidate, type_, reason in deinflector(substring):
+        for candidate, type_, _reason in deinflector(substring):
             for word in deinflector.search_edict(candidate):
                 if word.get_type() & type_:
                     items.add(word.edict_entry)

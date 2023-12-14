@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from ..models import (
+from nhkeasier.models import (
     image_filename,
     video_original_filename,
     video_reencoded_filename,

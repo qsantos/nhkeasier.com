@@ -86,10 +86,7 @@ def archive(request, year=None, month=None, day=None):
         player = request.build_absolute_uri(reverse('player', args=[story.id]))
     else:
         player = None
-    if story is not None and story.image:
-        image = request.build_absolute_uri(story.image.url)
-    else:
-        image = None
+    image = request.build_absolute_uri(story.image.url) if story is not None and story.image else None
 
     return render(request, 'index.html', {
         'title': 'Easier Japanese Practice',
@@ -110,8 +107,7 @@ def archive(request, year=None, month=None, day=None):
 
 
 def remove_all_html(content):
-    content = re.sub('<.*?>', '', content)
-    return content
+    return re.sub('<.*?>', '', content)
 
 
 def story(request, id):
@@ -126,14 +122,8 @@ def story(request, id):
     next_story = next_stories.order_by('published', 'id').first()
 
     # media for OpenGraph and such
-    if story.image:
-        image = request.build_absolute_uri(story.image.url)
-    else:
-        image = None
-    if story.video_reencoded:
-        player = request.build_absolute_uri(reverse('player', args=[story.id]))
-    else:
-        player = None
+    image = request.build_absolute_uri(story.image.url) if story.image else None
+    player = request.build_absolute_uri(reverse('player', args=[story.id])) if story.video_reencoded else None
 
     return render(request, 'story.html', {
         'title': story.title,

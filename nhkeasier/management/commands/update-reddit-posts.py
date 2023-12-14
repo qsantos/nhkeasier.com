@@ -6,8 +6,8 @@ from urllib.request import Request, urlopen
 
 from django.core.management.base import BaseCommand
 
-from ...logging import init_logging
-from ...models import Story
+from nhkeasier.logging import init_logging
+from nhkeasier.models import Story
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,7 @@ def submissions_from_pushshift():
     while True:
         result = fetch(base + '?' + urlencode(params)).decode()
         submissions = json.loads(result)['data']
-        for submission in submissions:
-            yield submission
+        yield from submissions
         if len(submissions) < 1000:
             break
         params['after'] = submissions[-1]['created_utc']
@@ -72,10 +71,7 @@ def main(archive):
         for story in Story.objects.all()
     }
 
-    if archive:
-        submissions = submissions_from_pushshift()
-    else:
-        submissions = submissions_from_reddit()
+    submissions = submissions_from_pushshift() if archive else submissions_from_reddit()
     for story_id, url in stories_with_urls(submissions):
         try:
             story = stories_by_story_id[story_id]

@@ -14,9 +14,9 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
-from ...edict.subedict import create_subedict, create_subenamdict, save_subedict
-from ...logging import init_logging
-from ...models import Story
+from nhkeasier.edict.subedict import create_subedict, create_subenamdict, save_subedict
+from nhkeasier.logging import init_logging
+from nhkeasier.models import Story
 
 logger = logging.getLogger(__name__)
 StoryInfo = NewType('StoryInfo', Dict)
@@ -114,16 +114,14 @@ def clean_up_content(content: str) -> str:
     content = content.replace('</a>', '')
     content = content.replace('</span>', '')
     content = content.replace('<p></p>', '')
-    content = content.strip()
-    return content
+    return content.strip()
 
 
 def remove_ruby(content: str) -> str:
     content = re.sub('<rp>.*?</rp>', '', content)
     content = re.sub('<rt>.*?</rt>', '', content)
     content = re.sub('<rtc>.*?</rtc>', '', content)
-    content = re.sub('<.*?>', '', content)
-    return content
+    return re.sub('<.*?>', '', content)
 
 
 def parse_datetime_nhk(s: str) -> datetime:
