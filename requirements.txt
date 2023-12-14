@@ -24,28 +24,16 @@ django-debug-toolbar==4.0.0
     # via nhkeasier (pyproject.toml)
 django-widget-tweaks==1.4.12
     # via nhkeasier (pyproject.toml)
-flake8==6.0.0
-    # via
-    #   flake8-isort
-    #   nhkeasier (pyproject.toml)
-flake8-isort==6.0.0
-    # via nhkeasier (pyproject.toml)
-isort==5.13.2
-    # via flake8-isort
-mccabe==0.7.0
-    # via flake8
 packaging==23.2
     # via build
 pip-tools==7.3.0
     # via nhkeasier (pyproject.toml)
-pycodestyle==2.10.0
-    # via flake8
 pycparser==2.21
     # via cffi
-pyflakes==3.0.1
-    # via flake8
 pyproject-hooks==1.0.0
     # via build
+ruff==0.1.8
+    # via nhkeasier (pyproject.toml)
 sqlparse==0.4.4
     # via
     #   django

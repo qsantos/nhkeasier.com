@@ -10,10 +10,58 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pip-tools",
+    "ruff",
     "django-debug-toolbar==4.0.0",
-    "flake8==6.0.0",
-    "flake8-isort==6.0.0",
 ]
 
 [tool.setuptools]
 py-modules = []
+
+[tool.ruff]
+select = [
+    "ARG",  # flake8-unused-arguments
+    "B",  # flake8-bugbear
+    "BLE",  # flake8-blind-except
+    "C4",  # flake8-comprehensions
+    "COM",  # flake8-commas
+    "DTZ",  # flake8-datetimez
+    "E",  # pycodestyle Error
+    "EM",  # flake8-errmsg
+    "EXE",  # flake8-executable
+    "F",  # Pyflakes
+    "FA",  # flake8-future-annotations
+    "FLY",  # flynt
+    "G",  # flake8-logging-format
+    "I",  # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "N",  # pep8-naming
+    "PERF",  # Perflint
+    "PIE",  # flake8-pie
+    "PL",  # Pylint
+    "PT",  # flake8-pytest-style
+    "PYI",  # flake8-pyi
+    "Q",  # flake8-quotes
+    "RET",  # flake8-return
+    "RSE",  # flake8-raise
+    "RUF",  # Ruff-specific rules
+    "SIM",  # flake8-simplify
+    "SLF",  # flake8-self
+    "SLOT",  # flake8-slots
+    "T10",  # flake8-debugger
+    # "T20",  # flake8-print
+    "TCH",  # flake8-type-checking
+    "TID",  # flake8-tidy-imports
+    "TRY",  # tryceratops
+    "UP",  # pyupgrade
+    "W",  # pycodestyle Warning
+    "YTT",  # flake8-2020
+]
+line-length = 119
+
+[tool.ruff.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.isort]
+split-on-trailing-comma = false
+
