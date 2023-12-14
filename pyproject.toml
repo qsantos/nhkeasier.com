@@ -1,0 +1,19 @@
+[project]
+name = "nhkeasier"
+dynamic = ["version"]
+dependencies = [
+    "Authlib==0.14.3",
+    "django==4.2",
+    "django-widget-tweaks==1.4.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pip-tools",
+    "django-debug-toolbar==4.0.0",
+    "flake8==6.0.0",
+    "flake8-isort==6.0.0",
+]
+
+[tool.setuptools]
+py-modules = []
