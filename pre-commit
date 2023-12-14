@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
+# Usage: copy this file to .git/hooks/
+
+# Exit at first error
+set -Eeu
+
+# To handle partially committed files, we must copy the staged changes to a
+# separate location
+# See also https://stackoverflow.com/a/36793330
 TEMPDIR=$(mktemp -d)
-trap "rm -Rf $TEMPDIR" SIGINT SIGTERM EXIT
-git checkout-index -af --prefix=$TEMPDIR/
-find $TEMPDIR -name '*.py' -print0 | xargs -0 python3 -m py_compile
+trap 'rm -rf "$TEMPDIR"' EXIT SIGHUP SIGINT SIGQUIT SIGTERM
+git checkout-index --prefix="$TEMPDIR/" -af
+
+(cd $TEMPDIR; ruff check .)
