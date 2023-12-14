@@ -16,6 +16,9 @@ import sys
 
 from .secrets import EMAIL_HOST_PASSWORD, SECRET_KEY
 
+_ = EMAIL_HOST_PASSWORD
+_ = SECRET_KEY
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ALLOWED_HOSTS = ['127.0.0.1', 'nhkeasier.localhost', 'nhkeasier.com', 'nhkeasier-preprod.qsantos.fr']
 INTERNAL_IPS = ('0.0.0.0', '127.0.0.1')
