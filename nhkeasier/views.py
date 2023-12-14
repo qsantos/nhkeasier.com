@@ -17,19 +17,51 @@ def simple_message(request, title: str, message: str, status: int = 200):
 
 
 def handler400(request, _exception):
-    return simple_message(request, 'Bad Request', 'Sorry, we were not able to handle the request you sent us. Please check that it is formatted correctly.', 400)
+    return simple_message(
+        request,
+        'Bad Request',
+        (
+            'Sorry, we were not able to handle the request you sent us. '
+            'Please check that it is formatted correctly.'
+        ),
+        400,
+    )
 
 
 def handler403(request, _exception):
-    return simple_message(request, 'Forbidden', 'Sorry, the permissions of this document are not configured properly to let you access it.', 403)
+    return simple_message(
+        request,
+        'Forbidden',
+        (
+            'Sorry, the permissions of this document are not configured '
+            'properly to let you access it.'
+        ),
+        403,
+    )
 
 
 def handler404(request, _exception):
-    return simple_message(request, 'Page Not Found', 'Sorry, we could not find the page you requested. Maybe the URL you followed is incomplete, or the document has been moved.', 404)
+    return simple_message(
+        request,
+        'Page Not Found',
+        (
+            'Sorry, we could not find the page you requested. Maybe the URL '
+            'you followed is incomplete, or the document has been moved.'
+        ),
+        404,
+    )
 
 
 def handler500(request):
-    return simple_message(request, 'Server Error', 'Sorry, something went very wrong on the server and we were not able to display the requested document.', 500)
+    return simple_message(
+        request,
+        'Server Error',
+        (
+            'Sorry, something went very wrong on the server and we were not '
+            'able to display the requested document.'
+        ),
+        500,
+    )
 
 
 def external_error(request, code):
@@ -116,9 +148,15 @@ def story(request, id):
         return handler404(request, None)
 
     # information for links (canonical URL, links to previous and next stories)
-    previous_stories = Story.objects.filter(published__date=story.published.date(), id__lt=story.id) | Story.objects.filter(published__date__lt=story.published.date())
+    # previous story
+    stores_previous_ids = Story.objects.filter(published__date=story.published.date(), id__lt=story.id)
+    stories_previous_days = Story.objects.filter(published__date__lt=story.published.date())
+    previous_stories = stores_previous_ids | stories_previous_days
     previous_story = previous_stories.order_by('-published', '-id').first()
-    next_stories = Story.objects.filter(published__date=story.published.date(), id__gt=story.id) | Story.objects.filter(published__date__gt=story.published.date())
+    # next story
+    stories_next_ids = Story.objects.filter(published__date=story.published.date(), id__gt=story.id)
+    stories_next_days = Story.objects.filter(published__date__gt=story.published.date())
+    next_stories = stories_next_ids | stories_next_days
     next_story = next_stories.order_by('published', 'id').first()
 
     # media for OpenGraph and such

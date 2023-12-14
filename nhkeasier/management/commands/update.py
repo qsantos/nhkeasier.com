@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import re
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from subprocess import DEVNULL, run
 from tempfile import mkstemp
 from typing import Any, Dict, List, NewType, Tuple
@@ -22,19 +22,17 @@ logger = logging.getLogger(__name__)
 StoryInfo = NewType('StoryInfo', Dict)
 
 
-class DuplicateStoryIDType(Exception):
+class DuplicateStoryIDError(Exception):
     pass
 
 
-class ContentNotFound(Exception):
+class ContentNotFoundError(Exception):
     pass
 
 
-class RegularAndNHKVideos(Exception):
+class RegularAndNHKVideosError(Exception):
     pass
 
-
-DuplicateStoryID = DuplicateStoryIDType()
 
 BASE_URL = 'http://www3.nhk.or.jp/news/easy/'
 story_list_url = BASE_URL + 'news-list.json'
@@ -125,9 +123,8 @@ def remove_ruby(content: str) -> str:
 
 
 def parse_datetime_nhk(s: str) -> datetime:
-    dt = datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
     jst = timezone(timedelta(hours=9))
-    return dt.replace(tzinfo=jst)
+    return datetime.strptime(s, '%Y-%m-%d %H:%M:%S').replace(tzinfo=jst)
 
 
 def story_from_info(info: StoryInfo) -> Tuple[Story, bool]:
@@ -141,7 +138,7 @@ def story_from_info(info: StoryInfo) -> Tuple[Story, bool]:
     published = parse_datetime_nhk(info['news_prearranged_time'])
     if story.published and abs(story.published - published).days > 2 and story.title != info['title']:
         # probably a reused story_id, not implemented yet
-        raise DuplicateStoryID
+        raise DuplicateStoryIDError
     story.published = published
     story.title = info['title']
     story.title_with_ruby = info['title_with_ruby']
@@ -269,7 +266,7 @@ def extract_story_content(story: Story) -> None:
     )
     if m is None:
         logger.error('Could not find content')
-        raise ContentNotFound
+        raise ContentNotFoundError
 
     raw_content = m.group(1)
     logger.debug(f'Parsed content ({len(raw_content)} characters)')
@@ -299,7 +296,7 @@ def fetch_story_nhk_video(story: Story) -> None:
 
     if story.video_original:
         logger.error('Story has both regular and NHK videos')
-        raise RegularAndNHKVideos
+        raise RegularAndNHKVideosError
 
     # extract JSON URL
     data = fetch(iframe_url)
@@ -368,7 +365,8 @@ def fetch_story(info: StoryInfo, replace_voice: Dict[str, str]) -> bool:
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
     fetch_story_voice(story, info)
-    if (date.today() - story.published.date()).days <= 7:
+    today = datetime.now(tz=timezone.utc).date()
+    if (today - story.published.date()).days <= 7:
         logger.debug('Recent story, fetching media')
         fetch_story_image(story, info)
         fetch_story_video(story, info)

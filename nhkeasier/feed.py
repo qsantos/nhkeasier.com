@@ -24,12 +24,14 @@ class LatestStoriesFeed(Feed):
         html = ''
 
         # content
-        if story.video_reencoded and story.image:
-            html += f'<video src="{story.video_reencoded.url}" poster="{story.image.url}" controls preload="none""></video>'
-        elif story.video_reencoded:
-            html += f'<video src="{story.video_reencoded.url}" controls preload="poster""></video>'
-        elif story.image:
-            html += f'<img src="{story.image.url}" alt="Story illustration">'
+        video_src = story.video_reencoded.url
+        img_src = story.image.url if story.image else None
+        if video_src and img_src:
+            html += f'<video src="{video_src}" poster="{img_src}" controls preload="none""></video>'
+        elif video_src:
+            html += f'<video src="{video_src}" controls preload="poster""></video>'
+        elif img_src:
+            html += f'<img src="{img_src}" alt="Story illustration">'
         html += story.content_with_ruby
         if story.voice:
             html += f'<audio src="{story.voice.url}" controls preload="none"></audio>'
