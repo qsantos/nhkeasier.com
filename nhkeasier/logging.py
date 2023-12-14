@@ -14,7 +14,7 @@ class DjangoMailHandler(logging.Handler):
                     subject=f'[{record.levelname}] {record.msg}',
                     message=f'{record.pathname}:{record.lineno}\n{msg}',
                     from_email='logs@nhkeasier.com',
-                    recipient_list=['contact@nhkeasier.com']
+                    recipient_list=['contact@nhkeasier.com'],
                 )
             except OSError:
                 logging.debug('FAILED TO SEND MAIL ALERT', exc_info=True)

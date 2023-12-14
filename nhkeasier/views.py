@@ -53,7 +53,7 @@ def archive(request, year=None, month=None, day=None):
             day = date(int(year), int(month), int(day))
         except ValueError as e:
             return handler400(request, e)
-        header = 'Stories on {}'.format(day)
+        header = f'Stories on {day}'
     elif stories.count():
         day = stories.order_by('-published').first().published.date()
         header = 'Latest Stories'

@@ -5,23 +5,23 @@ from django.urls import reverse
 
 
 def webpage_filename(instance: Story, filename: str) -> str:
-    return 'html/{}.html'.format(instance.story_id)
+    return f'html/{instance.story_id}.html'
 
 
 def image_filename(instance: Story, filename: str) -> str:
-    return 'jpg/{}.jpg'.format(instance.story_id)
+    return f'jpg/{instance.story_id}.jpg'
 
 
 def voice_filename(instance: Story, filename: str) -> str:
-    return 'mp3/{}.mp3'.format(instance.story_id)
+    return f'mp3/{instance.story_id}.mp3'
 
 
 def video_original_filename(instance: Story, filename: str) -> str:
-    return 'mp4/{}.mp4'.format(instance.story_id)
+    return f'mp4/{instance.story_id}.mp4'
 
 
 def video_reencoded_filename(instance: Story, filename: str) -> str:
-    return 'mp4/{}.reencoded.mp4'.format(instance.story_id)
+    return f'mp4/{instance.story_id}.reencoded.mp4'
 
 
 class Story(models.Model):
@@ -45,7 +45,7 @@ class Story(models.Model):
         verbose_name_plural = 'stories'
 
     def __str__(self) -> str:
-        return '{}: {}'.format(self.id, self.title)
+        return f'{self.id}: {self.title}'
 
     def get_absolute_url(self) -> str:
         return reverse('story', kwargs={'id': self.id})  # type: ignore

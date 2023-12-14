@@ -4,8 +4,13 @@ from collections import defaultdict
 from typing import DefaultDict, Dict, Set
 
 from .search import (
-    Word, common_marker, default_edict, default_edict_index, default_enamdict,
-    default_enamdict_index, edict_line_pattern,
+    Word,
+    common_marker,
+    default_edict,
+    default_edict_index,
+    default_enamdict,
+    default_enamdict_index,
+    edict_line_pattern,
 )
 
 byte_line_pattern = re.compile(b'(?m)^(.*)$')

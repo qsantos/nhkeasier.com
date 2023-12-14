@@ -18,7 +18,7 @@ fragment_pattern = re.compile('[' + ''.join(ranges) + ']+')
 def japanese_text_substrings(text: str) -> Iterator[str]:
     for match in fragment_pattern.finditer(text):
         fragment = match.group()
-        for start in range(0, len(fragment)):
+        for start in range(len(fragment)):
             for stop in reversed(range(start + 1, len(fragment) + 1)):
                 yield fragment[start:stop]
 

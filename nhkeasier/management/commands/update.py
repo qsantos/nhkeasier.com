@@ -14,9 +14,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
-from ...edict.subedict import (
-    create_subedict, create_subenamdict, save_subedict,
-)
+from ...edict.subedict import create_subedict, create_subenamdict, save_subedict
 from ...logging import init_logging
 from ...models import Story
 
@@ -209,7 +207,7 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
         voice_url = fragmented_voice_url_pattern.format(**info)
         logger.info(f'Download voice (fragmented MP4) {voice_url}')
         _, temp_name = mkstemp(suffix='.mp3')
-        res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL)
+        res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL, check=False)
         if res.returncode == 0:
             logger.debug('Fragmented voice fetched successfully')
             with open(temp_name, 'rb') as f:
@@ -243,7 +241,7 @@ def fetch_story_video(story: Story, info: StoryInfo) -> None:
     # some download complete partially, so we try several times
     for _ in range(2):
         logger.debug('Trying to read RTMP stream')
-        res = run(['rtmpdump', '-r', video_url, '-o', temp], stderr=DEVNULL)
+        res = run(['rtmpdump', '-r', video_url, '-o', temp], stderr=DEVNULL, check=False)
         if res.returncode != 2:
             break
     # some videos always trigger a partial download so we keep what we have
@@ -323,7 +321,7 @@ def fetch_story_nhk_video(story: Story) -> None:
     # fetch video
     logger.info(f'Fetching NHK video {video_url}')
     _, temp_name = mkstemp(suffix='.mp4')
-    res = run(['ffmpeg', '-y', '-i', video_url, temp_name], stderr=DEVNULL)
+    res = run(['ffmpeg', '-y', '-i', video_url, temp_name], stderr=DEVNULL, check=False)
     if res.returncode != 0:
         logger.warning('Failed to fetch NHK video')
         os.remove(temp_name)

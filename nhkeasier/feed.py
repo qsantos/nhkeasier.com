@@ -25,19 +25,19 @@ class LatestStoriesFeed(Feed):
 
         # content
         if story.video_reencoded and story.image:
-            html += '<video src="{}" poster="{}" controls preload="none""></video>'.format(story.video_reencoded.url, story.image.url)
+            html += f'<video src="{story.video_reencoded.url}" poster="{story.image.url}" controls preload="none""></video>'
         elif story.video_reencoded:
-            html += '<video src="{}" controls preload="poster""></video>'.format(story.video_reencoded.url)
+            html += f'<video src="{story.video_reencoded.url}" controls preload="poster""></video>'
         elif story.image:
-            html += '<img src="{}" alt="Story illustration">'.format(story.image.url)
+            html += f'<img src="{story.image.url}" alt="Story illustration">'
         html += story.content_with_ruby
         if story.voice:
-            html += '<audio src="{}" controls preload="none"></audio>'.format(story.voice.url)
+            html += f'<audio src="{story.voice.url}" controls preload="none"></audio>'
 
         # links
         html += '<ul>'
         if story.r_nhkeasynews_link:
-            html += '<li><a href="{}">/r/NHKEasyNews</a></li>'.format(story.r_nhkeasynews_link)
+            html += f'<li><a href="{story.r_nhkeasynews_link}">/r/NHKEasyNews</a></li>'
         if story.published.date() >= date(2017, 12, 5):
             html += '<li><a href="https://www3.nhk.or.jp/news/easy/{0}/{0}.html">Original</a></li>'.format(story.story_id)
         html += '<li><a href="{}" class="permalink">Permalink</a></li>'.format(reverse('story', args=[story.id]))
