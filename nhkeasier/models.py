@@ -4,23 +4,23 @@ from django.db import models
 from django.urls import reverse
 
 
-def webpage_filename(instance: Story, filename: str) -> str:
+def webpage_filename(instance: Story, _filename: str) -> str:
     return f'html/{instance.story_id}.html'
 
 
-def image_filename(instance: Story, filename: str) -> str:
+def image_filename(instance: Story, _filename: str) -> str:
     return f'jpg/{instance.story_id}.jpg'
 
 
-def voice_filename(instance: Story, filename: str) -> str:
+def voice_filename(instance: Story, _filename: str) -> str:
     return f'mp3/{instance.story_id}.mp3'
 
 
-def video_original_filename(instance: Story, filename: str) -> str:
+def video_original_filename(instance: Story, _filename: str) -> str:
     return f'mp4/{instance.story_id}.mp4'
 
 
-def video_reencoded_filename(instance: Story, filename: str) -> str:
+def video_reencoded_filename(instance: Story, _filename: str) -> str:
     return f'mp4/{instance.story_id}.reencoded.mp4'
 
 

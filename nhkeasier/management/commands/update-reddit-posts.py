@@ -94,7 +94,7 @@ class Command(BaseCommand):
         group.add_argument('--new', action='store_true')
         group.add_argument('--archive', action='store_true')
 
-    def handle(self, archive, *args, **kwargs):
+    def handle(self, archive, *_args, **_kwargs):
         init_logging()
         try:
             main(archive)

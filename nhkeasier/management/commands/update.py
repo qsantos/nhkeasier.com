@@ -460,7 +460,7 @@ def main() -> None:
 
 
 class Command(BaseCommand):
-    def handle(self, *args: Any, **options: Any) -> None:
+    def handle(self, *_args: Any, **_options: Any) -> None:
         try:
             main()
         except Exception:
