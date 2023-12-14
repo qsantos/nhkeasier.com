@@ -216,7 +216,7 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
         try:
             story.voice.save('', ContentFile(fetch(voice_url)))
         except HTTPError:
-            logger.warning('Failed to download voice', exc_info=True)
+            logger.warning('Failed to download voice')
         else:
             logger.debug('Voice saved')
 
