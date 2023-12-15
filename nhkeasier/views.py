@@ -1,6 +1,7 @@
+import datetime
 import re
-from datetime import date
 
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
@@ -8,7 +9,7 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 from .models import Story
 
 
-def simple_message(request, title: str, message: str, status: int = 200):
+def simple_message(request: HttpRequest, title: str, message: str, status: int = 200) -> HttpResponse:
     return render(request, 'message.html', {
         'title': title,
         'header': title,
@@ -16,7 +17,7 @@ def simple_message(request, title: str, message: str, status: int = 200):
     }, status=status)
 
 
-def handler400(request, _exception):
+def handler400(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
     return simple_message(
         request,
         'Bad Request',
@@ -28,7 +29,7 @@ def handler400(request, _exception):
     )
 
 
-def handler403(request, _exception):
+def handler403(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
     return simple_message(
         request,
         'Forbidden',
@@ -40,7 +41,7 @@ def handler403(request, _exception):
     )
 
 
-def handler404(request, _exception):
+def handler404(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
     return simple_message(
         request,
         'Page Not Found',
@@ -52,7 +53,7 @@ def handler404(request, _exception):
     )
 
 
-def handler500(request):
+def handler500(request: HttpRequest) -> HttpResponse:
     return simple_message(
         request,
         'Server Error',
@@ -64,7 +65,7 @@ def handler500(request):
     )
 
 
-def external_error(request, code):
+def external_error(request: HttpRequest, code: str) -> HttpResponse:
     try:
         handler = {
             '400': handler400,
@@ -77,17 +78,25 @@ def external_error(request, code):
         return handler(request, None)
 
 
-def archive(request, year=None, month=None, day=None):
+def archive(
+    request: HttpRequest,
+    year: str | None = None,
+    month: str | None = None,
+    day: str | None = None,
+) -> HttpResponse:
     stories = Story.objects.filter(subedict_created=True)
 
     if year is not None and month is not None and day is not None:
         try:
-            day = date(int(year), int(month), int(day))
+            date = datetime.date(int(year), int(month), int(day))
         except ValueError as e:
             return handler400(request, e)
-        header = f'Stories on {day}'
+        header = f'Stories on {date}'
     elif stories.count():
-        day = stories.order_by('-published').first().published.date()
+        story = stories.order_by('-published').first()
+        if story is None:
+            return handler404(request, None)
+        date = story.published.date()
         header = 'Latest Stories'
     else:
         return render(request, 'index.html', {
@@ -102,10 +111,10 @@ def archive(request, year=None, month=None, day=None):
         })
 
     # information for links (canonical URL, links to previous and next days)
-    previous_day = stories.filter(published__date__lt=day).order_by('-published').first()
-    next_day = stories.filter(published__date__gt=day).order_by('published').first()
+    previous_day = stories.filter(published__date__lt=date).order_by('-published').first()
+    next_day = stories.filter(published__date__gt=date).order_by('published').first()
 
-    stories = stories.filter(published__date=day).order_by('-published', '-id')
+    stories = stories.filter(published__date=date).order_by('-published', '-id')
     if not stories:
         return handler404(request, None)
 
@@ -133,16 +142,16 @@ def archive(request, year=None, month=None, day=None):
         'player': player,
         'stories': stories,
         'previous_day': previous_day,
-        'day': day,
+        'day': date,
         'next_day': next_day,
     })
 
 
-def remove_all_html(content):
+def remove_all_html(content: str) -> str:
     return re.sub('<.*?>', '', content)
 
 
-def story(request, id):
+def story(request: HttpRequest, id: str) -> HttpResponse:
     story = get_object_or_404(Story, pk=id)
     if not story.subedict_created:
         return handler404(request, None)
@@ -176,7 +185,7 @@ def story(request, id):
 
 
 @xframe_options_exempt
-def player(request, id):
+def player(request: HttpRequest, id: str) -> HttpResponse:
     story = get_object_or_404(Story, pk=id)
     if not story.video_reencoded:
         return handler404(request, None)
@@ -188,12 +197,12 @@ def player(request, id):
     })
 
 
-def about(request):
+def about(request: HttpRequest) -> HttpResponse:
     return render(request, 'about.html', {
         'title': 'About',
         'header': 'About',
     })
 
 
-def tools(_request):
+def tools(_request: HttpRequest) -> HttpResponse:
     return redirect('about')

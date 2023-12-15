@@ -60,6 +60,7 @@ select = [
 ]
 ignore = [
     "FA100",  #  Missing `from __future__ import annotations`, but uses `typing.*`
+    "FA102",  # Missing `from __future__ import annotations`, but uses PEP 604 *
     "G004",  # Logging statement uses f-string
     "PERF203",  # `try`-`except` within a loop incurs performance overhead
     "PLR2004",  # Magic value used in comparison, consider replacing * with a constant variable

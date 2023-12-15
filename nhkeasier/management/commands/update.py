@@ -5,7 +5,7 @@ import re
 from datetime import datetime, timedelta, timezone
 from subprocess import DEVNULL, run
 from tempfile import mkstemp
-from typing import Any, Dict, List, NewType, Tuple
+from typing import Any, Tuple, TypedDict
 from urllib.error import HTTPError
 from urllib.parse import urlparse, urlunparse
 from urllib.request import Request, urlopen
@@ -19,7 +19,19 @@ from nhkeasier.logging import init_logging
 from nhkeasier.models import Story
 
 logger = logging.getLogger(__name__)
-StoryInfo = NewType('StoryInfo', Dict)
+
+
+class StoryInfo(TypedDict):
+    has_news_easy_image: bool
+    has_news_easy_voice: bool
+    has_news_web_image: bool
+    has_news_web_movie: bool
+    news_id: str
+    news_prearranged_time: str
+    news_web_image_uri: str
+    title: str
+    title_with_ruby: str
+    voice_id: str
 
 
 class DuplicateStoryIDError(Exception):
@@ -48,7 +60,7 @@ nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 def remove_extra_dots(url: str) -> str:
     # inspired from https://stackoverflow.com/a/27950825
     parsed = urlparse(url)
-    dirs: List[str] = []
+    dirs: list[str] = []
     for name in parsed.path.split('/'):
         if name == '..':
             if len(dirs) > 1:
@@ -72,7 +84,7 @@ def fetch(url: str) -> bytes:
         return f.read()  # type: ignore
 
 
-def fetch_story_list() -> Dict[str, List[StoryInfo]]:
+def fetch_story_list() -> dict[str, list[StoryInfo]]:
     """Return a dictionary mapping days to stories published this day"""
     logger.debug('Fetching list of stories')
     data = fetch(story_list_url)
@@ -84,7 +96,7 @@ def fetch_story_list() -> Dict[str, List[StoryInfo]]:
     return stories_per_day  # type: ignore
 
 
-def fetch_replace_voice() -> Dict[str, str]:
+def fetch_replace_voice() -> dict[str, str]:
     """Return a dictionary mapping story_id to amended voice filename"""
     logger.debug('Fetching voice amendments')
     data = fetch(replace_voice_url)
@@ -96,7 +108,7 @@ def fetch_replace_voice() -> Dict[str, str]:
     }
 
 
-def set_voice_id(info: StoryInfo, replace_voice: Dict[str, str]) -> None:
+def set_voice_id(info: StoryInfo, replace_voice: dict[str, str]) -> None:
     news_id = info['news_id']
     if news_id in replace_voice:
         info['voice_id'] = replace_voice[news_id]
@@ -359,7 +371,7 @@ def convert_story_video(story: Story) -> None:
     os.remove(temp)
 
 
-def fetch_story(info: StoryInfo, replace_voice: Dict[str, str]) -> bool:
+def fetch_story(info: StoryInfo, replace_voice: dict[str, str]) -> bool:
     logger.debug(f'Fetching story {info["news_id"]} ({info["title"]})')
     set_voice_id(info, replace_voice)
     story, created = story_from_info(info)

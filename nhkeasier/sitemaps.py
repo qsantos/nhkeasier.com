@@ -1,6 +1,5 @@
-from typing import List
-
 from django.contrib.sitemaps import GenericSitemap, Sitemap
+from django.db import models
 from django.urls import reverse
 
 from .models import Story
@@ -9,10 +8,11 @@ from .models import Story
 class StaticSitemap(Sitemap):
     changefreq = 'daily'
 
-    def items(self) -> List[str]:
+    def items(self) -> list[str]:
         return ['about']
 
-    def location(self, item):
+    def location(self, item: models.Model) -> str:
+        assert isinstance(item, str)
         return reverse(item)
 
 

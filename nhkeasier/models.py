@@ -49,4 +49,4 @@ class Story(models.Model):
         return f'{self.id}: {self.title}'
 
     def get_absolute_url(self) -> str:
-        return reverse('story', kwargs={'id': self.id})  # type: ignore
+        return reverse('story', kwargs={'id': self.id})

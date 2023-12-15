@@ -1,7 +1,11 @@
-from datetime import date
+import datetime
 
 from django.contrib.syndication.views import Feed
+from django.db import models
+from django.db.models.manager import BaseManager
 from django.urls import reverse
+from django.utils.html import escape
+from django.utils.safestring import SafeString
 
 from .models import Story
 
@@ -11,16 +15,19 @@ class LatestStoriesFeed(Feed):
     link = '/'
     description = 'Latest stories from NHK News Web easy'
 
-    def items(self):
-        return Story.objects.filter(subedict_created=True).order_by('-published', '-id')[:50]
+    def items(self) -> BaseManager[models.Model]:
+        return Story.objects.filter(subedict_created=True).order_by('-published', '-id')[:50]  # type: ignore
 
-    def item_title(self, item):
-        return item.title
+    def item_title(self, item: models.Model) -> SafeString:
+        assert isinstance(item, Story)
+        return escape(item.title)
 
-    def item_pubdate(self, item):
+    def item_pubdate(self, item: models.Model) -> datetime.date:
+        assert isinstance(item, Story)
         return item.published
 
-    def item_description(self, story):
+    def item_description(self, story: models.Model) -> str:
+        assert isinstance(story, Story)
         html = ''
 
         # content
@@ -40,12 +47,13 @@ class LatestStoriesFeed(Feed):
         html += '<ul>'
         if story.r_nhkeasynews_link:
             html += f'<li><a href="{story.r_nhkeasynews_link}">/r/NHKEasyNews</a></li>'
-        if story.published.date() >= date(2017, 12, 5):
+        if story.published.date() >= datetime.date(2017, 12, 5):
             html += '<li><a href="https://www3.nhk.or.jp/news/easy/{0}/{0}.html">Original</a></li>'.format(story.story_id)
         html += '<li><a href="{}" class="permalink">Permalink</a></li>'.format(reverse('story', args=[story.id]))
         html += '</ul>'
 
         return html
 
-    def item_link(self, item):
+    def item_link(self, item: models.Model) -> str:
+        assert isinstance(item, Story)
         return reverse('story', args=[item.id])

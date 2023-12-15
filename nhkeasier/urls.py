@@ -34,4 +34,4 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
     import debug_toolbar  # type: ignore
-    urlpatterns = [re_path('^__debug__/', include(debug_toolbar.urls)), *urlpatterns]
+    urlpatterns = [re_path('^__debug__/', include(debug_toolbar.urls)), *urlpatterns]  # type: ignore
