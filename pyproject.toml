@@ -2,7 +2,6 @@
 name = "nhkeasier"
 dynamic = ["version"]
 dependencies = [
-    "Authlib==0.14.3",
     "django==4.2",
     "django-widget-tweaks==1.4.12",
 ]

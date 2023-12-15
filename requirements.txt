@@ -6,16 +6,10 @@
 #
 asgiref==3.7.2
     # via django
-authlib==0.14.3
-    # via nhkeasier (pyproject.toml)
 build==1.0.3
     # via pip-tools
-cffi==1.16.0
-    # via cryptography
 click==8.1.7
     # via pip-tools
-cryptography==41.0.7
-    # via authlib
 django==4.2
     # via
     #   django-debug-toolbar
@@ -34,8 +28,6 @@ packaging==23.2
     # via build
 pip-tools==7.3.0
     # via nhkeasier (pyproject.toml)
-pycparser==2.21
-    # via cffi
 pyproject-hooks==1.0.0
     # via build
 ruff==0.1.8
