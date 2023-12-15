@@ -24,7 +24,7 @@ class LatestStoriesFeed(Feed):
         html = ''
 
         # content
-        video_src = story.video_reencoded.url
+        video_src = story.video_reencoded.url if story.video_reencoded else None
         img_src = story.image.url if story.image else None
         if video_src and img_src:
             html += f'<video src="{video_src}" poster="{img_src}" controls preload="none""></video>'
