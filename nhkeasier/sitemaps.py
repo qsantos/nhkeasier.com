@@ -9,7 +9,7 @@ class StaticSitemap(Sitemap):
     changefreq = 'daily'
 
     def items(self) -> list[str]:
-        return ['about']
+        return ['contact', 'about']
 
     def location(self, item: models.Model) -> str:
         assert isinstance(item, str)
