@@ -75,3 +75,8 @@ inline-quotes = "single"
 [tool.ruff.isort]
 split-on-trailing-comma = false
 
+[mypy]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "nhkeasier.settings"
