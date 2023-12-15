@@ -11,9 +11,10 @@ urlpatterns = [
     re_path(r'^favicon.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico')),
     re_path(r'^robots.txt$', RedirectView.as_view(url=settings.STATIC_URL + 'robots.txt')),
     re_path(r'^sitemap\.xml$', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-
     re_path(r'^story/(?P<id>[0-9]*)/$', views.story, name='story'),
     re_path(r'^player/(?P<id>[0-9]*)/$', views.player, name='player'),
+    re_path(r'^contact/$', views.contact, name='contact'),
+    re_path(r'^contact/sent/$', views.contact_sent, name='contact_sent'),
     re_path(r'^about/$', views.about, name='about'),
     re_path(r'^tools/$', views.tools, name='tools'),
     re_path(r'^feed/$', feed.LatestStoriesFeed(), name='feed'),
