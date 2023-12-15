@@ -51,8 +51,7 @@ story_list_url = BASE_URL + 'news-list.json'
 replace_voice_url = BASE_URL + 'player/voice_replace/voice_replace.json'
 webpage_url_pattern = BASE_URL + '{news_id}/{news_id}.html'
 image_url_pattern = BASE_URL + '{news_id}/{news_easy_image_uri}'
-voice_url_pattern = BASE_URL + '{voice_id}/{news_easy_voice_uri}'
-fragmented_voice_url_pattern = 'https://nhks-vh.akamaihd.net/i/news/easy/{voice_id}.mp4/master.m3u8'
+voice_url_pattern = 'https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8'
 video_url_pattern = 'rtmp://flv.nhk.or.jp/ondemand/flv/news/{news_web_movie_uri}'
 nhk_contents = 'https://www3.nhk.or.jp/news/contents/easy/'
 
@@ -207,30 +206,21 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
         logger.debug('No voice')
         return
 
-    voice_url = voice_url_pattern.format(**info)
+    # fragmented MP4 using HTTP Live Streaming
     logger.debug('Voice found')
-    if voice_url.endswith('.mp4'):
-        # fragmented MP4 using HTTP Live Streaming
-        voice_url = fragmented_voice_url_pattern.format(**info)
-        logger.info(f'Download voice (fragmented MP4) {voice_url}')
-        _, temp_name = mkstemp(suffix='.mp3')
-        res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL, check=False)
-        if res.returncode == 0:
-            logger.debug('Fragmented voice fetched successfully')
-            with open(temp_name, 'rb') as f:
-                story.voice.save('', f)  # type: ignore
-            logger.debug('Voice saved')
-        else:
-            logger.warning('Failed to download fragmented voice')
-        os.remove(temp_name)
+    voiceid = info['news_easy_voice_uri'].removesuffix('.m4a')
+    voice_url = voice_url_pattern.format(voiceid=voiceid)
+    logger.info(f'Download voice (fragmented MP4) {voice_url}')
+    _, temp_name = mkstemp(suffix='.mp3')
+    res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL, check=False)
+    if res.returncode == 0:
+        logger.debug('Fragmented voice fetched successfully')
+        with open(temp_name, 'rb') as f:
+            story.voice.save('', f)  # type: ignore
+        logger.debug('Voice saved')
     else:
-        logger.info(f'Download voice {voice_url}')
-        try:
-            story.voice.save('', ContentFile(fetch(voice_url)))
-        except HTTPError:
-            logger.warning('Failed to download voice')
-        else:
-            logger.debug('Voice saved')
+        logger.warning('Failed to download fragmented voice')
+    os.remove(temp_name)
 
 
 def fetch_story_video(story: Story, info: StoryInfo) -> None:
