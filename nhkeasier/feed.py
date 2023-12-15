@@ -45,8 +45,6 @@ class LatestStoriesFeed(Feed):
 
         # links
         html += '<ul>'
-        if story.r_nhkeasynews_link:
-            html += f'<li><a href="{story.r_nhkeasynews_link}">/r/NHKEasyNews</a></li>'
         if story.published.date() >= datetime.date(2017, 12, 5):
             html += '<li><a href="https://www3.nhk.or.jp/news/easy/{0}/{0}.html">Original</a></li>'.format(story.story_id)
         html += '<li><a href="{}" class="permalink">Permalink</a></li>'.format(reverse('story', args=[story.id]))
