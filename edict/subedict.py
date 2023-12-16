@@ -26,10 +26,14 @@ def japanese_text_substrings(text: str) -> Iterator[str]:
 def create_subedict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
     deinflector = Deinflector()
-    return {
-        word.edict_entry
+    candidates = {
+        (candidate, type_)
         for substring in japanese_text_substrings(text)
         for candidate, type_, _reason in deinflector(substring)
+    }
+    return {
+        word.edict_entry
+        for (candidate, type_) in candidates
         for word in deinflector.search_edict(candidate)
         if word.get_type() & type_
     }
