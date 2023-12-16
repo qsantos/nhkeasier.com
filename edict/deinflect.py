@@ -65,17 +65,17 @@ class Deinflector:
                     reason = reasons[int(reason)]  # resolve string
                     self.rules.append(Rule(from_, to, type_, reason))
 
-    def __call__(self, word: str) -> List[Candidate]:
+    def __call__(self, word: str) -> Iterator[Candidate]:
         """Iterate through possible deinflections of word (including word)
 
         Each value is a triplet whose first element is the deinflected word,
         the second element is a mask of possible grammatical classes for the
         word, and the third element is the corresponding reasonning for the
         inflection"""
-        candidates = [Candidate(word, 0xff, ())]
-        i = 0
-        while i < len(candidates):
-            candidate = candidates[i]
+        q = [Candidate(word, 0xff, ())]
+        while q:
+            candidate = q.pop()
+            yield candidate
             for rule in self.rules:
                 # check types match
                 if candidate.type_ & rule.type_ == 0:
@@ -84,17 +84,11 @@ class Deinflector:
                 if not candidate.word.endswith(rule.from_):
                     continue
                 # append new candidate
-                candidates.append(Candidate(
+                q.append(Candidate(
                     word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
                     reasons=(*candidate.reasons, rule.reason),
                 ))
-                # NOTE: could check that new_word is already in candidates
-                # Rikaikun merges with previous candidate; if this candidate
-                # has already been processed, the new type is ignored
-                # Rikaichamp only combines candidates of identical types
-            i += 1
-        return candidates
 
     def search_edict(self, fragment: str) -> Iterator[Word]:
         candidates = set(self(fragment))
