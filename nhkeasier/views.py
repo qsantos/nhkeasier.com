@@ -19,7 +19,9 @@ def simple_message(request: HttpRequest, title: str, message: str, status: int =
     }, status=status)
 
 
-def handler400(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
+def handler400(request: HttpRequest, exception: Exception | None) -> HttpResponse:
+    # the argument really need to be named "exception"
+    _ = exception
     return simple_message(
         request,
         'Bad Request',
@@ -31,7 +33,9 @@ def handler400(request: HttpRequest, _exception: Exception | None) -> HttpRespon
     )
 
 
-def handler403(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
+def handler403(request: HttpRequest, exception: Exception | None) -> HttpResponse:
+    # the argument really need to be named "exception"
+    _ = exception
     return simple_message(
         request,
         'Forbidden',
@@ -43,7 +47,9 @@ def handler403(request: HttpRequest, _exception: Exception | None) -> HttpRespon
     )
 
 
-def handler404(request: HttpRequest, _exception: Exception | None) -> HttpResponse:
+def handler404(request: HttpRequest, exception: Exception | None) -> HttpResponse:
+    # the argument really need to be named "exception"
+    _ = exception
     return simple_message(
         request,
         'Page Not Found',
