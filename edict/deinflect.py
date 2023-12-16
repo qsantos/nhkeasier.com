@@ -1,8 +1,6 @@
 import os.path
 from typing import Iterator, List, NamedTuple
 
-from .search import Word, search_edict
-
 default_deinflect = os.path.join(os.path.dirname(__file__), 'deinflect.dat')
 
 
@@ -86,9 +84,3 @@ class Deinflector:
                     word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
                 ))
-
-    def search_edict(self, fragment: str) -> Iterator[Word]:
-        for candidate, type_ in set(self(fragment)):
-            for word in search_edict(candidate):
-                if word.get_type() & type_:
-                    yield word

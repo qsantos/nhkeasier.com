@@ -2,7 +2,7 @@ import re
 from typing import Iterator, Set
 
 from .deinflect import Deinflector
-from .search import search_enamdict
+from .search import search_edict, search_enamdict
 
 ranges = [
     '々',  # IDEOGRAPHIC ITERATION MARK (U+3005)
@@ -34,7 +34,7 @@ def create_subedict(text: str) -> Set[str]:
     return {
         word.edict_entry
         for (candidate, type_) in candidates
-        for word in deinflector.search_edict(candidate)
+        for word in search_edict(candidate)
         if word.get_type() & type_
     }
 
