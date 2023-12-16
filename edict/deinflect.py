@@ -1,6 +1,5 @@
 import os.path
-from collections import defaultdict
-from typing import DefaultDict, Iterator, List, NamedTuple, Set
+from typing import Iterator, List, NamedTuple
 
 from .search import Word, search_edict
 
@@ -89,13 +88,7 @@ class Deinflector:
                 ))
 
     def search_edict(self, fragment: str) -> Iterator[Word]:
-        candidates = set(self(fragment))
-        subedict: DefaultDict[str, Set[Word]] = defaultdict(set)
-        for candidate, _ in candidates:
+        for candidate, type_ in set(self(fragment)):
             for word in search_edict(candidate):
-                for k in word.readings + word.writings:
-                    subedict[k].add(word)
-        for candidate, type_ in candidates:
-            for word in subedict[candidate]:
                 if word.get_type() & type_:
                     yield word
