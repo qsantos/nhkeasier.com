@@ -1,6 +1,6 @@
 import os.path
 from collections import defaultdict
-from typing import DefaultDict, Iterator, List, NamedTuple, Set
+from typing import DefaultDict, Iterator, List, NamedTuple, Set, Tuple
 
 from .search import Word, search_edict
 
@@ -17,7 +17,7 @@ class Rule(NamedTuple):
 class Candidate(NamedTuple):
     word: str
     type_: int
-    reasons: List[str]
+    reasons: Tuple[str, ...]
 
 
 # deinflect.dat countains instructions to remove inflections from words
@@ -72,7 +72,7 @@ class Deinflector:
         the second element is a mask of possible grammatical classes for the
         word, and the third element is the corresponding reasonning for the
         inflection"""
-        candidates = [Candidate(word, 0xff, [])]
+        candidates = [Candidate(word, 0xff, ())]
         i = 0
         while i < len(candidates):
             candidate = candidates[i]
@@ -87,7 +87,7 @@ class Deinflector:
                 candidates.append(Candidate(
                     word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
-                    reasons=[*candidate.reasons, rule.reason],
+                    reasons=(*candidate.reasons, rule.reason),
                 ))
                 # NOTE: could check that new_word is already in candidates
                 # Rikaikun merges with previous candidate; if this candidate
@@ -97,7 +97,7 @@ class Deinflector:
         return candidates
 
     def search_edict(self, fragment: str) -> Iterator[Word]:
-        candidates = list(self(fragment))
+        candidates = set(self(fragment))
         subedict: DefaultDict[str, Set[Word]] = defaultdict(set)
         for candidate, _, _ in candidates:
             for word in search_edict(candidate):
