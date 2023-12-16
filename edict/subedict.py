@@ -26,24 +26,22 @@ def japanese_text_substrings(text: str) -> Iterator[str]:
 def create_subedict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
     deinflector = Deinflector()
-    # we directly store the set of EDICT entries (text lines), so that
-    # duplicates are naturally eliminated
-    items = set()
-    for substring in japanese_text_substrings(text):
-        for candidate, type_, _reason in deinflector(substring):
-            for word in deinflector.search_edict(candidate):
-                if word.get_type() & type_:
-                    items.add(word.edict_entry)
-    return items
+    return {
+        word.edict_entry
+        for substring in japanese_text_substrings(text)
+        for candidate, type_, _reason in deinflector(substring)
+        for word in deinflector.search_edict(candidate)
+        if word.get_type() & type_
+    }
 
 
 def create_subenamdict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
-    items = set()
-    for substring in japanese_text_substrings(text):
-        for word in search_enamdict(substring):
-            items.add(word.edict_entry)
-    return items
+    return {
+        word.edict_entry
+        for substring in japanese_text_substrings(text)
+        for word in search_enamdict(substring)
+    }
 
 
 def save_subedict(subedict: Set[str], filename: str) -> None:
