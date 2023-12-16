@@ -1,6 +1,6 @@
 import os.path
 from collections import defaultdict
-from typing import DefaultDict, Iterator, List, NamedTuple, Set, Tuple
+from typing import DefaultDict, Iterator, List, NamedTuple, Set
 
 from .search import Word, search_edict
 
@@ -17,7 +17,6 @@ class Rule(NamedTuple):
 class Candidate(NamedTuple):
     word: str
     type_: int
-    reasons: Tuple[str, ...]
 
 
 # deinflect.dat countains instructions to remove inflections from words
@@ -72,7 +71,7 @@ class Deinflector:
         the second element is a mask of possible grammatical classes for the
         word, and the third element is the corresponding reasonning for the
         inflection"""
-        q = [Candidate(word, 0xff, ())]
+        q = [Candidate(word, 0xff)]
         while q:
             candidate = q.pop()
             yield candidate
@@ -87,17 +86,16 @@ class Deinflector:
                 q.append(Candidate(
                     word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
                     type_=rule.type_ >> 8,
-                    reasons=(*candidate.reasons, rule.reason),
                 ))
 
     def search_edict(self, fragment: str) -> Iterator[Word]:
         candidates = set(self(fragment))
         subedict: DefaultDict[str, Set[Word]] = defaultdict(set)
-        for candidate, _, _ in candidates:
+        for candidate, _ in candidates:
             for word in search_edict(candidate):
                 for k in word.readings + word.writings:
                     subedict[k].add(word)
-        for candidate, type_, _reason in candidates:
+        for candidate, type_ in candidates:
             for word in subedict[candidate]:
                 if word.get_type() & type_:
                     yield word

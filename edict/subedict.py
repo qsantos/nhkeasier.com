@@ -29,7 +29,7 @@ def create_subedict(text: str) -> Set[str]:
     candidates = {
         (candidate, type_)
         for substring in japanese_text_substrings(text)
-        for candidate, type_, _reason in deinflector(substring)
+        for candidate, type_ in deinflector(substring)
     }
     return {
         word.edict_entry
