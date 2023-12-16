@@ -14,7 +14,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
-from nhkeasier.edict.subedict import create_subedict, create_subenamdict, save_subedict
+from edict.subedict import create_subedict, create_subenamdict, save_subedict
 from nhkeasier.logging import init_logging
 from nhkeasier.models import Story
 
