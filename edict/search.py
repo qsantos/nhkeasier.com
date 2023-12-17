@@ -12,6 +12,8 @@ common_marker = re.compile(r'\([^)]*\)')
 
 
 class EdictEntry:
+    __slots__ = ('edict_entry', 'type_')
+
     def __init__(
         self,
         edict_entry: str,  # full Edict entry corresponding to the word
