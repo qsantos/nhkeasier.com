@@ -31,6 +31,7 @@ class StoryInfo(TypedDict):
     title: str
     title_with_ruby: str
     voice_id: str
+    news_easy_voice_uri: str
 
 
 class DuplicateStoryIDError(Exception):

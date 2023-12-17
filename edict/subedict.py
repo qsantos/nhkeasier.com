@@ -23,7 +23,7 @@ def japanese_text_substrings(text: str) -> Iterator[str]:
                 yield fragment[start:stop]
 
 
-def create_subedict(text: str) -> Set[str]:
+def create_subedict(text: str) -> Set[bytes]:
     """List EDICT items that might be present in text"""
     deinflector = Deinflector()
     candidates = {
@@ -39,7 +39,7 @@ def create_subedict(text: str) -> Set[str]:
     }
 
 
-def create_subenamdict(text: str) -> Set[str]:
+def create_subenamdict(text: str) -> Set[bytes]:
     """List EDICT items that might be present in text"""
     return {
         entry
@@ -48,7 +48,7 @@ def create_subenamdict(text: str) -> Set[str]:
     }
 
 
-def save_subedict(subedict: Set[str], filename: str) -> None:
+def save_subedict(subedict: Set[bytes], filename: str) -> None:
     with open(filename, 'wb') as f:
         lines = [line.decode('euc-jp') for line in subedict]
         content = '\n'.join(sorted(lines)) + '\n'

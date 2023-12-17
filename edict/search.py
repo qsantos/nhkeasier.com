@@ -10,6 +10,8 @@ default_enamdict = os.path.join(os.path.dirname(__file__), 'enamdict')
 edict_line_pattern = re.compile(rb'(?m)^(\S*) (?:\[(\S*?)\] )?/(.*)/')
 common_marker = re.compile(rb'\([^)]*\)')
 
+EdictEntry = Tuple[bytes, int]
+
 
 def type_from_glosses(glosses: bytes) -> int:
     """Return type mask for deinflections"""
@@ -29,7 +31,7 @@ def type_from_glosses(glosses: bytes) -> int:
 
 class Edict:
     def __init__(self, filename: str = default_edict):
-        self.words = {}
+        self.words: dict[str, EdictEntry | list[EdictEntry]] = {}
         with open(filename, mode='rb') as f:
             for line in f:
                 match = edict_line_pattern.match(line)
@@ -55,14 +57,14 @@ class Edict:
                         else:
                             self.words[decoded_key] = [entries, entry]
 
-    def search(self, word: str) -> Iterator[Tuple[str, int]]:
+    def search(self, word: str) -> Iterator[EdictEntry]:
         try:
             entries = self.words[word]
         except KeyError:
             return
         else:
             if isinstance(entries, list):
-                yield from self.words[word]
+                yield from entries
             else:
                 yield entries
 

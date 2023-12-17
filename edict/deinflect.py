@@ -1,5 +1,5 @@
 import os.path
-from typing import Iterator, NamedTuple
+from typing import Iterator, NamedTuple, Tuple
 
 default_deinflect = os.path.join(os.path.dirname(__file__), 'deinflect.dat')
 
@@ -15,6 +15,8 @@ class Candidate(NamedTuple):
     word: str
     type_: int
 
+
+SuffixToRules = dict[str, Tuple[list[Rule], 'SuffixToRules']]
 
 # deinflect.dat countains instructions to remove inflections from words
 # the first line is a header
@@ -40,7 +42,7 @@ class Deinflector:
     """A Deinflector instance applies deinflection rules to normalize a word"""
     def __init__(self, deinflect_data_filename: str = default_deinflect):
         """Populate deinflecting rules from given file"""
-        self.suffix_to_rules = {}
+        self.suffix_to_rules: SuffixToRules = {}
         with open(deinflect_data_filename, 'rb') as f:
             lines = iter(f)
             next(lines)  # skip header
@@ -66,7 +68,7 @@ class Deinflector:
                             rules, suffix_to_rules = suffix_to_rules[c]
                         except KeyError:
                             rules = []
-                            new_suffix_to_rules = {}
+                            new_suffix_to_rules: SuffixToRules = {}
                             suffix_to_rules[c] = (rules, new_suffix_to_rules)
                             suffix_to_rules = new_suffix_to_rules
                     assert rules is not None
