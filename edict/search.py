@@ -94,53 +94,30 @@ class Word:
         return type_
 
 
-def search_index(word_: str, filename: str = default_edict_index) -> Iterator[int]:
-    word = word_.encode()
-    with open(filename, mode='rb') as f:
-        low = 0
-        f.seek(0, 2)
-        high = f.tell()
-        while high - low > 1:
-            middle = (high + low) // 2
-            f.seek(middle, 0)
-            f.readline()  # get to end of current line
+class Edict:
+    def __init__(self, edict_filename: str = default_edict, index_filename: str = default_edict_index):
+        self.offsets = {}
+        self.edict_filename = edict_filename
+        with open(index_filename, mode='rb') as f:
+            for line in f:
+                current_word, offsets = line.split(b' ', 1)
+                self.offsets[current_word.decode()] = [int(offset) for offset in offsets.split(b' ')]
 
-            line = f.readline()
-            if not line:
-                break
-
-            current_word, offsets = line.split(b' ', 1)
-            if current_word == word:
-                for offset in offsets.split(b' '):
-                    yield int(offset)
-                return
-            if word < current_word:
-                high = middle
-            elif word > current_word:
-                low = middle
-
-
-def search_edict(
-    word: str,
-    edict_filename: str = default_edict,
-    index_filename: str = default_edict_index,
-) -> Iterator[Word]:
-    with open(edict_filename, mode='rb') as f:
-        for offset in search_index(word, index_filename):
-            f.seek(offset, 0)
-            line = f.readline().decode('euc_jp')
-            match = edict_line_pattern.match(line)
-            if match is None:
-                continue
-            line, swritings, sreadings, glosses = match.groups()
-            writings = common_marker.sub('', swritings).split(';')
-            readings = common_marker.sub('', sreadings).split(';') if sreadings else []
-            yield Word(writings, readings, glosses, line)
+    def search(self, word: str) -> Iterator[Word]:
+        offsets = self.offsets.get(word)
+        if offsets:
+            with open(self.edict_filename, mode='rb') as f:
+                for offset in offsets:
+                    f.seek(offset, 0)
+                    line = f.readline().decode('euc_jp')
+                    match = edict_line_pattern.match(line)
+                    if match is None:
+                        continue
+                    line, swritings, sreadings, glosses = match.groups()
+                    writings = common_marker.sub('', swritings).split(';')
+                    readings = common_marker.sub('', sreadings).split(';') if sreadings else []
+                    yield Word(writings, readings, glosses, line)
 
 
-def search_enamdict(
-    word: str,
-    enamdict_filename: str = default_enamdict,
-    index_filename: str = default_enamdict_index,
-) -> Iterator[Word]:
-    return search_edict(word, enamdict_filename, index_filename)
+edict = Edict(default_edict, default_edict_index)
+enamdict = Edict(default_enamdict, default_enamdict_index)
