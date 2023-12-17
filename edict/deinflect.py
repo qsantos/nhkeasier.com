@@ -77,10 +77,11 @@ class Deinflector:
                 if candidate.type_ & rule.type_ == 0:
                     continue
                 # check suffix matches
-                if not candidate.word.endswith(rule.from_):
+                prefix = candidate.word.removesuffix(rule.from_)
+                if prefix == candidate.word:
                     continue
                 # append new candidate
                 q.append(Candidate(
-                    word=candidate.word[:-len(rule.from_)] + rule.to,  # replace suffix,
+                    word=prefix + rule.to,
                     type_=rule.type_ >> 8,
                 ))
