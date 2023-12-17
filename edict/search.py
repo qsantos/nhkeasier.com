@@ -1,6 +1,6 @@
 import os.path
 import re
-from typing import Iterator
+from typing import Iterator, NamedTuple
 
 # default filenames
 default_edict = os.path.join(os.path.dirname(__file__), 'edict2')
@@ -11,35 +11,25 @@ edict_line_pattern = re.compile(r'(?m)^(\S*) (?:\[(\S*?)\] )?/(.*)/')
 common_marker = re.compile(r'\([^)]*\)')
 
 
-class EdictEntry:
-    __slots__ = ('edict_entry', 'type_')
+class EdictEntry(NamedTuple):
+    edict_entry: str
+    type_: int
 
-    def __init__(
-        self,
-        edict_entry: str,  # full Edict entry corresponding to the word
-        type_: int,
-    ):
-        self.edict_entry = edict_entry
-        self.type_ = type_
 
-    def __repr__(self) -> str:
-        return f'<{self.kanji}>'
-
-    @staticmethod
-    def get_type(glosses: str) -> int:
-        """Return type mask for deinflections"""
-        type_ = 1 << 7
-        if re.search(r'\bv1\b', glosses):
-            type_ |= 1 << 0
-        if re.search(r'\bv5.\b', glosses):
-            type_ |= 1 << 1
-        if re.search(r'\badj-i\b', glosses):
-            type_ |= 1 << 2
-        if re.search(r'\bvk\b', glosses):
-            type_ |= 1 << 3
-        if re.search(r'\bvs\b', glosses):
-            type_ |= 1 << 4
-        return type_
+def type_from_glosses(glosses: str) -> int:
+    """Return type mask for deinflections"""
+    type_ = 1 << 7
+    if re.search(r'\bv1\b', glosses):
+        type_ |= 1 << 0
+    if re.search(r'\bv5.\b', glosses):
+        type_ |= 1 << 1
+    if re.search(r'\badj-i\b', glosses):
+        type_ |= 1 << 2
+    if re.search(r'\bvk\b', glosses):
+        type_ |= 1 << 3
+    if re.search(r'\bvs\b', glosses):
+        type_ |= 1 << 4
+    return type_
 
 
 class Edict:
@@ -53,7 +43,7 @@ class Edict:
 
                 # gather information for new word
                 swritings, sreadings, glosses = match.groups()
-                entry = EdictEntry(line.strip(), EdictEntry.get_type(glosses))
+                entry = EdictEntry(line.strip(), type_from_glosses(glosses))
 
                 # map writings and reading to entry
                 writings = common_marker.sub('', swritings).split(';')
