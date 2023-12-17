@@ -30,7 +30,6 @@ class StoryInfo(TypedDict):
     news_easy_voice_uri: str
     title: str
     title_with_ruby: str
-    voice_id: str
     news_easy_voice_uri: str
 
 
@@ -93,28 +92,6 @@ def fetch_story_list() -> dict[str, list[StoryInfo]]:
     n_days = len(stories_per_day)
     logger.debug(f'{n_stories} stories over {n_days} days found')
     return stories_per_day  # type: ignore
-
-
-def fetch_replace_voice() -> dict[str, str]:
-    """Return a dictionary mapping story_id to amended voice filename"""
-    logger.debug('Fetching voice amendments')
-    data = fetch(replace_voice_url)
-    amendments = json.loads(data.decode())
-    logger.debug(f'{len(amendments)} voice amendments found')
-    return {
-        amendment['news_id']: amendment['voice_id']
-        for amendment in amendments
-    }
-
-
-def set_voice_id(info: StoryInfo, replace_voice: dict[str, str]) -> None:
-    news_id = info['news_id']
-    if news_id in replace_voice:
-        info['voice_id'] = replace_voice[news_id]
-        logger.debug(f'Amending voice_id ({info["voice_id"]})')
-    else:
-        info['voice_id'] = news_id
-        logger.debug(f'Copying voice_id ({info["voice_id"]})')
 
 
 def clean_up_content(content: str) -> str:
@@ -376,9 +353,8 @@ def convert_story_video(story: Story) -> None:
     os.remove(temp)
 
 
-def fetch_story(info: StoryInfo, replace_voice: dict[str, str]) -> bool:
+def fetch_story(info: StoryInfo) -> bool:
     logger.debug(f'Fetching story {info["news_id"]} ({info["title"]})')
-    set_voice_id(info, replace_voice)
     story, created = story_from_info(info)
     fetch_story_webpage(story, info)
     fetch_story_voice(story, info)
@@ -403,9 +379,8 @@ def fetch_story(info: StoryInfo, replace_voice: dict[str, str]) -> bool:
 def fetch_stories() -> None:
     logger.debug('Fetching stories')
     stories_per_day = fetch_story_list()
-    replace_voice = fetch_replace_voice()
     new_stories_count = sum(
-        fetch_story(story, replace_voice)
+        fetch_story(story)
         for day in sorted(stories_per_day)
         for story in stories_per_day[day]
     )
