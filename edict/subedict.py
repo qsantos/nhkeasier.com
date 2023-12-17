@@ -35,7 +35,7 @@ def create_subedict(text: str) -> Set[str]:
         word.edict_entry
         for (candidate, type_) in candidates
         for word in edict.search(candidate)
-        if word.get_type() & type_
+        if word.type_ & type_
     }
 
 
