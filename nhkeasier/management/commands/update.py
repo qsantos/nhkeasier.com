@@ -10,11 +10,9 @@ from urllib.error import HTTPError
 from urllib.parse import urlparse, urlunparse
 from urllib.request import Request, urlopen
 
-from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 
-from edict.subedict import create_subedict, create_subenamdict, save_subedict
 from nhkeasier.logging import init_logging
 from nhkeasier.models import Story
 
@@ -419,64 +417,10 @@ def fetch_stories() -> None:
         logger.info(f'{new_stories_count} new stories')
 
 
-def subedict_from_content(filename: str, content: str) -> None:
-    subedict_dir = os.path.join(settings.BASE_DIR, 'media', 'subedict')
-    os.makedirs(subedict_dir, exist_ok=True)
-    path = os.path.join(subedict_dir, filename)
-    save_subedict(create_subedict(content), path)
-
-
-def subenamdict_from_content(filename: str, content: str) -> None:
-    subenamdict_dir = os.path.join(settings.BASE_DIR, 'media', 'subenamdict')
-    os.makedirs(subenamdict_dir, exist_ok=True)
-    path = os.path.join(subenamdict_dir, filename)
-    save_subedict(create_subenamdict(content), path)
-
-
-def create_subedicts() -> None:
-    logger.debug('Creating subedicts')
-    stories = Story.objects.filter(subedict_created=False, content__isnull=False)
-    logger.debug(f'Stories without subedicts: {len(stories)}')
-
-    # create sub EDICT files for stories and list days that must be updated
-    logger.debug('Creating story subedicts')
-    new_days = set()
-    for story in stories:
-        logger.debug(f'Considering story id={story.id}')
-        new_days.add(story.published.date())
-        filename = f'{story.id:05}.dat'
-        assert story.content is not None  # ensured by filter above
-        subedict_from_content(filename, story.content)
-        subenamdict_from_content(filename, story.content)
-        logger.info(filename)
-    logger.info('Story-wise sub EDICT files updated')
-
-    # update sub EDICT files for days
-    logger.debug('Creating day subedicts')
-    for day in sorted(new_days):
-        logger.debug(f'Considering day {day}')
-        day_stories = Story.objects.filter(published__date=day)
-        content = ''.join(
-            story.content # type: ignore
-            # non-null ensured by filter above
-            for story in day_stories
-        )
-        filename = f'{day}.dat'
-        subedict_from_content(filename, content)
-        subenamdict_from_content(filename, content)
-        logger.info(filename)
-    logger.info('Day-wise sub EDICT files updated')
-
-    # note that the subedict have been generated for those stories
-    stories.update(subedict_created=True)
-    logger.debug('Subedicts created')
-
-
 def main() -> None:
     init_logging()
     logger.debug('Start of NHKUpdate command')
     fetch_stories()
-    create_subedicts()
     logger.debug('End of NHKUpdate command')
 
 
