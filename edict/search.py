@@ -1,6 +1,6 @@
 import os.path
 import re
-from typing import Iterator, NamedTuple
+from typing import Iterator, Tuple
 
 # default filenames
 default_edict = os.path.join(os.path.dirname(__file__), 'edict2')
@@ -9,11 +9,6 @@ default_enamdict = os.path.join(os.path.dirname(__file__), 'enamdict')
 # pre-compile regular expressions
 edict_line_pattern = re.compile(r'(?m)^(\S*) (?:\[(\S*?)\] )?/(.*)/')
 common_marker = re.compile(r'\([^)]*\)')
-
-
-class EdictEntry(NamedTuple):
-    edict_entry: str
-    type_: int
 
 
 def type_from_glosses(glosses: str) -> int:
@@ -43,7 +38,7 @@ class Edict:
 
                 # gather information for new word
                 swritings, sreadings, glosses = match.groups()
-                entry = EdictEntry(line.strip(), type_from_glosses(glosses))
+                entry = (line.strip(), type_from_glosses(glosses))
 
                 # map writings and reading to entry
                 writings = common_marker.sub('', swritings).split(';')
@@ -54,7 +49,7 @@ class Edict:
                     except KeyError:
                         self.words[key] = [entry]
 
-    def search(self, word: str) -> Iterator[EdictEntry]:
+    def search(self, word: str) -> Iterator[Tuple[str, int]]:
         try:
             yield from self.words[word]
         except KeyError:

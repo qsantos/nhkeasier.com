@@ -32,19 +32,19 @@ def create_subedict(text: str) -> Set[str]:
         for candidate, type_ in deinflector(substring)
     }
     return {
-        word.edict_entry
+        entry
         for (candidate, type_) in candidates
-        for word in edict.search(candidate)
-        if word.type_ & type_
+        for (entry, entry_type_) in edict.search(candidate)
+        if entry_type_ & type_
     }
 
 
 def create_subenamdict(text: str) -> Set[str]:
     """List EDICT items that might be present in text"""
     return {
-        word.edict_entry
+        entry
         for substring in japanese_text_substrings(text)
-        for word in enamdict.search(substring)
+        for (entry, _) in enamdict.search(substring)
     }
 
 
