@@ -2,7 +2,6 @@ import re
 from typing import Iterator, Set
 
 from .deinflect import Deinflector
-from .search import edict, enamdict
 
 ranges = [
     '々',  # IDEOGRAPHIC ITERATION MARK (U+3005)
@@ -25,6 +24,7 @@ def japanese_text_substrings(text: str) -> Iterator[str]:
 
 def create_subedict(text: str) -> Set[bytes]:
     """List EDICT items that might be present in text"""
+    from .search import edict
     deinflector = Deinflector()
     candidates = {
         (candidate, type_)
@@ -41,6 +41,7 @@ def create_subedict(text: str) -> Set[bytes]:
 
 def create_subenamdict(text: str) -> Set[bytes]:
     """List EDICT items that might be present in text"""
+    from .search import enamdict
     return {
         entry
         for substring in japanese_text_substrings(text)
