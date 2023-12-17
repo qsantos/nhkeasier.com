@@ -95,29 +95,33 @@ class Word:
 
 
 class Edict:
-    def __init__(self, edict_filename: str = default_edict, index_filename: str = default_edict_index):
-        self.offsets = {}
-        self.edict_filename = edict_filename
-        with open(index_filename, mode='rb') as f:
+    def __init__(self, filename: str = default_edict):
+        self.words = {}
+        with open(filename, encoding='euc_jp') as f:
             for line in f:
-                current_word, offsets = line.split(b' ', 1)
-                self.offsets[current_word.decode()] = [int(offset) for offset in offsets.split(b' ')]
+                match = edict_line_pattern.match(line)
+                if not match:
+                    continue
+
+                # gather information for new word
+                entry, swritings, sreadings, glosses = match.groups()
+                writings = common_marker.sub('', swritings).split(';')
+                readings = common_marker.sub('', sreadings).split(';') if sreadings else []
+                word = Word(writings, readings, glosses, entry, 0)
+
+                # map writings and reading to word
+                for key in writings + readings:
+                    try:
+                        self.words[key].add(word)
+                    except KeyError:
+                        self.words[key] = {word}
 
     def search(self, word: str) -> Iterator[Word]:
-        offsets = self.offsets.get(word)
-        if offsets:
-            with open(self.edict_filename, mode='rb') as f:
-                for offset in offsets:
-                    f.seek(offset, 0)
-                    line = f.readline().decode('euc_jp')
-                    match = edict_line_pattern.match(line)
-                    if match is None:
-                        continue
-                    line, swritings, sreadings, glosses = match.groups()
-                    writings = common_marker.sub('', swritings).split(';')
-                    readings = common_marker.sub('', sreadings).split(';') if sreadings else []
-                    yield Word(writings, readings, glosses, line)
+        try:
+            yield from self.words[word]
+        except KeyError:
+            return
 
 
-edict = Edict(default_edict, default_edict_index)
-enamdict = Edict(default_enamdict, default_enamdict_index)
+edict = Edict(default_edict)
+enamdict = Edict(default_enamdict)
