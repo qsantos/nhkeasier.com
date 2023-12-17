@@ -415,6 +415,7 @@ function append_meaning(html, sense, reason) {
 }
 
 function rikai_html(text) {
+    let ret = '';
     const edict_html = [];
     const added_words = [];
     iter_subfragments(text, function(subfragment) {
@@ -432,7 +433,7 @@ function rikai_html(text) {
     });
 
     if (edict_html.length) {
-        return '<dl>' + edict_html.join('') + '</dl>';
+        ret += '<h3>Words</h3><dl>' + edict_html.join('') + '</dl>';
     }
 
     const names_html = [];
@@ -442,10 +443,10 @@ function rikai_html(text) {
     });
 
     if (names_html.length) {
-        return '<dl>' + names_html.join('') + '</dl>';
+        ret += '<h3>Names</h3><dl>' + names_html.join('') + '</dl>';
     }
 
-    return '';
+    return ret;
 }
 
 function main() {
