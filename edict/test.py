@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from datetime import datetime, timezone
 from difflib import unified_diff
 from sys import stderr
 from tempfile import NamedTemporaryFile
@@ -26,7 +27,11 @@ class TestSubedict(unittest.TestCase):
             stories = json.load(f)
         content = ''.join(story['content'] for story in stories)
         with NamedTemporaryFile() as f:
+            start = datetime.now(tz=timezone.utc)
             save_subedict(create_subedict(content), f.name)
+            elapsed = datetime.now(tz=timezone.utc) - start
+            print()
+            print(elapsed)
             self.diff(output_edict_path, f.name)
 
     def test_subenamdict(self) -> None:
@@ -34,5 +39,9 @@ class TestSubedict(unittest.TestCase):
             stories = json.load(f)
         content = ''.join(story['content'] for story in stories)
         with NamedTemporaryFile() as f:
+            start = datetime.now(tz=timezone.utc)
             save_subedict(create_subenamdict(content), f.name)
+            elapsed = datetime.now(tz=timezone.utc) - start
+            print()
+            print(elapsed)
             self.diff(output_enamdict_path, f.name)
