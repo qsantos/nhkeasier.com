@@ -17,8 +17,11 @@ For some more stories, visit <a href="https://slow-communication.jp/">Slow Commu
 {% include 'widgets/story.html' %}
 {% endfor %}
 {% include 'widgets/nav_day.html' %}
-<script>
-var edict_filename = '{{ day|date:'Y-m-d' }}.dat';
+<script type="edict">
+{{ edict }}
+</script>
+<script type="enamdict">
+{{ enamdict }}
 </script>
 <script async src="{% static 'scripts.js' %}"></script>
 {% endblock %}

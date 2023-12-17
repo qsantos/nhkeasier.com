@@ -450,14 +450,20 @@ function rikai_html(text) {
 }
 
 function main() {
-    if (edict_filename == '.dat') {
-        return;
-    }
-
     /* Start downloading data */
     fetch('/static/deinflect.dat', load_deinflect);
-    fetch('/media/subedict/' + edict_filename, load_edict);
-    fetch('/media/subenamdict/' + edict_filename, load_enamdict);
+
+    /* Parse EDICT2 data */
+    const edict_data = document.querySelector('script[type=edict]');
+    if (!edict_data) {
+        return;
+    }
+    const enamdict_data = document.querySelector('script[type=enamdict]');
+    if (!enamdict_data) {
+        return;
+    }
+    load_edict(edict_data.innerText);
+    load_enamdict(enamdict_data.innerText);
 
     const rikai = document.createElement('div');
     rikai.id = 'rikai';

@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
+from edict.subedict import create_subedict, create_subenamdict
+
 from .forms import ContactForm
 from .models import Story
 
@@ -170,6 +172,9 @@ def archive(
         player = None
     image = request.build_absolute_uri(story.image.url) if story is not None and story.image else None
 
+    titles = '\n'.join(story.title for story in stories)
+    contents = '\n'.join(story.content for story in stories)
+    content = titles + '\n' + contents
     return render(request, 'index.html', {
         'title': 'Easier Japanese Practice',
         'header': header,
@@ -180,6 +185,8 @@ def archive(
         'previous_day': previous_day,
         'day': date,
         'next_day': next_day,
+        'edict': '\n'.join(create_subedict(content)),
+        'enamdict': '\n'.join(create_subenamdict(content)),
     })
 
 
@@ -235,6 +242,8 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
         'story': story,
         'previous_story': previous_story,
         'next_story': next_story,
+        'edict': '\n'.join(create_subedict(story.content)),
+        'enamdict': '\n'.join(create_subenamdict(story.content)),
     })
 
 

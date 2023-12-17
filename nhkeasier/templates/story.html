@@ -4,8 +4,11 @@
 {% include 'widgets/nav_story.html' %}
 {% include 'widgets/story.html' %}
 {% include 'widgets/nav_story.html' %}
-<script>
-var edict_filename = '{{ story.id|stringformat:"05d" }}.dat';
+<script type="edict">
+{{ edict }}
+</script>
+<script type="enamdict">
+{{ enamdict }}
 </script>
 <script async src="{% static 'scripts.js' %}"></script>
 {% endblock %}
