@@ -1,5 +1,5 @@
 import os.path
-from typing import Iterator, List, NamedTuple
+from typing import Iterator, NamedTuple
 
 default_deinflect = os.path.join(os.path.dirname(__file__), 'deinflect.dat')
 
@@ -40,11 +40,12 @@ class Deinflector:
     """A Deinflector instance applies deinflection rules to normalize a word"""
     def __init__(self, deinflect_data_filename: str = default_deinflect):
         """Populate deinflecting rules from given file"""
+        self.rules = {}
+        self.rule_lengths = set()
         with open(deinflect_data_filename, 'rb') as f:
             lines = iter(f)
             next(lines)  # skip header
             reasons = []  # collect the string array for later resolution
-            self.rules: List[Rule] = []
             for byte_line in lines:
                 line = byte_line.decode()
                 fields = line.strip().split('\t')
@@ -59,7 +60,12 @@ class Deinflector:
                     from_, to, stype_, reason = fields
                     type_ = int(stype_)
                     reason = reasons[int(reason)]  # resolve string
-                    self.rules.append(Rule(from_, to, type_, reason))
+                    rule = Rule(from_, to, type_, reason)
+                    try:
+                        self.rules[from_].add(rule)
+                    except KeyError:
+                        self.rules[from_] = {rule}
+                    self.rule_lengths.add(len(from_))
 
     def __call__(self, word: str) -> Iterator[Candidate]:
         """Iterate through possible deinflections of word (including word)
@@ -72,16 +78,21 @@ class Deinflector:
         while q:
             candidate = q.pop()
             yield candidate
-            for rule in self.rules:
-                # check types match
-                if candidate.type_ & rule.type_ == 0:
+            word = candidate.word
+            for length in self.rule_lengths:
+                if len(word) < length:
                     continue
-                # check suffix matches
-                prefix = candidate.word.removesuffix(rule.from_)
-                if prefix == candidate.word:
+                suffix = word[-length:]
+                try:
+                    rules = self.rules[suffix]
+                except KeyError:
                     continue
-                # append new candidate
-                q.append(Candidate(
-                    word=prefix + rule.to,
-                    type_=rule.type_ >> 8,
-                ))
+                for rule in rules:
+                    # check types match
+                    if candidate.type_ & rule.type_ == 0:
+                        continue
+                    # append new candidate
+                    q.append(Candidate(
+                        word=word[:-length] + rule.to,
+                        type_=rule.type_ >> 8,
+                    ))
