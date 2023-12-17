@@ -40,8 +40,7 @@ class Deinflector:
     """A Deinflector instance applies deinflection rules to normalize a word"""
     def __init__(self, deinflect_data_filename: str = default_deinflect):
         """Populate deinflecting rules from given file"""
-        self.rules = {}
-        self.rule_lengths = set()
+        self.suffix_to_rules = {}
         with open(deinflect_data_filename, 'rb') as f:
             lines = iter(f)
             next(lines)  # skip header
@@ -60,12 +59,18 @@ class Deinflector:
                     from_, to, stype_, reason = fields
                     type_ = int(stype_)
                     reason = reasons[int(reason)]  # resolve string
-                    rule = Rule(from_, to, type_, reason)
-                    try:
-                        self.rules[from_].add(rule)
-                    except KeyError:
-                        self.rules[from_] = {rule}
-                    self.rule_lengths.add(len(from_))
+                    rules = None
+                    suffix_to_rules = self.suffix_to_rules
+                    for c in reversed(from_):
+                        try:
+                            rules, suffix_to_rules = suffix_to_rules[c]
+                        except KeyError:
+                            rules = []
+                            new_suffix_to_rules = {}
+                            suffix_to_rules[c] = (rules, new_suffix_to_rules)
+                            suffix_to_rules = new_suffix_to_rules
+                    assert rules is not None
+                    rules.append(Rule(from_, to, type_, reason))
 
     def __call__(self, word: str) -> Iterator[Candidate]:
         """Iterate through possible deinflections of word (including word)
@@ -79,20 +84,22 @@ class Deinflector:
             candidate = q.pop()
             yield candidate
             word = candidate.word
-            for length in self.rule_lengths:
-                if len(word) < length:
-                    continue
-                suffix = word[-length:]
+            rules = None
+            suffix_to_rules = self.suffix_to_rules
+            for c in reversed(word):
+                if not suffix_to_rules:
+                    break
                 try:
-                    rules = self.rules[suffix]
+                    rules, suffix_to_rules = suffix_to_rules[c]
                 except KeyError:
-                    continue
+                    break
+
                 for rule in rules:
                     # check types match
                     if candidate.type_ & rule.type_ == 0:
                         continue
                     # append new candidate
                     q.append(Candidate(
-                        word=word[:-length] + rule.to,
+                        word=word.removesuffix(rule.from_) + rule.to,
                         type_=rule.type_ >> 8,
                     ))
