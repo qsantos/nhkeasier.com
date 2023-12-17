@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from edict.subedict import create_subedict, create_subenamdict
+from edict2.subedict import create_subedict, create_subenamdict
 
 from .forms import ContactForm
 from .models import Story
