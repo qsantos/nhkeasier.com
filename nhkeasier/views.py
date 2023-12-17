@@ -185,8 +185,8 @@ def archive(
         'previous_day': previous_day,
         'day': date,
         'next_day': next_day,
-        'edict': '\n'.join(create_subedict(content)),
-        'enamdict': '\n'.join(create_subenamdict(content)),
+        'edict': b'\n'.join(create_subedict(content)).decode('euc-jp'),
+        'enamdict': b'\n'.join(create_subenamdict(content)).decode('euc-jp'),
     })
 
 
@@ -242,8 +242,8 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
         'story': story,
         'previous_story': previous_story,
         'next_story': next_story,
-        'edict': '\n'.join(create_subedict(story.content)),
-        'enamdict': '\n'.join(create_subenamdict(story.content)),
+        'edict': b'\n'.join(create_subedict(story.content)).decode('euc-jp'),
+        'enamdict': b'\n'.join(create_subenamdict(story.content)).decode('euc-jp'),
     })
 
 

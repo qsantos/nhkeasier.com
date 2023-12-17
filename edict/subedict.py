@@ -50,7 +50,8 @@ def create_subenamdict(text: str) -> Set[str]:
 
 def save_subedict(subedict: Set[str], filename: str) -> None:
     with open(filename, 'wb') as f:
-        content = '\n'.join(sorted(subedict)) + '\n'
+        lines = [line.decode('euc-jp') for line in subedict]
+        content = '\n'.join(sorted(lines)) + '\n'
         f.write(content.encode('utf-8'))
 
 
