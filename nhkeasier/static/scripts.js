@@ -362,7 +362,7 @@ function iter_deinflections(word, callback) {
     }
 }
 
-function append_sense(html, sense, reason) {
+function append_meaning(html, sense, reason) {
     html.push('<dt>')
     sense.kanjis.forEach(function(kanji) {
         html.push('<span class="kanji">');
@@ -426,7 +426,7 @@ function rikai_html(text) {
                     return;
                 }
                 added_words.push(info);
-                append_sense(edict_html, info, reason);
+                append_meaning(edict_html, info, reason);
             });
         });
     });
@@ -438,7 +438,7 @@ function rikai_html(text) {
     const names_html = [];
     iter_subfragments(text, function(candidate) {
         const infos = enamdict[candidate] || [];
-        infos.forEach(function(info) { return append_sense(names_html, info); });
+        infos.forEach(function(info) { return append_meaning(names_html, info); });
     });
 
     if (names_html.length) {
