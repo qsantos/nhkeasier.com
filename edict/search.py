@@ -58,9 +58,9 @@ class Edict:
                 readings = common_marker.sub('', sreadings).split(';') if sreadings else []
                 for key in writings + readings:
                     try:
-                        self.words[key].add(entry)
+                        self.words[key].append(entry)
                     except KeyError:
-                        self.words[key] = {entry}
+                        self.words[key] = [entry]
 
     def search(self, word: str) -> Iterator[EdictEntry]:
         try:
