@@ -21,13 +21,11 @@ class Word:
         readings: List[str],
         glosses: str,
         edict_entry: str,  # full Edict entry corresponding to the word
-        edict_offset: int = 0,  # offset position in bytes of the entry
     ):
         self.writings = writings
         self.readings = readings
         self.glosses = glosses
         self.edict_entry = edict_entry
-        self.edict_offset = edict_offset
 
         self.kanji = self.writings[0]
         self.kana = self.readings[0] if self.readings else self.kanji
@@ -105,7 +103,7 @@ class Edict:
                 entry, swritings, sreadings, glosses = match.groups()
                 writings = common_marker.sub('', swritings).split(';')
                 readings = common_marker.sub('', sreadings).split(';') if sreadings else []
-                word = Word(writings, readings, glosses, entry, 0)
+                word = Word(writings, readings, glosses, entry)
 
                 # map writings and reading to word
                 for key in writings + readings:
