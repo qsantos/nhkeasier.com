@@ -45,15 +45,25 @@ class Edict:
                 readings = common_marker.sub('', sreadings).split(';') if sreadings else []
                 for key in writings + readings:
                     try:
-                        self.words[key].append(entry)
+                        entries = self.words[key]
                     except KeyError:
-                        self.words[key] = [entry]
+                        self.words[key] = entry
+                    else:
+                        if isinstance(entries, list):
+                            entries.append(entry)
+                        else:
+                            self.words[key] = [entries, entry]
 
     def search(self, word: str) -> Iterator[Tuple[str, int]]:
         try:
-            yield from self.words[word]
+            entries = self.words[word]
         except KeyError:
             return
+        else:
+            if isinstance(entries, list):
+                yield from self.words[word]
+            else:
+                yield entries
 
 
 edict = Edict(default_edict)
