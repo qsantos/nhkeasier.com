@@ -41,9 +41,9 @@ if (!String.prototype.endsWith) {
 /* Show time in locale format in tooltip when hovering <time> elements */
 (function(){
     $$('time').forEach(function(element) {
-        let iso8601 = element.getAttribute('datetime') || element.innerText
-        let datetime = new Date(iso8601);
-        let options = {
+        const iso8601 = element.getAttribute('datetime') || element.innerText
+        const datetime = new Date(iso8601);
+        const options = {
             year: 'numeric', month: 'long', day: 'numeric', weekday: 'long',
             hour: 'numeric', minute: 'numeric', second: 'numeric',
             timeZoneName: 'short',
@@ -54,7 +54,7 @@ if (!String.prototype.endsWith) {
 
 /* Toggle <rt> in <ruby> elements depending on <input type="radio"> */
 (function(){
-    let toggles = $('#rubby-toggles');
+    const toggles = $('#rubby-toggles');
     let last_mode = null;
     $$('input', toggles).forEach(function(element) {
         element.addEventListener('click', update);
@@ -71,8 +71,7 @@ if (!String.prototype.endsWith) {
         if (event.shiftKey) {
             set_mode('hover');
         } else {
-            let mode = get_mode();
-            if (mode == 'always') {
+            if (get_mode() == 'always') {
                 set_mode('never');
             } else {
                 set_mode('always');
@@ -100,15 +99,14 @@ if (!String.prototype.endsWith) {
         if (event.touches.length != 0) {
             return;
         }
-        let now = new Date().getTime();
+        const now = new Date().getTime();
         if (now - tap_start > 300) {
             return;
         }
         if (triple_tap) {
             set_mode('hover');
         } else {
-            let mode = get_mode();
-            if (mode == 'always') {
+            if (get_mode() == 'always') {
                 set_mode('never');
             } else {
                 set_mode('always');
@@ -123,7 +121,7 @@ if (!String.prototype.endsWith) {
 
     function set_mode(mode) {
         last_mode = get_mode();
-        let input_element = $('[value=' + mode + ']', toggles)
+        const input_element = $('[value=' + mode + ']', toggles)
         input_element.checked = true;
         update();
     }
@@ -133,7 +131,7 @@ if (!String.prototype.endsWith) {
     }
 
     function update(event) {
-        let mode = get_mode();
+        const mode = get_mode();
         localStorage.setItem('ruby-toggle', mode);
         document.body.classList.remove('ruby-never');
         document.body.classList.remove('ruby-always');
@@ -147,12 +145,12 @@ if (!String.prototype.endsWith) {
 
 /* The rest is rikai handling (loading EDICT and showing translations) */
 (function(){
-let edict = {};
-let enamdict = {};
-let deinflect = [];
+const edict = {};
+const enamdict = {};
+const deinflect = [];
 
 function fetch(url, callback) {
-    let req = new XMLHttpRequest();
+    const req = new XMLHttpRequest();
     req.addEventListener('load', function(event) {
         callback(req.response);
     });
@@ -166,10 +164,10 @@ function dict_set_or_append(dict, key, value) {
 }
 
 function parse_edict(dst, data) {
-    let edict_line_pattern = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
+    const edict_line_pattern = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
     let match;
     while ((match = edict_line_pattern.exec(data))) {
-        let glosses = match[3].replace(/\//g, '; ');
+        const glosses = match[3].replace(/\//g, '; ');
 
         let type = 1<<7;
         if (glosses.search('v1') >= 0)    { type |= 1<<0; }
@@ -178,11 +176,11 @@ function parse_edict(dst, data) {
         if (glosses.search('vk') >= 0)    { type |= 1<<3; }
         if (glosses.search('vs') >= 0)    { type |= 1<<4; }
 
-        let common_marker = /\([^)]*\)/gm;
+        const common_marker = /\([^)]*\)/gm;
 
         if (match[2]) {  // kanjis and kanas are given
-            let kanjis = match[1].replace(common_marker, '').split(';');
-            let kanas = match[2].replace(common_marker, '').split(';');
+            const kanjis = match[1].replace(common_marker, '').split(';');
+            const kanas = match[2].replace(common_marker, '').split(';');
 
             kanjis.forEach(function(kanji) {
                 dict_set_or_append(dst, kanji, {
@@ -202,7 +200,7 @@ function parse_edict(dst, data) {
                 });
             });
         } else {  // only kanas
-            let kanas = match[1].replace(common_marker, '').split(';');
+            const kanas = match[1].replace(common_marker, '').split(';');
             kanas.forEach(function(kana) {
                 dict_set_or_append(dst, kana, {
                     'kanjis': [],
@@ -224,16 +222,16 @@ function load_enamdict(data) {
 }
 
 function load_deinflect(data) {
-    let lines = data.split('\n');
-    let reasons = [];
+    const lines = data.split('\n');
+    const reasons = [];
     for (let i = 1; i < lines.length; i += 1) {  // skip headers
-        let fields = lines[i].split('\t');
+        const fields = lines[i].split('\t');
         if (fields.length == 1) {  // string array
             reasons.push(lines[i]);
         } else {  // deinflection
-            let from = fields[0];
-            let to = fields[1];
-            let type = fields[2];
+            const from = fields[0];
+            const to = fields[1];
+            const type = fields[2];
             let reason = fields[3];
             reason = reasons[reason];
             deinflect.push([from, to, type, reason]);
@@ -278,7 +276,7 @@ function get_text_at_point(x, y) {
         return '';
     }
     // check that the cursor is actually within target
-    let rect = target.parentNode.getBoundingClientRect();
+    const rect = target.parentNode.getBoundingClientRect();
     if (!rect ||
         !(rect.left <= x && x <= rect.right) ||
         !(rect.top <= y && y <= rect.bottom)) {
@@ -295,7 +293,7 @@ function get_text_at_point(x, y) {
     } while (display == 'inline' || display == 'ruby');
     // treeWalker and nodeIterator are the same unless the DOM is modified
     // <https://mail-archives.apache.org/mod_mbox/xml-general/200012.mbox/%3C002d01c05bbe$42d71680$1000a8c0@equitytg.com%3E>
-    let treeWalker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
+    const treeWalker = document.createTreeWalker(parent, NodeFilter.SHOW_TEXT, null, false);
 
     while (treeWalker.nextNode() != target);  // skip nodes before target
     let text = target.data.substring(offset);
@@ -310,35 +308,35 @@ function get_text_at_point(x, y) {
 }
 
 function iter_subfragments(text, callback) {
-    let re = /^[\u25cb\u3004-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]+/g;
-    let match = re.exec(text);
+    const re = /^[\u25cb\u3004-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]+/g;
+    const match = re.exec(text);
     if (!match) {
         return;
     }
-    let fragment = match[0];
+    const fragment = match[0];
     for (var stop = fragment.length+1; stop --> 1; ) {
         callback(fragment.substring(0, stop));
     }
 }
 
 function iter_deinflections(word, callback) {
-    let candidates = [[word, 0xff, []]]
+    const candidates = [[word, 0xff, []]]
     // consider all candidates and their deinflections recursively
     for (let i = 0; i < candidates.length; i += 1) {
-        let candidate = candidates[i];
-        let word = candidate[0];
-        let wtype = candidate[1];
-        let wreason = candidate[2];
+        const candidate = candidates[i];
+        const word = candidate[0];
+        const wtype = candidate[1];
+        const wreason = candidate[2];
 
         callback(word, wtype, wreason);
 
         // iterate over rules
         for (let j = 0; j < deinflect.length; j += 1) {
-            let rule = deinflect[j];
-            let rfrom = rule[0];
-            let rto = rule[1];
-            let rtype = rule[2];
-            let rreason = rule[3];
+            const rule = deinflect[j];
+            const rfrom = rule[0];
+            const rto = rule[1];
+            const rtype = rule[2];
+            const rreason = rule[3];
 
             // check types match
             if (wtype & rtype === 0) {
@@ -350,9 +348,9 @@ function iter_deinflections(word, callback) {
             }
 
             // append new candidate
-            let new_word = word.substr(0, word.length-rfrom.length) + rto;  // replace suffix
-            let new_type = rtype >> 8;
-            let new_reason = wreason.slice();
+            const new_word = word.substr(0, word.length-rfrom.length) + rto;  // replace suffix
+            const new_type = rtype >> 8;
+            const new_reason = wreason.slice();
             new_reason.push(rreason);
             candidates.push([new_word, new_type, new_reason])
             /* NOTE: could check that new_word is already in candidates
@@ -385,17 +383,17 @@ function append_sense(html, sense, reason) {
     html.push('<dd>');
 
     // extract meanings
-    let meanings = [];
+    const meanings = [];
     let last_meaning = [];
     sense.glosses.split('; ').forEach(function(gloss) {
         if (gloss == '(P)' || gloss.startsWith('EntL')) {
             return;
         }
 
-        let match = /^(?:\(([^0-9]\S?)\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/.exec(gloss);
-        let nature = match[1];
-        let meaning_id = match[2];
-        let meaning = match[3];
+        const match = /^(?:\(([^0-9]\S?)\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/.exec(gloss);
+        const nature = match[1];
+        const meaning_id = match[2];
+        const meaning = match[3];
         if (meaning_id !== undefined && last_meaning.length !== 0) {
             meanings.push(last_meaning.join('; '));
             last_meaning = [];
@@ -417,11 +415,11 @@ function append_sense(html, sense, reason) {
 }
 
 function rikai_html(text) {
-    let edict_html = [];
-    let added_words = [];
+    const edict_html = [];
+    const added_words = [];
     iter_subfragments(text, function(subfragment) {
         iter_deinflections(subfragment, function(candidate, type, reason) {
-            let infos = edict[candidate] || [];
+            const infos = edict[candidate] || [];
             infos.filter(function(info) { return (info.type & type) !== 0; })
             .forEach(function(info) {
                 if (added_words.indexOf(info) >= 0) {
@@ -437,9 +435,9 @@ function rikai_html(text) {
         return '<dl>' + edict_html.join('') + '</dl>';
     }
 
-    let names_html = [];
+    const names_html = [];
     iter_subfragments(text, function(candidate) {
-        let infos = enamdict[candidate] || [];
+        const infos = enamdict[candidate] || [];
         infos.forEach(function(info) { return append_sense(names_html, info); });
     });
 
@@ -460,28 +458,28 @@ function main() {
     fetch('/media/subedict/' + edict_filename, load_edict);
     fetch('/media/subenamdict/' + edict_filename, load_enamdict);
 
-    let rikai = document.createElement('div');
+    const rikai = document.createElement('div');
     rikai.id = 'rikai';
     document.body.appendChild(rikai);
 
     let last_click = 0;
     function update_rikai(cursorX, cursorY) {
-        let now = new Date().getTime();
+        const now = new Date().getTime();
         if (now - last_click < 1000) {  // 1 second
             return;
         }
 
-        let r = get_text_at_point(cursorX, cursorY);
-        let text = r[0];
-        let range = r[1];
-        let target = r[2];
+        const r = get_text_at_point(cursorX, cursorY);
+        const text = r[0];
+        const range = r[1];
+        const target = r[2];
 
-        let html = rikai_html(text);
+        const html = rikai_html(text);
         if (html.length == 0) {
             rikai.style.display = 'none';
         } else {
-            let lineheight = 39;
-            let vertical_margin = 5;
+            const lineheight = 39;
+            const vertical_margin = 5;
 
             rikai.innerHTML = html;
             rikai.style.display = 'block';
@@ -496,9 +494,9 @@ function main() {
 
             // fix edge case where caret is at the end of previous line
             // we detect this by comparing to the cursor position
-            let dx = x - cursorX;
-            let dy = y - cursorY;
-            let d2 = dx*dx + dy*dy;
+            const dx = x - cursorX;
+            const dy = y - cursorY;
+            const d2 = dx*dx + dy*dy;
             if (d2 > 10000) {  // more than 100px away
                 x = target.parentNode.getBoundingClientRect().left;
                 y += lineheight;
@@ -510,7 +508,7 @@ function main() {
             x = Math.max(0, Math.min(x, document.documentElement.clientWidth - rect.width));
             // avoid bottom overflow
             if (y + rect.height > document.documentElement.clientHeight) {
-                let offset = 2*vertical_margin + lineheight + rect.height;
+                const offset = 2*vertical_margin + lineheight + rect.height;
                 if (y - offset > 0) {  // no point in clipping the top
                     y -= offset;
                 }
