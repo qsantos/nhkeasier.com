@@ -7,8 +7,6 @@ from .furigana import furigana_from_kanji_kana
 # default filenames
 default_edict = os.path.join(os.path.dirname(__file__), 'edict2')
 default_enamdict = os.path.join(os.path.dirname(__file__), 'enamdict')
-default_edict_index = os.path.join(os.path.dirname(__file__), 'edict2_index')
-default_enamdict_index = os.path.join(os.path.dirname(__file__), 'enamdict_index')
 
 # pre-compile regular expressions
 edict_line_pattern = re.compile(r'(?m)(^(\S*) (?:\[(\S*?)\] )?/(.*)/.*$)')
