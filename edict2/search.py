@@ -35,7 +35,9 @@ class Edict:
     def __init__(self, filename: str = default_edict):
         self.words: dict[str, EdictEntry | list[EdictEntry]] = {}
         with open(filename, mode='rb') as f:
-            for line in f:
+            lines = iter(f)
+            next(lines)  # skip header
+            for line in lines:
                 match = edict_line_pattern.match(line)
                 if not match:
                     continue
