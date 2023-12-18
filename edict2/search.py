@@ -7,7 +7,7 @@ default_edict = os.path.join(os.path.dirname(__file__), 'edict2')
 default_enamdict = os.path.join(os.path.dirname(__file__), 'enamdict')
 
 # pre-compile regular expressions
-edict_line_pattern = re.compile(rb'(?m)^(\S*) (?:\[(\S*?)\] )?/(.*)/')
+edict_line_pattern = re.compile(rb'(?m)^(\S*) (?:\[(\S*?)\] )?/(?:\(([^)]*?)\))?')
 common_marker = re.compile(rb'\([^)]*\)')
 
 EdictEntry = Tuple[bytes, int]
@@ -16,16 +16,18 @@ EdictEntry = Tuple[bytes, int]
 def type_from_glosses(glosses: bytes) -> int:
     """Return type mask for deinflections"""
     type_ = 1 << 7
-    if re.search(rb'\bv1\b', glosses):
-        type_ |= 1 << 0
-    if re.search(rb'\bv5.\b', glosses):
-        type_ |= 1 << 1
-    if re.search(rb'\badj-i\b', glosses):
-        type_ |= 1 << 2
-    if re.search(rb'\bvk\b', glosses):
-        type_ |= 1 << 3
-    if re.search(rb'\bvs\b', glosses):
-        type_ |= 1 << 4
+    if glosses:
+        for gloss in glosses.split(b','):
+            if gloss == b'v1':
+                type_ |= 1 << 0
+            elif gloss.startswith(b'v5'):
+                type_ |= 1 << 1
+            elif gloss == b'adj-i':
+                type_ |= 1 << 2
+            elif gloss == b'vk':
+                type_ |= 1 << 3
+            elif gloss == b'vs':
+                type_ |= 1 << 4
     return type_
 
 
