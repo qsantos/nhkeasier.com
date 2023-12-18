@@ -26,7 +26,7 @@ def type_from_glosses(glosses: bytes) -> int:
                 type_ |= 1 << 2
             elif gloss == b'vk':
                 type_ |= 1 << 3
-            elif gloss == b'vs':
+            elif gloss == b'vs' or gloss.startswith(b'vs-'):
                 type_ |= 1 << 4
     return type_
 
