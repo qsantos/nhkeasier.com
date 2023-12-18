@@ -1,0 +1,11 @@
+[package]
+name = "edict2"
+version = "0.1.0"
+edition = "2021"
+
+[profile.profiling]
+inherits = "release"
+debug = true
+
+[dependencies]
+regex = "1.10.2"

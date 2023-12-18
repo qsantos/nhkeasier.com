@@ -5,3 +5,4 @@ __pycache__/
 /static/
 nhkeasier/secrets.py
 /venv/
+target/
