@@ -3,6 +3,8 @@ use std::collections::HashMap;
 
 use regex::Regex;
 
+use edict2::Deinflector;
+
 struct EdictEntry<'a> {
     line: &'a str,
     type_: u32,
@@ -74,50 +76,12 @@ fn parse_edict(data: &str) -> HashMap<&str, Vec<EdictEntry<'_>>> {
     entries
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct Rule {
-    from: String,
-    to: String,
-    type_: u32,
-    reason: String,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-struct Candidate {
-    word: String,
-    type_: u32,
-}
-
 fn main() {
     let data = std::fs::read_to_string("edict2").unwrap();
     let edict2 = parse_edict(&data);
 
     let data = std::fs::read_to_string("deinflect.dat").unwrap();
-    // NOTE: skip(1) for header on first line
-    let mut rules: HashMap<&str, Vec<Rule>> = HashMap::new();
-    let mut reasons = Vec::new();
-    for line in data.lines().skip(1) {
-        let fields: Vec<&str> = line.split('\t').collect();
-        match fields[..] {
-            [_] => reasons.push(line),
-            [from, to, type_, reason] => {
-                let type_: u32 = type_.parse().unwrap();
-                let reason: usize = reason.parse().unwrap();
-                let reason = reasons[reason];
-                let rule = Rule {
-                    from: from.to_string(),
-                    to: to.to_string(),
-                    type_,
-                    reason: reason.to_string(),
-                };
-                match rules.entry(from) {
-                    Entry::Occupied(mut e) => e.get_mut().push(rule),
-                    Entry::Vacant(e) => drop(e.insert(vec![rule])),
-                }
-            }
-            _ => panic!("unexpected line {line}"),
-        }
-    }
+    let deinflector = Deinflector::parse(&data);
 
     // iter fragments
     let data = std::fs::read_to_string("test-input").unwrap();
@@ -138,13 +102,7 @@ fn main() {
             let suffix = &fragment[start..];
             for (end, c) in suffix.char_indices() {
                 let word = &suffix[..end + c.len_utf8()];
-
-                // iter deinflections
-                let mut candidates = vec![Candidate {
-                    word: word.to_string(),
-                    type_: 0xff,
-                }];
-                while let Some(candidate) = candidates.pop() {
+                for candidate in deinflector.deinflect(word) {
                     // iter search
                     if let Some(entries) = edict2.get(&candidate.word as &str) {
                         for entry in entries {
@@ -154,21 +112,6 @@ fn main() {
                         }
                     }
                     // end search
-
-                    for (start, _) in candidate.word.char_indices().rev().take(9) {
-                        let suffix = &candidate.word[start..];
-                        if let Some(rules) = rules.get(suffix) {
-                            for rule in rules {
-                                if candidate.type_ & rule.type_ == 0 {
-                                    continue;
-                                }
-                                candidates.push(Candidate {
-                                    word: format!("{}{}", &candidate.word[..start], rule.to),
-                                    type_: rule.type_ >> 8,
-                                })
-                            }
-                        }
-                    }
                 }
             }
         }
