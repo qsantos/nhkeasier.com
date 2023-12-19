@@ -14,7 +14,7 @@ fn main() {
     let fragments: HashSet<&str> = iter_fragments(&data).collect();
 
     let mut candidates = HashSet::new();
-    for fragment in fragments  {
+    for fragment in fragments {
         candidates.extend(deinflector.deinflect(fragment));
     }
 

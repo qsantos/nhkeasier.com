@@ -1,4 +1,3 @@
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -14,6 +13,9 @@ pub struct Candidate {
     pub word: String,
     pub type_: u32,
 }
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct SuffixToRules(HashMap<char, (Vec<Rule>, SuffixToRules)>);
 
 // deinflect.dat countains instructions to remove inflections from words
 // the first line is a header
@@ -36,14 +38,34 @@ pub struct Candidate {
 // for a rule, type[8:16] gives the grammatical class of the resulting word
 // thus, the new word has type wtype = rtyle >> 8
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Deinflector<'a> {
-    rules: HashMap<&'a str, Vec<Rule>>,
+pub struct Deinflector {
+    suffix_to_rules: SuffixToRules,
 }
 
-impl<'a> Deinflector<'a> {
-    pub fn parse(data: &'a str) -> Self {
+impl Deinflector {
+    pub fn parse(data: &str) -> Self {
+        fn aux<I: Iterator<Item = char>>(
+            chars: &mut I,
+            rule: Rule,
+            cur_suffix_to_rules: &mut SuffixToRules,
+            cur_rules: Option<&mut Vec<Rule>>,
+        ) {
+            if let Some(c) = chars.next() {
+                if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get_mut(&c) {
+                    aux(chars, rule, suffix_to_rules, Some(rules));
+                } else {
+                    let mut rules = Vec::new();
+                    let mut suffix_to_rules = SuffixToRules(HashMap::new());
+                    aux(chars, rule, &mut suffix_to_rules, Some(&mut rules));
+                    cur_suffix_to_rules.0.insert(c, (rules, suffix_to_rules));
+                }
+            } else {
+                cur_rules.unwrap().push(rule);
+            }
+        }
+
         // NOTE: skip(1) for header on first line
-        let mut rules: HashMap<&str, Vec<Rule>> = HashMap::new();
+        let mut suffix_to_rules = SuffixToRules(HashMap::new());
         let mut reasons = Vec::new();
         for line in data.lines().skip(1) {
             let fields: Vec<&str> = line.split('\t').collect();
@@ -59,15 +81,12 @@ impl<'a> Deinflector<'a> {
                         type_,
                         reason: reason.to_string(),
                     };
-                    match rules.entry(from) {
-                        Entry::Occupied(mut e) => e.get_mut().push(rule),
-                        Entry::Vacant(e) => drop(e.insert(vec![rule])),
-                    }
+                    aux(&mut from.chars().rev(), rule, &mut suffix_to_rules, None)
                 }
                 _ => panic!("unexpected line {line}"),
             }
         }
-        Deinflector { rules }
+        Deinflector { suffix_to_rules }
     }
 
     pub fn deinflect(&self, word: &str) -> Iter<'_> {
@@ -82,7 +101,7 @@ impl<'a> Deinflector<'a> {
 }
 
 pub struct Iter<'a> {
-    deinflector: &'a Deinflector<'a>,
+    deinflector: &'a Deinflector,
     candidates: Vec<Candidate>,
 }
 
@@ -91,18 +110,22 @@ impl<'a> Iterator for Iter<'a> {
     fn next(&mut self) -> Option<Self::Item> {
         // iter deinflections
         if let Some(candidate) = self.candidates.pop() {
-            for (start, _) in candidate.word.char_indices().rev().take(9) {
-                let suffix = &candidate.word[start..];
-                if let Some(rules) = self.deinflector.rules.get(suffix) {
+            let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
+            for c in candidate.word.chars().rev() {
+                if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get(&c) {
+                    cur_suffix_to_rules = suffix_to_rules;
                     for rule in rules {
                         if candidate.type_ & rule.type_ == 0 {
                             continue;
                         }
+                        let prefix = candidate.word.strip_suffix(&rule.from).unwrap();
                         self.candidates.push(Candidate {
-                            word: format!("{}{}", &candidate.word[..start], rule.to),
+                            word: format!("{}{}", prefix, rule.to),
                             type_: rule.type_ >> 8,
                         })
                     }
+                } else {
+                    break;
                 }
             }
             Some(candidate)
