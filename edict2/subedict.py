@@ -49,11 +49,16 @@ def create_subenamdict(text: str) -> Set[bytes]:
     }
 
 
+def export_subedict(subedict: Set[bytes], sort: bool = False) -> str:
+    lines = [line.decode('euc-jp') for line in subedict]
+    if sort:
+        lines.sort()
+    return '\n'.join(lines) + '\n'
+
+
 def save_subedict(subedict: Set[bytes], filename: str) -> None:
-    with open(filename, 'wb') as f:
-        lines = [line.decode('euc-jp') for line in subedict]
-        content = '\n'.join(sorted(lines)) + '\n'
-        f.write(content.encode('utf-8'))
+    with open(filename, 'w') as f:
+        f.write(export_subedict(subedict, sort=True))
 
 
 def main() -> None:
