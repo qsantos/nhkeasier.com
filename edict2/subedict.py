@@ -50,7 +50,7 @@ def create_subenamdict(text: str) -> Set[bytes]:
 
 
 def export_subedict(subedict: Set[bytes], sort: bool = False) -> str:
-    lines = [line.decode('euc-jp') for line in subedict]
+    lines = [line.decode() for line in subedict]
     if sort:
         lines.sort()
     return '\n'.join(lines) + '\n'

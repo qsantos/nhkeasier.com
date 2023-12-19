@@ -50,7 +50,7 @@ class Edict:
                 writings = common_marker.sub(b'', swritings).split(b';')
                 readings = common_marker.sub(b'', sreadings).split(b';') if sreadings else []
                 for key in writings + readings:
-                    decoded_key = key.decode('euc-jp')
+                    decoded_key = key.decode()
                     try:
                         entries = self.words[decoded_key]
                     except KeyError:
