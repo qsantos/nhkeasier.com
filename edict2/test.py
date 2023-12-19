@@ -5,7 +5,10 @@ from difflib import unified_diff
 from sys import stderr
 from tempfile import NamedTemporaryFile
 
+from .search import edict
 from .subedict import create_subedict, create_subenamdict, save_subedict
+
+_ = edict
 
 input_path = os.path.join(os.path.dirname(__file__), 'test-input')
 output_edict_path = os.path.join(os.path.dirname(__file__), 'test-output-edict')
