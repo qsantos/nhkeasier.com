@@ -108,7 +108,6 @@ pub struct Iter<'a> {
 impl<'a> Iterator for Iter<'a> {
     type Item = Candidate;
     fn next(&mut self) -> Option<Self::Item> {
-        // iter deinflections
         if let Some(candidate) = self.candidates.pop() {
             let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
             for c in candidate.word.chars().rev() {
