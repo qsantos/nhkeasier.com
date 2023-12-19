@@ -120,7 +120,7 @@ impl<'a> Iterator for Iter<'a> {
                         }
                         let prefix = candidate.word.strip_suffix(&rule.from).unwrap();
                         self.candidates.push(Candidate {
-                            word: format!("{}{}", prefix, rule.to),
+                            word: String::from(prefix) + &rule.to,
                             type_: rule.type_ >> 8,
                         })
                     }
