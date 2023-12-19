@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use std::io::{stdout, BufWriter, Write};
 
 use edict2::{iter_fragments, Deinflector, Edict};
@@ -11,14 +11,14 @@ fn main() {
     let deinflector = Deinflector::parse(&data);
 
     let data = std::fs::read_to_string("test-input").unwrap();
-    let fragments: HashSet<&str> = iter_fragments(&data).collect();
+    let fragments: BTreeSet<&str> = iter_fragments(&data).collect();
 
-    let mut candidates = HashSet::new();
+    let mut candidates = BTreeSet::new();
     for fragment in fragments {
         candidates.extend(deinflector.deinflect(fragment));
     }
 
-    let mut lines = HashSet::new();
+    let mut lines = BTreeSet::new();
     for candidate in candidates {
         if let Some(entries) = edict2.lookup(&candidate.word as &str) {
             for entry in entries {

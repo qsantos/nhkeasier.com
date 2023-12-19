@@ -8,7 +8,7 @@ struct Rule<'a> {
     reason: &'a str,
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Candidate {
     pub word: String,
     pub type_: u32,
