@@ -1,4 +1,3 @@
-import json
 import os
 import unittest
 from datetime import datetime, timezone
@@ -8,7 +7,7 @@ from tempfile import NamedTemporaryFile
 
 from .subedict import create_subedict, create_subenamdict, save_subedict
 
-input_path = os.path.join(os.path.dirname(__file__), 'test-input.json')
+input_path = os.path.join(os.path.dirname(__file__), 'test-input')
 output_edict_path = os.path.join(os.path.dirname(__file__), 'test-output-edict')
 output_enamdict_path = os.path.join(os.path.dirname(__file__), 'test-output-enamdict')
 
@@ -24,8 +23,7 @@ class TestSubedict(unittest.TestCase):
 
     def test_subedict(self) -> None:
         with open(input_path) as f:
-            stories = json.load(f)
-        content = ''.join(story['content'] for story in stories)
+            content = f.read()
         with NamedTemporaryFile() as f:
             start = datetime.now(tz=timezone.utc)
             save_subedict(create_subedict(content), f.name)
@@ -36,8 +34,7 @@ class TestSubedict(unittest.TestCase):
 
     def test_subenamdict(self) -> None:
         with open(input_path) as f:
-            stories = json.load(f)
-        content = ''.join(story['content'] for story in stories)
+            content = f.read()
         with NamedTemporaryFile() as f:
             start = datetime.now(tz=timezone.utc)
             save_subedict(create_subenamdict(content), f.name)
