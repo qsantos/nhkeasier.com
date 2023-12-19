@@ -41,6 +41,10 @@ class Story(models.Model):
 
     class Meta:
         verbose_name_plural = 'stories'
+        indexes = [
+           models.Index(fields=['story_id']),
+           models.Index(fields=['published']),
+        ]
 
     def __str__(self) -> str:
         return f'{self.id}: {self.title}'
