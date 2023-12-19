@@ -119,8 +119,34 @@ def archive(
         })
 
     # information for links (canonical URL, links to previous and next days)
-    previous_day = stories.filter(published__date__lt=date).order_by('-published').first()
-    next_day = stories.filter(published__date__gt=date).order_by('published').first()
+    # NOTE: Django's ORM is way too slow at generating the SQL queries
+    dt = str(date)
+    try:
+        previous_day = stories.raw(
+            """
+                SELECT "nhkeasier_story"."id", "nhkeasier_story"."published"
+                FROM "nhkeasier_story"
+                WHERE date("nhkeasier_story"."published") < %s
+                ORDER BY "nhkeasier_story"."published" DESC
+                LIMIT 1
+            """,
+            [dt],
+        )[0]
+    except IndexError:
+        previous_day = None
+    try:
+        next_day = stories.raw(
+            """
+                SELECT "nhkeasier_story"."id", "nhkeasier_story"."published"
+                FROM "nhkeasier_story"
+                WHERE date("nhkeasier_story"."published") > %s
+                ORDER BY "nhkeasier_story"."published" ASC
+                LIMIT 1
+            """,
+            [dt],
+        )[0]
+    except IndexError:
+        next_day = None
 
     stories = stories.filter(published__date=date).order_by('-published', '-id')
     if not stories:
