@@ -101,6 +101,7 @@ def archive(
             return handler400(request, e)
         header = f'Stories on {date}'
     elif stories.count():
+        # TODO: avoid doing a separate query for this
         story = stories.order_by('-published').first()
         if story is None:
             return handler404(request, None)
