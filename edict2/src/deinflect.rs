@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
-struct Rule {
-    from: String,
-    to: String,
+struct Rule<'a> {
+    from: &'a str,
+    to: &'a str,
     type_: u32,
-    reason: String,
+    reason: &'a str,
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -15,7 +15,7 @@ pub struct Candidate {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct SuffixToRules(HashMap<char, (Vec<Rule>, SuffixToRules)>);
+struct SuffixToRules<'a>(HashMap<char, (Vec<Rule<'a>>, SuffixToRules<'a>)>);
 
 // deinflect.dat countains instructions to remove inflections from words
 // the first line is a header
@@ -38,17 +38,17 @@ struct SuffixToRules(HashMap<char, (Vec<Rule>, SuffixToRules)>);
 // for a rule, type[8:16] gives the grammatical class of the resulting word
 // thus, the new word has type wtype = rtyle >> 8
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Deinflector {
-    suffix_to_rules: SuffixToRules,
+pub struct Deinflector<'a> {
+    suffix_to_rules: SuffixToRules<'a>,
 }
 
-impl Deinflector {
-    pub fn parse(data: &str) -> Self {
-        fn aux<I: Iterator<Item = char>>(
+impl<'a> Deinflector<'a> {
+    pub fn parse(data: &'a str) -> Self {
+        fn aux<'a, I: Iterator<Item = char>>(
             chars: &mut I,
-            rule: Rule,
-            cur_suffix_to_rules: &mut SuffixToRules,
-            cur_rules: Option<&mut Vec<Rule>>,
+            rule: Rule<'a>,
+            cur_suffix_to_rules: &mut SuffixToRules<'a>,
+            cur_rules: Option<&mut Vec<Rule<'a>>>,
         ) {
             if let Some(c) = chars.next() {
                 if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get_mut(&c) {
@@ -76,10 +76,10 @@ impl Deinflector {
                     let reason: usize = reason.parse().unwrap();
                     let reason = reasons[reason];
                     let rule = Rule {
-                        from: from.to_string(),
-                        to: to.to_string(),
+                        from,
+                        to,
                         type_,
-                        reason: reason.to_string(),
+                        reason,
                     };
                     aux(&mut from.chars().rev(), rule, &mut suffix_to_rules, None)
                 }
@@ -101,7 +101,7 @@ impl Deinflector {
 }
 
 pub struct Iter<'a> {
-    deinflector: &'a Deinflector,
+    deinflector: &'a Deinflector<'a>,
     candidates: Vec<Candidate>,
 }
 
@@ -120,7 +120,7 @@ impl<'a> Iterator for Iter<'a> {
                         }
                         let prefix = candidate.word.strip_suffix(&rule.from).unwrap();
                         self.candidates.push(Candidate {
-                            word: String::from(prefix) + &rule.to,
+                            word: String::from(prefix) + rule.to,
                             type_: rule.type_ >> 8,
                         })
                     }
