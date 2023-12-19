@@ -165,16 +165,46 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
         return handler404(request, None)
 
     # information for links (canonical URL, links to previous and next stories)
-    # previous story
-    stores_previous_ids = Story.objects.filter(published__date=story.published.date(), id__lt=story.id)
-    stories_previous_days = Story.objects.filter(published__date__lt=story.published.date())
-    previous_stories = stores_previous_ids | stories_previous_days
-    previous_story = previous_stories.order_by('-published', '-id').first()
-    # next story
-    stories_next_ids = Story.objects.filter(published__date=story.published.date(), id__gt=story.id)
-    stories_next_days = Story.objects.filter(published__date__gt=story.published.date())
-    next_stories = stories_next_ids | stories_next_days
-    next_story = next_stories.order_by('published', 'id').first()
+    # NOTE: Django's ORM is way too slow at generating the SQL queries
+    dt = story.published.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        previous_story = Story.objects.raw(
+            """
+                SELECT "nhkeasier_story"."id"
+                FROM "nhkeasier_story"
+                WHERE (
+                    ("nhkeasier_story"."id" < %s AND "nhkeasier_story"."published" = %s)
+                    OR
+                    "nhkeasier_story"."published" < %s
+                )
+                ORDER BY
+                    "nhkeasier_story"."published" DESC,
+                    "nhkeasier_story"."id" DESC
+                LIMIT 1
+            """,
+            [id, dt, dt],
+        )[0]
+    except IndexError:
+        previous_story = None
+    try:
+        next_story = Story.objects.raw(
+            """
+                SELECT "nhkeasier_story"."id"
+                FROM "nhkeasier_story"
+                WHERE (
+                    ("nhkeasier_story"."id" > %s AND "nhkeasier_story"."published" = %s)
+                    OR
+                    "nhkeasier_story"."published" > %s
+                )
+                ORDER BY
+                    "nhkeasier_story"."published" ASC,
+                    "nhkeasier_story"."id" ASC
+                LIMIT 1
+            """,
+            [id, dt, dt],
+        )[0]
+    except IndexError:
+        next_story = None
 
     # media for OpenGraph and such
     image = request.build_absolute_uri(story.image.url) if story.image else None
