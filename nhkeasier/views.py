@@ -148,14 +148,18 @@ def archive(
     except IndexError:
         next_day = None
 
-    stories = stories.filter(published__date=date).order_by('-published', '-id')
+    stories = list(stories.filter(published__date=date).order_by('-published', '-id'))
     if not stories:
         return handler404(request, None)
 
     # select interesting story
-    story = stories.exclude(video_reencoded='').first()
-    if story is None:
-        story = stories.exclude(image='').first()
+    try:
+        story = next(story for story in stories if story.video_reencoded)
+    except StopIteration:
+        try:
+            story = next(story for story in stories if story.image)
+        except StopIteration:
+            story = None
     # media for OpenGraph and such
     if story is not None and story.video_reencoded:
         player = request.build_absolute_uri(reverse('player', args=[story.id]))
