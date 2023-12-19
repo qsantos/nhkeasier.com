@@ -1,11 +1,13 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct EdictEntry<'a> {
     pub line: &'a str,
     pub type_: u32,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Edict<'a> {
     entries: HashMap<&'a str, Vec<EdictEntry<'a>>>,
 }

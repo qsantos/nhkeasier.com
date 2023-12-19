@@ -21,7 +21,9 @@ pub fn iter_fragments(data: &str) -> impl Iterator<Item = &str> {
         let fragment = m.as_str();
         fragment.char_indices().flat_map(|(start, _)| {
             let suffix = &fragment[start..];
-            suffix.char_indices().map(|(end, c)| &suffix[..end + c.len_utf8()])
+            suffix
+                .char_indices()
+                .map(|(end, c)| &suffix[..end + c.len_utf8()])
         })
     })
 }

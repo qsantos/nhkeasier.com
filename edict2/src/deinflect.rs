@@ -1,7 +1,7 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct Rule {
     from: String,
     to: String,
@@ -9,12 +9,13 @@ struct Rule {
     reason: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Candidate {
     pub word: String,
     pub type_: u32,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Deinflector<'a> {
     rules: HashMap<&'a str, Vec<Rule>>,
 }
