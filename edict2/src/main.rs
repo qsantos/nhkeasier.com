@@ -13,7 +13,7 @@ fn main() {
     let data = std::fs::read_to_string("test-input").unwrap();
     let fragments: BTreeSet<&str> = iter_fragments(&data).collect();
 
-    let mut candidates = BTreeSet::new();
+    let mut candidates = Vec::new();
     for fragment in fragments {
         candidates.extend(deinflector.deinflect(fragment));
     }
