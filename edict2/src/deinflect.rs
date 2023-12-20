@@ -117,9 +117,13 @@ impl<'a> Iterator for Iter<'a> {
                         if candidate.type_ & rule.type_ == 0 {
                             continue;
                         }
-                        let prefix = candidate.word.strip_suffix(&rule.from).unwrap();
+                        let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
+                        let prefix = &candidate.word[..prefix_len];
+                        let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
+                        word.push_str(prefix);
+                        word.push_str(rule.to);
                         self.candidates.push(Candidate {
-                            word: String::from(prefix) + rule.to,
+                            word,
                             type_: rule.type_ >> 8,
                         })
                     }
