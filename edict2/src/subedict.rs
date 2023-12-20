@@ -33,8 +33,9 @@ impl SubEdictCreator {
             let fragments: HashSet<&str> = iter_fragments(content).collect();
 
             let mut candidates = Vec::new();
+            let mut buffer = Vec::new();
             for fragment in fragments {
-                candidates.extend(fields.deinflector.deinflect(fragment));
+                candidates.extend(fields.deinflector.deinflect(fragment, &mut buffer));
             }
 
             let mut lines = HashSet::new();

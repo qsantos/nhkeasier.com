@@ -89,23 +89,25 @@ impl<'a> Deinflector<'a> {
         Deinflector { suffix_to_rules }
     }
 
-    pub fn deinflect(&self, word: &str) -> Iter<'_> {
+    pub fn deinflect<'b>(&self, word: &str, vec: &'b mut Vec<Candidate>) -> Iter<'_, 'b> {
+        vec.clear();
+        vec.push(Candidate {
+            word: word.to_string(),
+            type_: 0xff,
+        });
         Iter {
             deinflector: self,
-            candidates: vec![Candidate {
-                word: word.to_string(),
-                type_: 0xff,
-            }],
+            candidates: vec,
         }
     }
 }
 
-pub struct Iter<'a> {
+pub struct Iter<'a, 'b> {
     deinflector: &'a Deinflector<'a>,
-    candidates: Vec<Candidate>,
+    candidates: &'b mut Vec<Candidate>,
 }
 
-impl<'a> Iterator for Iter<'a> {
+impl<'a, 'b> Iterator for Iter<'a, 'b> {
     type Item = Candidate;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(candidate) = self.candidates.pop() {
