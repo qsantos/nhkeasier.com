@@ -12,4 +12,5 @@ debug = true
 
 [dependencies]
 lazy_static = "1.4.0"
+ouroboros = "0.18.1"
 regex = { version = "1.10.2", default-features = false, features = ["std", "perf"] }
