@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
@@ -9,8 +10,8 @@ struct Rule<'a> {
 }
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Candidate {
-    pub word: String,
+pub struct Candidate<'a> {
+    pub word: Cow<'a, str>,
     pub type_: u32,
 }
 
@@ -89,10 +90,14 @@ impl<'a> Deinflector<'a> {
         Deinflector { suffix_to_rules }
     }
 
-    pub fn deinflect<'b>(&self, word: &str, vec: &'b mut Vec<Candidate>) -> Iter<'_, 'b> {
+    pub fn deinflect<'b, 'c>(
+        &self,
+        word: &'c str,
+        vec: &'b mut Vec<Candidate<'c>>,
+    ) -> Iter<'_, 'b, 'c> {
         vec.clear();
         vec.push(Candidate {
-            word: word.to_string(),
+            word: Cow::Borrowed(word),
             type_: 0xff,
         });
         Iter {
@@ -102,13 +107,13 @@ impl<'a> Deinflector<'a> {
     }
 }
 
-pub struct Iter<'a, 'b> {
+pub struct Iter<'a, 'b, 'c> {
     deinflector: &'a Deinflector<'a>,
-    candidates: &'b mut Vec<Candidate>,
+    candidates: &'b mut Vec<Candidate<'c>>,
 }
 
-impl<'a, 'b> Iterator for Iter<'a, 'b> {
-    type Item = Candidate;
+impl<'a, 'b, 'c: 'a> Iterator for Iter<'a, 'b, 'c> {
+    type Item = Candidate<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(candidate) = self.candidates.pop() {
             let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
@@ -125,7 +130,7 @@ impl<'a, 'b> Iterator for Iter<'a, 'b> {
                         word.push_str(prefix);
                         word.push_str(rule.to);
                         self.candidates.push(Candidate {
-                            word,
+                            word: Cow::Owned(word),
                             type_: rule.type_ >> 8,
                         })
                     }
