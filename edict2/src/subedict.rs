@@ -54,3 +54,40 @@ impl SubEdictCreator {
         })
     }
 }
+
+#[self_referencing]
+pub struct SubEnamdictCreator {
+    enamdict_data: String,
+    #[borrows(enamdict_data)]
+    #[not_covariant]
+    enamdict: Edict<'this>,
+}
+
+impl SubEnamdictCreator {
+    pub fn from_files() -> Self {
+        SubEnamdictCreatorBuilder {
+            enamdict_data: read_to_string("enamdict").unwrap(),
+            enamdict_builder: |data| Edict::parse(data),
+        }
+        .build()
+    }
+
+    pub fn from(&self, content: &str) -> Vec<&str> {
+        self.with(|fields| {
+            let fragments: HashSet<&str> = iter_fragments(content).collect();
+
+            let mut lines = HashSet::new();
+            for fragment in fragments {
+                if let Some(entries) = fields.enamdict.lookup(&fragment as &str) {
+                    for entry in entries {
+                        lines.insert(entry.line);
+                    }
+                }
+            }
+
+            let mut lines: Vec<&str> = lines.into_iter().collect();
+            lines.sort();
+            lines
+        })
+    }
+}
