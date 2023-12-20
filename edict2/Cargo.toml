@@ -9,6 +9,7 @@ lto = true
 [profile.profiling]
 inherits = "release"
 debug = true
+lto = false
 
 [dependencies]
 lazy_static = "1.4.0"
