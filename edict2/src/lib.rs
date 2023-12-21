@@ -19,14 +19,14 @@ lazy_static! {
 
 #[pyfunction]
 #[pyo3(name = "subedict")]
-fn py_subedict(content: &str) -> PyResult<Vec<&str>> {
-    Ok(SUB_EDICT_CREATOR.from(content))
+fn py_subedict(content: &str) -> Vec<&str> {
+    SUB_EDICT_CREATOR.from(content)
 }
 
 #[pyfunction]
 #[pyo3(name = "subenamdict")]
-fn py_subenamdict(content: &str) -> PyResult<Vec<&str>> {
-    Ok(SUB_EDICT_CREATOR.from(content))
+fn py_subenamdict(content: &str) -> Vec<&str> {
+    SUB_EDICT_CREATOR.from(content)
 }
 
 #[pymodule]
