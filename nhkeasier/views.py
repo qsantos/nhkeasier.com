@@ -147,7 +147,11 @@ def archive(
     except IndexError:
         next_day = None
 
-    stories = list(stories.filter(published__date=date).order_by('-published', '-id'))
+    midnight = datetime.datetime.combine(date, datetime.time(0))
+    one_day = datetime.timedelta(days=1)
+    stories = stories.filter(published__gte=midnight, published__lt=midnight + one_day)
+
+    stories = stories.order_by('-published', '-id')
     if not stories:
         return handler404(request, None)
 
