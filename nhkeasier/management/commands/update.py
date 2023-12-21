@@ -189,7 +189,7 @@ def fetch_story_image(story: Story, info: StoryInfo) -> None:
     try:
         story.image.save('', ContentFile(fetch(image_url)))
     except HTTPError:
-        logger.warning('Failed to fetch image')
+        logger.warning(f'Failed to fetch image for story {story.id}')
         return
     logger.debug('Image saved')
 
@@ -230,7 +230,7 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
             story.voice.save('', f)  # type: ignore
         logger.debug('Voice saved')
     else:
-        logger.warning('Failed to download fragmented voice')
+        logger.warning(f'Failed to download fragmented voice for story {story.id}')
     os.remove(temp_name)
 
 
@@ -259,7 +259,7 @@ def fetch_story_video(story: Story, info: StoryInfo) -> None:
             story.video_original.save('', f)  # type: ignore
         logger.debug('Video saved')
     else:
-        logger.info('Failed to fetch video')
+        logger.info(f'Failed to fetch video for story {story.id}')
     os.remove(temp)
 
 
@@ -278,7 +278,7 @@ def extract_story_content(story: Story) -> None:
         data,
     )
     if m is None:
-        logger.error('Could not find content')
+        logger.error(f'Could not find content for story {story.id}')
         raise ContentNotFoundError
 
     raw_content = m.group(1)
@@ -308,14 +308,14 @@ def fetch_story_nhk_video(story: Story) -> None:
     logger.debug(f'Found iframe (URL={iframe_url})')
 
     if story.video_original:
-        logger.error('Story has both regular and NHK videos')
+        logger.error(f'Both regular and NHK videos for story {story.id}')
         raise RegularAndNHKVideosError
 
     # extract JSON URL
     data = fetch(iframe_url)
     json_match = re.search(r'[^"\']*.json', data.decode())
     if not json_match:
-        logger.error('Failed to find JSON filename of NHK video')
+        logger.error(f'Failed to find JSON filename of NHK video for story {story.id}')
         return
     json_filename = json_match.group()
     logger.debug(f'Found JSON filename ({json_filename})')
@@ -331,7 +331,7 @@ def fetch_story_nhk_video(story: Story) -> None:
     _, temp_name = mkstemp(suffix='.mp4')
     res = run(['ffmpeg', '-y', '-i', video_url, temp_name], stderr=DEVNULL, check=False)
     if res.returncode != 0:
-        logger.warning('Failed to fetch NHK video')
+        logger.warning(f'Failed to fetch NHK video for story {story.id}')
         os.remove(temp_name)
         return
     logger.debug('Fetched video')
