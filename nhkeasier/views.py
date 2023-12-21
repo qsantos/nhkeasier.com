@@ -199,38 +199,26 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
     try:
         previous_story = Story.objects.raw(
             """
-                SELECT "nhkeasier_story"."id"
-                FROM "nhkeasier_story"
-                WHERE (
-                    ("nhkeasier_story"."id" < %s AND "nhkeasier_story"."published" = %s)
-                    OR
-                    "nhkeasier_story"."published" < %s
-                )
-                ORDER BY
-                    "nhkeasier_story"."published" DESC,
-                    "nhkeasier_story"."id" DESC
+                SELECT id
+                FROM nhkeasier_story
+                WHERE (published, id) < (%s, %s)
+                ORDER BY published DESC, id DESC
                 LIMIT 1
             """,
-            [id, dt, dt],
+            [dt, id],
         )[0]
     except IndexError:
         previous_story = None
     try:
         next_story = Story.objects.raw(
             """
-                SELECT "nhkeasier_story"."id"
-                FROM "nhkeasier_story"
-                WHERE (
-                    ("nhkeasier_story"."id" > %s AND "nhkeasier_story"."published" = %s)
-                    OR
-                    "nhkeasier_story"."published" > %s
-                )
-                ORDER BY
-                    "nhkeasier_story"."published" ASC,
-                    "nhkeasier_story"."id" ASC
+                SELECT id
+                FROM nhkeasier_story
+                WHERE (published, id) > (%s, %s)
+                ORDER BY published ASC, id ASC
                 LIMIT 1
             """,
-            [id, dt, dt],
+            [dt, id],
         )[0]
     except IndexError:
         next_story = None
