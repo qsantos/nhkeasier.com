@@ -189,7 +189,7 @@ def fetch_story_image(story: Story, info: StoryInfo) -> None:
     try:
         story.image.save('', ContentFile(fetch(image_url)))
     except HTTPError:
-        logger.warning('Failed to fetch image', exc_info=True)
+        logger.warning('Failed to fetch image')
         return
     logger.debug('Image saved')
 
