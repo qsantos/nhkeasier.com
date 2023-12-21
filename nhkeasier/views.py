@@ -100,24 +100,22 @@ def archive(
         except ValueError as e:
             return handler400(request, e)
         header = f'Stories on {date}'
-    elif stories.count():
+    else:
         # TODO: avoid doing a separate query for this
         story = stories.order_by('-published').first()
         if story is None:
-            return handler404(request, None)
+            return render(request, 'index.html', {
+                'title': 'Easier Japanese Practice',
+                'header': 'Japanese stories here soon!',
+                'description':
+                    'Come practice reading and listening to Japanese with recent news '
+                    'stories! Simple vocabulary, simple kanji and simple sentence '
+                    'structures, as well as kanji readings (furigana) and an '
+                    'integrated dictionary will let you train until you get more '
+                    'comfortable for harder materials.',
+            })
         date = story.published.date()
         header = 'Latest Stories'
-    else:
-        return render(request, 'index.html', {
-            'title': 'Easier Japanese Practice',
-            'header': 'Japanese stories here soon!',
-            'description':
-                'Come practice reading and listening to Japanese with recent news '
-                'stories! Simple vocabulary, simple kanji and simple sentence '
-                'structures, as well as kanji readings (furigana) and an '
-                'integrated dictionary will let you train until you get more '
-                'comfortable for harder materials.',
-        })
 
     # information for links (canonical URL, links to previous and next days)
     # NOTE: Django's ORM is way too slow at generating the SQL queries
