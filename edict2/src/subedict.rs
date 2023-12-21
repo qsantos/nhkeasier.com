@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::fs::read_to_string;
+use std::include_str;
 
 use ouroboros::self_referencing;
 
@@ -7,8 +7,8 @@ use crate::{iter_fragments, Deinflector, Edict};
 
 #[self_referencing]
 pub struct SubEdictCreator {
-    edict2_data: String,
-    deinflector_data: String,
+    edict2_data: &'static str,
+    deinflector_data: &'static str,
     #[borrows(edict2_data)]
     #[not_covariant]
     edict2: Edict<'this>,
@@ -20,8 +20,8 @@ pub struct SubEdictCreator {
 impl SubEdictCreator {
     pub fn from_files() -> Self {
         SubEdictCreatorBuilder {
-            edict2_data: read_to_string("edict2").unwrap(),
-            deinflector_data: read_to_string("deinflect.dat").unwrap(),
+            edict2_data: include_str!("../data/edict2"),
+            deinflector_data: include_str!("../data/deinflect"),
             edict2_builder: |data| Edict::parse(data),
             deinflector_builder: |data| Deinflector::parse(data),
         }
@@ -58,7 +58,7 @@ impl SubEdictCreator {
 
 #[self_referencing]
 pub struct SubEnamdictCreator {
-    enamdict_data: String,
+    enamdict_data: &'static str,
     #[borrows(enamdict_data)]
     #[not_covariant]
     enamdict: Edict<'this>,
@@ -67,7 +67,7 @@ pub struct SubEnamdictCreator {
 impl SubEnamdictCreator {
     pub fn from_files() -> Self {
         SubEnamdictCreatorBuilder {
-            enamdict_data: read_to_string("enamdict").unwrap(),
+            enamdict_data: include_str!("../data/enamdict"),
             enamdict_builder: |data| Edict::parse(data),
         }
         .build()
