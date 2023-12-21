@@ -212,7 +212,18 @@ def fetch_story_voice(story: Story, info: StoryInfo) -> None:
     voice_url = voice_url_pattern.format(voiceid=voiceid)
     logger.info(f'Download voice (fragmented MP4) {voice_url}')
     _, temp_name = mkstemp(suffix='.mp3')
-    res = run(['ffmpeg', '-y', '-i', voice_url, temp_name], stderr=DEVNULL, check=False)
+    res = run(
+        [
+            'vlc',
+            '-I',
+            'dummy',
+            voice_url,
+            ':sout=#transcode{acodec=mpga,ab=192}:std{dst=' + temp_name + ',access=file}',
+            'vlc://quit',
+        ],
+        stderr=DEVNULL,
+        check=False,
+    )
     if res.returncode == 0:
         logger.debug('Fragmented voice fetched successfully')
         with open(temp_name, 'rb') as f:
