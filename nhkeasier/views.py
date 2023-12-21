@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.clickjacking import xframe_options_exempt
 
-from edict2.subedict import create_subedict, create_subenamdict, export_subedict
+from edict2 import subedict, subenamdict
 
 from .forms import ContactForm
 from .models import Story
@@ -185,8 +185,8 @@ def archive(
         'previous_day': previous_day,
         'day': date,
         'next_day': next_day,
-        'edict': export_subedict(create_subedict(content)),
-        'enamdict': export_subedict(create_subenamdict(content)),
+        'edict': '\n'.join(subedict(content)),
+        'enamdict': '\n'.join(subenamdict(content)),
     })
 
 
@@ -242,8 +242,8 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
         'story': story,
         'previous_story': previous_story,
         'next_story': next_story,
-        'edict': export_subedict(create_subedict(story.content)),
-        'enamdict': export_subedict(create_subenamdict(story.content)),
+        'edict': '\n'.join(subedict(story.content)),
+        'enamdict': '\n'.join(subenamdict(story.content)),
     })
 
 
