@@ -5,10 +5,10 @@
 {% include 'widgets/story.html' %}
 {% include 'widgets/nav_story.html' %}
 <script type="edict">
-{{ edict }}
+{{ edict|safe }}
 </script>
 <script type="enamdict">
-{{ enamdict }}
+{{ enamdict|safe }}
 </script>
 <script async src="{% static 'scripts.js' %}"></script>
 {% endblock %}
