@@ -173,12 +173,7 @@ def archive(
     return render(request, 'index.html', {
         'title': 'Easier Japanese Practice',
         'header': header,
-        'description':
-            'Come practice reading and listening to Japanese with recent news '
-            'stories! Simple vocabulary, simple kanji and simple sentence '
-            'structures, as well as kanji readings (furigana) and an '
-            'integrated dictionary will let you train until you get more '
-            'comfortable for harder materials.',
+        'description': remove_all_html(story.content),
         'image': image,
         'player': player,
         'stories': stories,
