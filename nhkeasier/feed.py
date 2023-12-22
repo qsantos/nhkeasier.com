@@ -3,6 +3,7 @@ import datetime
 from django.contrib.syndication.views import Feed
 from django.db import models
 from django.db.models.manager import BaseManager
+from django.http import HttpRequest
 from django.urls import reverse
 from django.utils.html import escape
 from django.utils.safestring import SafeString
@@ -14,6 +15,10 @@ class LatestStoriesFeed(Feed):
     title = 'NHK News Web Easier'
     link = '/'
     description = 'Latest stories from NHK News Web easy'
+    furiganas = False
+
+    def get_object(self, request: HttpRequest):
+        self.furiganas = request.META['QUERY_STRING'] != 'no-furiganas'
 
     def items(self) -> BaseManager[models.Model]:
         return Story.objects.filter(subedict_created=True).order_by('-published', '-id')[:50]  # type: ignore
@@ -39,7 +44,10 @@ class LatestStoriesFeed(Feed):
             html += f'<video src="{video_src}" controls preload="poster""></video>'
         elif img_src:
             html += f'<img src="{img_src}" alt="Story illustration">'
-        html += story.content_with_ruby
+        if self.furiganas:
+            html += story.content_with_ruby
+        else:
+            html += story.content
         if story.voice:
             html += f'<audio src="{story.voice.url}" controls preload="none"></audio>'
 
