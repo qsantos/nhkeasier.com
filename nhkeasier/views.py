@@ -173,7 +173,7 @@ def archive(
     return render(request, 'index.html', {
         'title': 'Easier Japanese Practice',
         'header': header,
-        'description': remove_all_html(story.content),
+        'description': remove_all_html(story.content) if story and story.content else '',
         'image': image,
         'player': player,
         'stories': stories,
@@ -229,7 +229,7 @@ def story(request: HttpRequest, id: str) -> HttpResponse:
     return render(request, 'story.html', {
         'title': story.title,
         'header': 'Single Story',
-        'description': remove_all_html(story.content),
+        'description': remove_all_html(story.content) if story.content else '',
         'image': image,
         'player': player,
         'story': story,

@@ -44,9 +44,9 @@ class LatestStoriesFeed(Feed):
             html += f'<video src="{video_src}" controls preload="poster""></video>'
         elif img_src:
             html += f'<img src="{img_src}" alt="Story illustration">'
-        if self.furiganas:
+        if self.furiganas and story.content_with_ruby:
             html += story.content_with_ruby
-        else:
+        elif story.content:
             html += story.content
         if story.voice:
             html += f'<audio src="{story.voice.url}" controls preload="none"></audio>'

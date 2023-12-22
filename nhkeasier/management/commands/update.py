@@ -295,6 +295,9 @@ def fetch_story_nhk_video(story: Story) -> None:
     if story.video_reencoded:
         logger.debug('Web video already present')
         return
+    if not story.content_with_ruby:
+        logger.warning('No content in story, cannot find video')
+        return
 
     logger.debug('Fetching NHK video')
 
@@ -432,7 +435,7 @@ def subenamdict_from_content(filename: str, content: str) -> None:
 
 def create_subedicts() -> None:
     logger.debug('Creating subedicts')
-    stories = Story.objects.filter(subedict_created=False)
+    stories = Story.objects.filter(subedict_created=False, content__isnull=False)
     logger.debug(f'Stories without subedicts: {len(stories)}')
 
     # create sub EDICT files for stories and list days that must be updated
@@ -442,6 +445,7 @@ def create_subedicts() -> None:
         logger.debug(f'Considering story id={story.id}')
         new_days.add(story.published.date())
         filename = f'{story.id:05}.dat'
+        assert story.content is not None  # ensured by filter above
         subedict_from_content(filename, story.content)
         subenamdict_from_content(filename, story.content)
         logger.info(filename)
@@ -452,7 +456,11 @@ def create_subedicts() -> None:
     for day in sorted(new_days):
         logger.debug(f'Considering day {day}')
         day_stories = Story.objects.filter(published__date=day)
-        content = ''.join(story.content for story in day_stories)
+        content = ''.join(
+            story.content # type: ignore
+            # non-null ensured by filter above
+            for story in day_stories
+        )
         filename = f'{day}.dat'
         subedict_from_content(filename, content)
         subenamdict_from_content(filename, content)
