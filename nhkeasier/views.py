@@ -262,7 +262,7 @@ def tools(_request: HttpRequest) -> HttpResponse:
     return redirect('about')
 
 
-def contact(request):
+def contact(request: HttpRequest) -> HttpResponse:
     form = ContactForm() if request.method == 'GET' else ContactForm(request.POST)
     if form.is_valid():
         subject = '[NHKEasier] {}'.format(form.cleaned_data['subject'])
@@ -277,7 +277,7 @@ def contact(request):
     })
 
 
-def contact_sent(request):
+def contact_sent(request: HttpRequest) -> HttpResponse:
     return simple_message(
         request,
         'Message Sent',
