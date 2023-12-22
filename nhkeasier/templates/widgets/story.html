@@ -6,7 +6,7 @@
 {% if story.video_reencoded %}
     <video src="{{ story.video_reencoded.url }}"{% if story.image %} poster="{{ story.image.url}}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
 {% elif story.image %}
-    <img src="{{ story.image.url }}" alt="Story illustration">
+    <img src="{{ story.image.url }}" alt="Story illustration" width="640" height="360">
 {% endif %}
 {{ story.content_with_ruby|safe }}
 {% if story.voice %}<audio src="{{ story.voice.url }}" controls preload="none"></audio>{% endif %}
