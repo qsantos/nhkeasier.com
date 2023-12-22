@@ -26,10 +26,10 @@ def video_reencoded_filename(instance: Story, _filename: str) -> str:
 
 class Story(models.Model):
     id = models.AutoField(primary_key=True)
-    story_id = models.CharField(max_length=200, null=True)
-    published = models.DateTimeField(null=True)
-    title_with_ruby = models.CharField(max_length=200, null=True)
-    title = models.CharField(max_length=200, null=True)
+    story_id = models.CharField(max_length=200)
+    published = models.DateTimeField()
+    title_with_ruby = models.CharField(max_length=200)
+    title = models.CharField(max_length=200)
     content_with_ruby = models.TextField(null=True)
     content = models.TextField(null=True)
     webpage = models.FileField(upload_to=webpage_filename, null=True)

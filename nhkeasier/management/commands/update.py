@@ -141,19 +141,20 @@ def parse_datetime_nhk(s: str) -> datetime:
 
 def story_from_info(info: StoryInfo) -> Tuple[Story, bool]:
     logger.debug('Extracting story info')
-    story, created = Story.objects.get_or_create(story_id=info['news_id'])
+    published = parse_datetime_nhk(info['news_prearranged_time'])
+    story, created = Story.objects.get_or_create(
+        story_id=info['news_id'],
+        published=published,
+        title_with_ruby=info['title_with_ruby'],
+        title=info['title'],
+    )
     if created:
         logger.debug(f'Inserted into database (id={story.id})')
     else:
         logger.debug(f'Retrieved from database (id={story.id})')
-
-    published = parse_datetime_nhk(info['news_prearranged_time'])
-    if story.published and abs(story.published - published).days > 2 and story.title != info['title']:
+    if abs(story.published - published).days > 2 and story.title != info['title']:
         # probably a reused story_id, not implemented yet
         raise DuplicateStoryIDError
-    story.published = published
-    story.title = info['title']
-    story.title_with_ruby = info['title_with_ruby']
     assert remove_ruby(story.title_with_ruby) == story.title
     return story, created
 
