@@ -1,22 +1,23 @@
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::types::chrono::{DateTime, Utc};
+use sqlx::types::chrono::NaiveDateTime;
 use sqlx::FromRow;
 
 #[derive(Debug, FromRow)]
 #[allow(dead_code)]
 struct Story {
-    id: u32,
-    story_id: String,
-    published: DateTime<Utc>,
-    title_with_ruby: String,
-    title: String,
-    content_with_ruby: String,
-    content: String,
-    webpage: String,
-    image: String,
-    voice: String,
-    video_original: String,
-    video_reencoded: String,
+    id: i64,
+    story_id: Option<String>,
+    published: Option<NaiveDateTime>,
+    title_with_ruby: Option<String>,
+    title: Option<String>,
+    content_with_ruby: Option<String>,
+    content: Option<String>,
+    image: Option<String>,
+    voice: Option<String>,
+    video_original: Option<String>,
+    video_reencoded: Option<String>,
+    subedict_created: bool,
+    webpage: Option<String>,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -26,7 +27,7 @@ async fn main() -> Result<(), sqlx::Error> {
         .connect("db.sqlite3")
         .await?;
 
-    let story = sqlx::query_as::<_, Story>("SELECT * FROM nhkeasier_story ORDER BY id DESC")
+    let story = sqlx::query_as!(Story, "SELECT * FROM nhkeasier_story ORDER BY id DESC")
         .fetch_one(&pool)
         .await?;
 
