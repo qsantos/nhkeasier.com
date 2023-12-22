@@ -1,0 +1,5 @@
+<nav><ul>
+    <li>{% if let Some(previous_story_id) = previous_story_id %}<a href="/story{{ previous_story_id|safe }}/">Previous Story</a>{% endif %}</li>
+    <li><a href="TODO">TODO</a></li>
+    <li>{% if let Some(next_story_id) = next_story_id %}<a href="/story{{ next_story_id|safe }}/">Next story</a>{% endif %}</li>
+</ul></nav>

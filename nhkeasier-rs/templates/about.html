@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<article>
+<p>
+NHK News Web <ruby>Easier<rt>イーシア</rt></ruby> provides content for people
+wishing to learn Japanese, in the form of text, voice and video.
+</p>
+
+<p>
+<a href="https://www3.nhk.or.jp/news/">NHK News Web</a>
+is the online newspaper edited by
+<a href="https://www.nhk.or.jp/">NHK</a>
+(<ruby>日<rt>にっ</rt>本<rt>ぽん</rt>放<rt>ほう</rt>送<rt>そう</rt>協<rt>きょう</rt>会<rt>かい</rt></ruby>),
+Japan's
+<a href="https://en.wikipedia.org/wiki/Public_broadcasting">public broadcasting</a>
+company.
+<a href="https://www3.nhk.or.jp/news/easy/">News Web <ruby>Easy<rt>イーシー</rt></ruby></a>
+is a version targeted at children with simpler words, kanji and sentence structures, and with
+<a href="https://en.wikipedia.org/wiki/Furigana">furigana</a>
+(<ruby>振<rt>ふ</rt>り<rt></rt>仮名<rt>がな</rt></ruby>).
+</p>
+
+<p>
+NHK<ruby>Easier<rt>イーシア</rt></ruby> gathers content from News
+Web Easy and presents it in a way optimized for language learners:
+</p>
+<ul>
+<li>partially (show on mouse hover) or fully disable furigana</li>
+<li>quick access to translations of words and expressions</li>
+<li>voice and video served by HTML5 (no Flash player needed)</li>
+<li>valid <a href="{% url 'feed' %}">RSS feed</a> to use in your news aggregator</li>
+</ul>
+
+<p>
+Regarding the translations, NHK<ruby>Easier<rt>イーシア</rt></ruby> relies on
+the <a href="http://edrdg.org/jmdict/edict.html">EDICT Dictionary File</a> and
+serves a subset optimized for each page.
+<p>
+<strong>NHK News Web <ruby>Easier<rt>イーシア</rt></ruby> is not affiliated
+with NHK.</strong>
+</p>
+
+<p>
+The main feature of this website was inspired by a series of webbrowser
+extenions called <a
+href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a>
+(Google Chrome), <a href="https://www.polarcloud.com/getrcx/">Rikaichan</a>
+(Mozilla Firefox, obsolete) and <a
+href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a>
+(Mozilla Firefox, replacement of Rikaichan). You can use these extension to
+benefit from a quick-access Japanese dictionary working on any website!
+</p>
+<ul>
+    <li>Install <a href="https://chrome.google.com/webstore/detail/rikaikun/jipdnfibhldikgcjhfnomkfpcebammhp">Rikaikun</a> on Google Chrome</li>
+    <li>Install <a href="https://addons.mozilla.org/en-US/firefox/addon/rikaichamp/">Rikaichamp</a> on Mozilla Firefox</li>
+</ul>
+
+<p>
+If you prefer reading news directly on <a
+href="https://www3.nhk.or.jp/news/easy/">NHK News Web Easy</a>, or regularly
+consult other website with furigana, install <a
+href="https://www.darrenlester.com/projects/furigana-toggle">Furigana
+toggle</a> (either Google Chrome or Mozilla Firefox) to hide them by default!
+You will be able to display them simply by hovering the kanji with your cursor.
+Alternatively, you can use the smartphone application
+<a href=https://play.google.com/store/apps/details?id=net.kelbi.nhkeasysync">Sync for NHK Easy News</a>
+for offline reading.
+</p>
+
+<p>
+As an addition to News Web Easy articles, you can also study
+<a href="https://www.nhk.or.jp/lesson/english/">NHK's introduction to Japanese</a>
+for English speakers (also available in multiple languages).
+
+</article>
+{% endblock %}

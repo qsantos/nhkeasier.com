@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+{% include "widgets/nav_story.html" %}
+{% include "widgets/story.html" %}
+{% include "widgets/nav_story.html" %}
+<script type="edict">
+{{ edict|safe }}
+</script>
+<script type="enamdict">
+{{ enamdict|safe }}
+</script>
+<script async src="/static/scripts.js"></script>
+{% endblock %}

@@ -2,14 +2,16 @@ use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::NaiveDateTime;
 use sqlx::FromRow;
 
+use askama::Template;
+
 #[derive(Debug, FromRow)]
 #[allow(dead_code)]
 struct Story {
     id: i64,
-    story_id: Option<String>,
-    published: Option<NaiveDateTime>,
-    title_with_ruby: Option<String>,
-    title: Option<String>,
+    story_id: String,
+    published: NaiveDateTime,
+    title_with_ruby: String,
+    title: String,
     content_with_ruby: Option<String>,
     content: Option<String>,
     image: Option<String>,
@@ -18,6 +20,22 @@ struct Story {
     video_reencoded: Option<String>,
     subedict_created: bool,
     webpage: Option<String>,
+}
+
+#[derive(Template)]
+#[template(path = "story.html")]
+struct MyTemplate {
+    debug: bool,
+    title: String,
+    description: Option<String>,
+    image: Option<String>,
+    player: Option<String>,
+    header: String,
+    story: Story,
+    previous_story_id: Option<i64>,
+    next_story_id: Option<i64>,
+    edict: String,
+    enamdict: String,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -31,7 +49,20 @@ async fn main() -> Result<(), sqlx::Error> {
         .fetch_one(&pool)
         .await?;
 
-    println!("{story:?}");
+    let t = MyTemplate {
+        debug: true,
+        title: story.title.clone(),
+        description: story.content.clone(),
+        image: story.image.clone(),
+        player: None,
+        header: "Single Story".to_string(),
+        previous_story_id: Some(story.id - 1),
+        next_story_id: None,
+        story,
+        edict: "".to_string(),
+        enamdict: "".to_string(),
+    };
+    println!("{}", t.render().unwrap());
 
     Ok(())
 }

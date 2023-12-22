@@ -1,0 +1,5 @@
+<nav><ul>
+    <li>{% if previous_day %}<a href="{{ previous_day.published|date:'/Y/m/d/' }}">Older stories</a>{% endif %}</li>
+    <li><a href="{{ day|date:'/Y/m/d/' }}">{{ day|date:'Y-m-d' }}</a></li>
+    <li>{% if next_day %}<a href="{{ next_day.published|date:'/Y/m/d/' }}">Newer stories</a>{% endif %}</li>
+</ul></nav>

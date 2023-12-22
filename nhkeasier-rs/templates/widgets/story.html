@@ -1,0 +1,34 @@
+<article lang=ja>
+<h3>{{ story.title_with_ruby|safe }}</h3>
+<h4>
+    <a href="/story/{{ story.id|safe }}">
+        <time datetime="TODO">
+            TODO
+        </time>
+    </a>
+</h4>
+
+{% if let Some(video) = story.video_reencoded %}
+    <video src="{{ video|safe }}"{% if let Some(image) = story.image %} poster="{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+{% else if let Some(image) = story.image %}
+    <img src="{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
+{% endif %}
+{% if let Some(content) = story.content_with_ruby %}
+{{ content|safe }}
+{% else %}
+Missing content
+{% endif %}
+{% if let Some(voice) = story.voice %}<audio src="{{ voice|safe }}" controls preload="none"></audio>{% endif %}
+<table class="links">
+    <td>
+        {# left empty  #}
+    </td>
+    <td>
+    <a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id|safe }}/{{ story.story_id|safe }}.html">Original</a>
+    </td>
+    <td>
+        <a href="/story/{{ story.id|safe }}" class="permalink">Permalink</a>
+    </td>
+</table>
+
+</article>
