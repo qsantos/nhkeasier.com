@@ -16,18 +16,6 @@ git checkout-index --prefix="$TEMPDIR/" -af
 # the script
 GIT_ROOT=$(git rev-parse --show-toplevel)
 
-# lint Python
-if ! git diff --cached --name-only --diff-filter=AM --quiet -- nhkeasier; then
-    pushd $TEMPDIR >/dev/null
-    cat >nhkeasier/secrets.py <<EOF
-SECRET_KEY = ''
-EMAIL_HOST_PASSWORD = ''
-EOF
-    ruff check
-    mypy --strict .
-    popd >/dev/null
-fi
-
 # lint Rust: edict2
 if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2; then
     pushd $TEMPDIR/edict2 >/dev/null
