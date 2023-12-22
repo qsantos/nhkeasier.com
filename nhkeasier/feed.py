@@ -17,7 +17,7 @@ class LatestStoriesFeed(Feed):
     description = 'Latest stories from NHK News Web easy'
     furiganas = False
 
-    def get_object(self, request: HttpRequest):
+    def get_object(self, request: HttpRequest) -> None:
         self.furiganas = request.META['QUERY_STRING'] != 'no-furiganas'
 
     def items(self) -> BaseManager[models.Model]:
