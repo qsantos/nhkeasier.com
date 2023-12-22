@@ -29,6 +29,7 @@ class StoryInfo(TypedDict):
     news_id: str
     news_prearranged_time: str
     news_web_image_uri: str
+    news_easy_voice_uri: str
     title: str
     title_with_ruby: str
     voice_id: str
