@@ -145,7 +145,8 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .route("/story/:id/", get(story))
-        .nest_service("/static", ServeDir::new("../static"))
+        .nest_service("/media", ServeDir::new("../media"))
+        .nest_service("/static", ServeDir::new("static"))
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000

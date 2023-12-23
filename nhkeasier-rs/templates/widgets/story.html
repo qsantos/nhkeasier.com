@@ -8,16 +8,16 @@
     </a>
 </h4>
 {%- if let Some(video) = story.video_reencoded -%}
-    <video src="{{ video|safe }}"{% if let Some(image) = story.image %} poster="{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+    <video src="/media/{{ video|safe }}"{% if let Some(image) = story.image %} poster="/media/{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
 {%- else if let Some(image) = story.image -%}
-    <img src="{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
+    <img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
 {%- endif -%}
 {%- if let Some(content) = story.content_with_ruby -%}
 {{ content|safe }}
 {%- else -%}
 Missing content
 {%- endif -%}
-{% if let Some(voice) = story.voice %}<audio src="{{ voice|safe }}" controls preload="none"></audio>{% endif %}
+{% if let Some(voice) = story.voice %}<audio src="/media/{{ voice|safe }}" controls preload="none"></audio>{% endif %}
 <table class="links">
     <td>
         {# left empty  #}
