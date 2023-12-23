@@ -89,9 +89,19 @@ struct State {
 
 async fn archive(
     extract::State(state): extract::State<Arc<State>>,
-    extract::Path((year, month, day)): extract::Path<(i32, u32, u32)>,
+    maybe_ymd: Option<extract::Path<(i32, u32, u32)>>,
 ) -> impl IntoResponse {
-    let date = NaiveDate::from_ymd_opt(year, month, day).unwrap();
+    let date = if let Some(extract::Path((year, month, day))) = maybe_ymd {
+        NaiveDate::from_ymd_opt(year, month, day).unwrap()
+    } else {
+        let maybe_dt = sqlx::query_scalar!("SELECT max(published) FROM nhkeasier_story")
+            .fetch_one(&state.pool)
+            .await
+            .unwrap();
+        NaiveDateTime::parse_from_str(maybe_dt.as_ref().unwrap(), "%Y-%m-%d %H:%M:%S")
+            .unwrap()
+            .date()
+    };
 
     let rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE date(published) = $1")
         .bind(date)
@@ -263,6 +273,7 @@ async fn main() {
 
     // build our application with a single route
     let app = Router::new()
+        .route("/", get(archive))
         .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
