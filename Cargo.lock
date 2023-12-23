@@ -982,6 +982,7 @@ dependencies = [
  "askama",
  "askama_axum",
  "axum",
+ "chrono",
  "edict2",
  "http-body-util",
  "lazy_static",

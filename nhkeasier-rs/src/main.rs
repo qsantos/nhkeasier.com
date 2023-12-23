@@ -10,10 +10,10 @@ use axum::{
     routing::get,
     Router,
 };
+use chrono::{Duration, FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone};
 use lazy_static::lazy_static;
 use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::types::chrono::{FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
 use tower_http::services::{ServeDir, ServeFile};
 
@@ -157,12 +157,15 @@ async fn archive(
             .unwrap()
             .date()
     };
+    let tomorrow = date + Duration::days(1);
 
-    let rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE date(published) = $1")
-        .bind(date)
-        .fetch_all(&state.pool)
-        .await
-        .unwrap();
+    let rows =
+        sqlx::query("SELECT * FROM nhkeasier_story WHERE $1 <= published AND published < $2")
+            .bind(date)
+            .bind(tomorrow)
+            .fetch_all(&state.pool)
+            .await
+            .unwrap();
     let stories: Vec<Story> = rows
         .iter()
         .map(|row| Story::from_row(row).unwrap())
@@ -173,7 +176,7 @@ async fn archive(
         "
             SELECT published
             FROM nhkeasier_story
-            WHERE date(published) < $1
+            WHERE published < $1
             ORDER BY published DESC
             LIMIT 1
         ",
@@ -187,11 +190,11 @@ async fn archive(
         "
             SELECT published
             FROM nhkeasier_story
-            WHERE date(published) > $1
+            WHERE published >= $1
             ORDER BY published ASC
             LIMIT 1
         ",
-        date,
+        tomorrow,
     )
     .fetch_optional(&state.pool)
     .await
