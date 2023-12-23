@@ -65,6 +65,38 @@ async fn story(
         .unwrap();
     let story = Story::from_row(&row).unwrap();
 
+    // find ids of previous and next stories
+    // dt = story.published.strftime('%Y-%m-%d %H:%M:%S')
+    let dt = story.published;
+    let previous_story_id = sqlx::query_scalar!(
+        "
+            SELECT id
+            FROM nhkeasier_story
+            WHERE (published, id) < ($1, $2)
+            ORDER BY published DESC, id DESC
+            LIMIT 1
+        ",
+        dt,
+        id,
+    )
+    .fetch_optional(&state.pool)
+    .await
+    .unwrap();
+    let next_story_id = sqlx::query_scalar!(
+        "
+            SELECT id
+            FROM nhkeasier_story
+            WHERE (published, id) > ($1, $2)
+            ORDER BY published ASC, id ASC
+            LIMIT 1
+        ",
+        dt,
+        id,
+    )
+    .fetch_optional(&state.pool)
+    .await
+    .unwrap();
+
     let edict = story
         .content
         .as_ref()
@@ -82,8 +114,8 @@ async fn story(
             image: story.image,
             player: None,
             header: "Single Story",
-            previous_story_id: Some(story.id - 1),
-            next_story_id: None,
+            previous_story_id,
+            next_story_id,
             edict: edict.as_deref(),
             enamdict: enamdict.as_deref(),
             story: &story,
