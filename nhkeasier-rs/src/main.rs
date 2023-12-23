@@ -38,6 +38,17 @@ struct Story<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "about.html")]
+struct AboutTemplate<'a> {
+    debug: bool,
+    title: &'a str,
+    description: Option<&'a str>,
+    image: Option<&'a str>,
+    player: Option<&'a str>,
+    header: &'a str,
+}
+
+#[derive(Template)]
 #[template(path = "index.html")]
 struct ArchiveTemplate<'a> {
     debug: bool,
@@ -223,6 +234,21 @@ async fn story(
     )
 }
 
+async fn about() -> impl IntoResponse {
+    Html(
+        AboutTemplate {
+            debug: true,
+            title: "About",
+            description: None,
+            image: None,
+            player: None,
+            header: "About",
+        }
+        .render()
+        .unwrap(),
+    )
+}
+
 #[tokio::main]
 async fn main() {
     let state = Arc::new(State {
@@ -239,6 +265,7 @@ async fn main() {
     let app = Router::new()
         .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
+        .route("/about/", get(about))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(state);
