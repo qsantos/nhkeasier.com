@@ -7,12 +7,17 @@ use axum::{
     routing::get,
     Router,
 };
+use lazy_static::lazy_static;
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::types::chrono::NaiveDateTime;
+use sqlx::types::chrono::{FixedOffset, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
 use tower_http::services::ServeDir;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
+
+lazy_static! {
+    static ref JST: FixedOffset = FixedOffset::east_opt(3600 * 9).unwrap();
+}
 
 #[derive(Clone, Debug, FromRow)]
 #[allow(dead_code)]

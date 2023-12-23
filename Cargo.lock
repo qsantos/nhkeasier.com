@@ -983,6 +983,7 @@ dependencies = [
  "axum",
  "edict2",
  "http-body-util",
+ "lazy_static",
  "sqlx",
  "tokio",
  "tower-http",
