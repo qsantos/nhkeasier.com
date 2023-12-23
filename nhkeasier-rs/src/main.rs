@@ -149,9 +149,19 @@ async fn archive(
         .or_else(|| stories.iter().find(|story| story.image.is_some()))
         .unwrap_or_else(|| &stories[0]);
 
-    let content = "";
-    let edict = state.sub_edict_creator.from(content).join("\n");
-    let enamdict = state.sub_enamdict_creator.from(content).join("\n");
+    let titles = stories
+        .iter()
+        .map(|story| story.title)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let contents = stories
+        .iter()
+        .flat_map(|story| story.content)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let content = titles + &contents;
+    let edict = state.sub_edict_creator.from(&content).join("\n");
+    let enamdict = state.sub_enamdict_creator.from(&content).join("\n");
 
     Html(
         ArchiveTemplate {
