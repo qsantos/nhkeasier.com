@@ -15,7 +15,7 @@ use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::{FixedOffset, NaiveDate, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
@@ -397,6 +397,8 @@ async fn main() {
         .route("/contact/", get(contact))
         .route("/contact/sent/", get(contact_sent))
         .route("/feed/", get(feed))
+        .route_service("/robots.txt", ServeFile::new("static/robots.txt"))
+        .route_service("/favicon.ico", ServeFile::new("static/favicon.ico"))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(state);
