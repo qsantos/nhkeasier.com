@@ -10,6 +10,7 @@ use axum::{
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::NaiveDateTime;
 use sqlx::FromRow;
+use tower_http::services::ServeDir;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
@@ -107,6 +108,7 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .route("/story/:id/", get(story))
+        .nest_service("/static", ServeDir::new("../static"))
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
