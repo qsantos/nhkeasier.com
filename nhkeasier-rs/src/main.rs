@@ -4,6 +4,7 @@ use std::sync::Arc;
 use askama_axum::Template;
 use axum::{
     extract,
+    http::header,
     response::{Html, IntoResponse},
     routing::get,
     Router,
@@ -105,6 +106,12 @@ struct StoryTemplate<'a> {
     next_story_id: Option<i64>,
     edict: Option<&'a str>,
     enamdict: Option<&'a str>,
+}
+
+#[derive(Template)]
+#[template(path = "feed.atom", escape = "xml")]
+struct FeedTemplate<'a> {
+    stories: Vec<Story<'a>>,
 }
 
 struct State {
@@ -345,6 +352,20 @@ async fn contact_sent() -> impl IntoResponse {
     .await
 }
 
+async fn feed(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
+    let rows =
+        sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published DESC, id DESC LIMIT 50")
+            .fetch_all(&state.pool)
+            .await
+            .unwrap();
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).unwrap())
+        .collect();
+    let content = FeedTemplate { stories }.render().unwrap();
+    ([(header::CONTENT_TYPE, "application/rss+xml")], content)
+}
+
 #[tokio::main]
 async fn main() {
     let state = Arc::new(State {
@@ -365,6 +386,7 @@ async fn main() {
         .route("/about/", get(about))
         .route("/contact/", get(contact))
         .route("/contact/sent/", get(contact_sent))
+        .route("/feed/", get(feed))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(state);

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>NHK News Web Easier</title>
+        <link>https://nhkeasier.com/</link>
+        <description>Latest stories from NHK News Web easy</description>
+        <atom:link href="https://nhkeasier.com/feed/" rel="self"/>
+        <language>en-us</language>
+        <lastBuildDate>Fri, 22 Dec 2023 07:00:00 +0000</lastBuildDate>
+        {% for story in stories %}
+        <item>
+            <title>{{ story.title|safe }}</title>
+            <link>https://nhkeasier.com/story/{{ story.id|safe }}/</link>
+            <description>{% if let Some(content) = story.content_with_ruby %}{{ content }}{% else %}Content is missing{% endif %}</description>
+            <pubDate>Fri, 22 Dec 2023 07:00:00 +0000</pubDate>
+            <guid>https://nhkeasier.com/story/{{ story.id|safe }}/</guid>
+        </item>
+        {% endfor %}
+    </channel>
+</rss>
