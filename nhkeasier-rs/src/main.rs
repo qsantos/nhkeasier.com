@@ -9,7 +9,7 @@ use axum::{
 };
 use lazy_static::lazy_static;
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::types::chrono::{FixedOffset, NaiveDateTime, TimeZone};
+use sqlx::types::chrono::{FixedOffset, NaiveDate, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
 use tower_http::services::ServeDir;
 
@@ -38,8 +38,25 @@ struct Story<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "index.html")]
+struct ArchiveTemplate<'a> {
+    debug: bool,
+    title: &'a str,
+    description: Option<&'a str>,
+    image: Option<&'a str>,
+    player: Option<&'a str>,
+    header: &'a str,
+    stories: Vec<Story<'a>>,
+    previous_day: Option<NaiveDate>,
+    date: NaiveDate,
+    next_day: Option<NaiveDate>,
+    edict: Option<&'a str>,
+    enamdict: Option<&'a str>,
+}
+
+#[derive(Template)]
 #[template(path = "story.html")]
-struct MyTemplate<'a> {
+struct StoryTemplate<'a> {
     debug: bool,
     title: &'a str,
     description: Option<&'a str>,
@@ -57,6 +74,82 @@ struct State {
     pool: sqlx::Pool<sqlx::Sqlite>,
     sub_edict_creator: SubEdictCreator,
     sub_enamdict_creator: SubEnamdictCreator,
+}
+
+async fn archive(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Path((year, month, day)): extract::Path<(i32, u32, u32)>,
+) -> impl IntoResponse {
+    let date = NaiveDate::from_ymd_opt(year, month, day).unwrap();
+
+    let rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE date(published) = $1")
+        .bind(date)
+        .fetch_all(&state.pool)
+        .await
+        .unwrap();
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).unwrap())
+        .collect();
+
+    // find previous and next days with stories
+    let previous_day = sqlx::query_scalar!(
+        "
+            SELECT published
+            FROM nhkeasier_story
+            WHERE date(published) < $1
+            ORDER BY published DESC
+            LIMIT 1
+        ",
+        date,
+    )
+    .fetch_optional(&state.pool)
+    .await
+    .unwrap()
+    .map(|dt| dt.date());
+    let next_day = sqlx::query_scalar!(
+        "
+            SELECT published
+            FROM nhkeasier_story
+            WHERE date(published) > $1
+            ORDER BY published ASC
+            LIMIT 1
+        ",
+        date,
+    )
+    .fetch_optional(&state.pool)
+    .await
+    .unwrap()
+    .map(|dt| dt.date());
+
+    let story = stories
+        .iter()
+        .find(|story| story.video_reencoded.is_some())
+        .or_else(|| stories.iter().find(|story| story.image.is_some()))
+        .unwrap_or_else(|| &stories[0]);
+
+    let content = "";
+    let edict = state.sub_edict_creator.from(content).join("\n");
+    let enamdict = state.sub_enamdict_creator.from(content).join("\n");
+
+    Html(
+        ArchiveTemplate {
+            debug: true,
+            title: "Easier Japanese Practice",
+            description: story.content,
+            image: story.image,
+            player: None, // TODO
+            header: &format!("Stories on {}", date.format("%Y-%m-%d")),
+            previous_day,
+            date,
+            next_day,
+            edict: Some(&edict),
+            enamdict: Some(&enamdict),
+            stories,
+        }
+        .render()
+        .unwrap(),
+    )
 }
 
 async fn story(
@@ -112,7 +205,7 @@ async fn story(
         .map(|content| state.sub_enamdict_creator.from(content).join("\n"));
 
     Html(
-        MyTemplate {
+        StoryTemplate {
             debug: true,
             title: story.title,
             description: story.content,
@@ -144,6 +237,7 @@ async fn main() {
 
     // build our application with a single route
     let app = Router::new()
+        .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))

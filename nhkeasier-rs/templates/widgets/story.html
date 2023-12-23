@@ -1,7 +1,7 @@
 <article lang=ja>
 <h3>{{ story.title_with_ruby|safe }}</h3>
 <h4>
-    <a href="/story/{{ story.id|safe }}">
+    <a href="/story/{{ story.id|safe }}/">
         <time datetime="{{ story.published.format("%Y-%m-%dT%H:%M:%S+00:00") }}">
             {{ JST.from_utc_datetime(story.published).format("%Y-%m-%d %H:%M:%S %z") }} (JST)
         </time>
@@ -26,7 +26,7 @@ Missing content
     <a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id|safe }}/{{ story.story_id|safe }}.html">Original</a>
     </td>
     <td>
-        <a href="/story/{{ story.id|safe }}" class="permalink">Permalink</a>
+        <a href="/story/{{ story.id|safe }}/" class="permalink">Permalink</a>
     </td>
 </table>
 </article>
