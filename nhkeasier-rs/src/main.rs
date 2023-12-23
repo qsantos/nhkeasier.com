@@ -13,7 +13,7 @@ use axum::{
 use lazy_static::lazy_static;
 use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::types::chrono::{FixedOffset, NaiveDate, NaiveDateTime, TimeZone};
+use sqlx::types::chrono::{FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
 use tower_http::services::{ServeDir, ServeFile};
 
