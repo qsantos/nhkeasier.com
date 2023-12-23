@@ -49,6 +49,17 @@ struct AboutTemplate<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "contact.html")]
+struct ContactTemplate<'a> {
+    debug: bool,
+    title: &'a str,
+    description: Option<&'a str>,
+    image: Option<&'a str>,
+    player: Option<&'a str>,
+    header: &'a str,
+}
+
+#[derive(Template)]
 #[template(path = "index.html")]
 struct ArchiveTemplate<'a> {
     debug: bool,
@@ -269,6 +280,21 @@ async fn about() -> impl IntoResponse {
     )
 }
 
+async fn contact() -> impl IntoResponse {
+    Html(
+        ContactTemplate {
+            debug: true,
+            title: "Contact",
+            description: None,
+            image: None,
+            player: None,
+            header: "Contact",
+        }
+        .render()
+        .unwrap(),
+    )
+}
+
 #[tokio::main]
 async fn main() {
     let state = Arc::new(State {
@@ -287,6 +313,7 @@ async fn main() {
         .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
+        .route("/contact/", get(contact))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(state);

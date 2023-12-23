@@ -1,10 +1,24 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% block content %}
 <p>
-To contact the webmasters, send an email to <a
-    href="mailto:contact@nhkeasier.com">contact@nhkeasier.com</a> or fill in
-the form below and click “Submit”:
+To contact the webmasters, send an email to
+<a href="mailto:contact@nhkeasier.com">contact@nhkeasier.com</a>
+or fill in the form below and click “Submit”:
 </p>
-
-{% include 'widgets/form.html' %}
+<form method="post">
+    <div class="form-group">
+        <label for="id_from_email">Your email:</label>
+        <input type="email" name="from_email" placeholder="john.doe@example.com" class="form-control" required id="id_from_email">
+    </div>
+    <div class="form-group">
+        <label for="id_subject">Subject:</label>
+        <input type="text" name="subject" class="form-control" id="id_subject">
+    </div>
+    <div class="form-group">
+        <label for="id_message">Message:</label>
+        <textarea name="message" cols="40" rows="10" class="form-control" required id="id_message">
+        </textarea>
+    </div>
+    <input type="submit" value="Submit" class="form-control">
+</form>
 {% endblock %}
