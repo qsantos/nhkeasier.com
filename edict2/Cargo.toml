@@ -10,14 +10,6 @@ name = "edict2"
 # however, this produced binary is of the expected size
 crate-type = ["cdylib", "lib"]
 
-[profile.release]
-lto = true
-
-[profile.profiling]
-inherits = "release"
-debug = true
-lto = false
-
 [dependencies]
 lazy_static = "1.4.0"
 ouroboros = "0.18.1"

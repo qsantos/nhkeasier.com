@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+members = [
+    "edict2",
+    "nhkeasier-rs",
+]
+
+[profile.release]
+lto = true
+
+[profile.profiling]
+inherits = "release"
+debug = true
+lto = false

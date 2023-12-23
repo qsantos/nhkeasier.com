@@ -16,22 +16,11 @@ git checkout-index --prefix="$TEMPDIR/" -af
 # the script
 GIT_ROOT=$(git rev-parse --show-toplevel)
 
-# lint Rust: edict2
-if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2; then
-    pushd $TEMPDIR/edict2 >/dev/null
-    export CARGO_TARGET_DIR="${GIT_ROOT}/edict2/target"
-    echo "Running cargo fmt"
-    cargo fmt --check
-    echo "Running cargo clippy"
-    cargo clippy --all -- --deny warnings
-    popd >/dev/null
-fi
-
-# lint Rust nhkeasier-rs
-if ! git diff --cached --name-only --diff-filter=AM --quiet -- nhkeasier-rs; then
-    pushd $TEMPDIR/nhkeasier-rs >/dev/null
-    ln -fs $GIT_ROOT/db.sqlite3 $TEMPDIR/nhkeasier-rs/db.sqlite3
-    export CARGO_TARGET_DIR="${GIT_ROOT}/nhkeasier-rs/target"
+# lint Rust
+if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2 nhkeasier-rs Cargo.toml Cargo.lock; then
+    pushd $TEMPDIR >/dev/null
+    ln -fs $GIT_ROOT/db.sqlite3 $TEMPDIR/db.sqlite3
+    export CARGO_TARGET_DIR="${GIT_ROOT}/target"
     echo "Running cargo fmt"
     cargo fmt --check
     echo "Running cargo clippy"
