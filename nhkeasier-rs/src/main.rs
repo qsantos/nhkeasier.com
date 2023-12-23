@@ -110,7 +110,7 @@ struct StoryTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "feed.atom", escape = "xml")]
+#[template(path = "feed.rss", escape = "xml")]
 struct FeedTemplate<'a> {
     stories: Vec<Story<'a>>,
     furiganas: bool,
