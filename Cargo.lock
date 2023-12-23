@@ -984,6 +984,7 @@ dependencies = [
  "edict2",
  "http-body-util",
  "lazy_static",
+ "regex",
  "sqlx",
  "tokio",
  "tower-http",

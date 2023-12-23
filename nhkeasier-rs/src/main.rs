@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::sync::Arc;
 
 use askama_axum::Template;
@@ -8,6 +9,7 @@ use axum::{
     Router,
 };
 use lazy_static::lazy_static;
+use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::{FixedOffset, NaiveDate, NaiveDateTime, TimeZone};
 use sqlx::FromRow;
@@ -17,6 +19,7 @@ use edict2::{SubEdictCreator, SubEnamdictCreator};
 
 lazy_static! {
     static ref JST: FixedOffset = FixedOffset::east_opt(3600 * 9).unwrap();
+    static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").unwrap();
 }
 
 #[derive(Clone, Debug, FromRow)]
@@ -126,6 +129,10 @@ async fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoRespon
     )
 }
 
+fn remove_all_html(content: &str) -> Cow<'_, str> {
+    REMOVE_HTML_REGEX.replace_all(content, "")
+}
+
 async fn archive(
     extract::State(state): extract::State<Arc<State>>,
     maybe_ymd: Option<extract::Path<(i32, u32, u32)>>,
@@ -206,7 +213,10 @@ async fn archive(
         ArchiveTemplate {
             debug: true,
             title: "Easier Japanese Practice",
-            description: story.content,
+            description: story
+                .content
+                .map(|content| remove_all_html(content))
+                .as_deref(),
             image: story.image,
             player: None, // TODO
             header: &format!("Stories on {}", date.format("%Y-%m-%d")),
@@ -278,7 +288,10 @@ async fn story(
         StoryTemplate {
             debug: true,
             title: story.title,
-            description: story.content,
+            description: story
+                .content
+                .map(|content| remove_all_html(content))
+                .as_deref(),
             image: story.image,
             player: None,
             header: "Single Story",
