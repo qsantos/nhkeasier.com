@@ -38,6 +38,18 @@ struct Story<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "message.html")]
+struct MessageTemplate<'a> {
+    debug: bool,
+    title: &'a str,
+    description: Option<&'a str>,
+    image: Option<&'a str>,
+    player: Option<&'a str>,
+    header: &'a str,
+    message: &'a str,
+}
+
+#[derive(Template)]
 #[template(path = "about.html")]
 struct AboutTemplate<'a> {
     debug: bool,
@@ -96,6 +108,22 @@ struct State {
     pool: sqlx::Pool<sqlx::Sqlite>,
     sub_edict_creator: SubEdictCreator,
     sub_enamdict_creator: SubEnamdictCreator,
+}
+
+async fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoResponse {
+    Html(
+        MessageTemplate {
+            debug: true,
+            title,
+            description: None,
+            image: None,
+            player: None,
+            header: title,
+            message,
+        }
+        .render()
+        .unwrap(),
+    )
 }
 
 async fn archive(
@@ -295,6 +323,15 @@ async fn contact() -> impl IntoResponse {
     )
 }
 
+async fn contact_sent() -> impl IntoResponse {
+    simple_message(
+        "Message Sent",
+        "Thank you for your feedback. We will take your message under \
+        consideration as soon as possible.",
+    )
+    .await
+}
+
 #[tokio::main]
 async fn main() {
     let state = Arc::new(State {
@@ -314,6 +351,7 @@ async fn main() {
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
         .route("/contact/", get(contact))
+        .route("/contact/sent/", get(contact_sent))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
         .with_state(state);
