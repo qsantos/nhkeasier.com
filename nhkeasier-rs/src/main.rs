@@ -1,4 +1,12 @@
-use askama::Template;
+use std::sync::Arc;
+
+use askama_axum::Template;
+use axum::{
+    extract,
+    response::{Html, IntoResponse},
+    routing::get,
+    Router,
+};
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::NaiveDateTime;
 use sqlx::FromRow;
@@ -39,46 +47,69 @@ struct MyTemplate<'a> {
     enamdict: Option<&'a str>,
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> Result<(), sqlx::Error> {
-    let pool = SqlitePoolOptions::new()
-        .max_connections(5)
-        .connect("db.sqlite3")
-        .await?;
+struct State {
+    pool: sqlx::Pool<sqlx::Sqlite>,
+    sub_edict_creator: SubEdictCreator,
+    sub_enamdict_creator: SubEnamdictCreator,
+}
 
-    let sub_edict_creator = SubEdictCreator::from_files();
-    let sub_enamdict_creator = SubEnamdictCreator::from_files();
-
-    let row = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY id DESC")
-        .fetch_one(&pool)
-        .await?;
-    let story = Story::from_row(&row)?;
+async fn story(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Path(id): extract::Path<i64>,
+) -> impl IntoResponse {
+    let row = sqlx::query("SELECT * FROM nhkeasier_story WHERE id = $1")
+        .bind(id)
+        .fetch_one(&state.pool)
+        .await
+        .unwrap();
+    let story = Story::from_row(&row).unwrap();
 
     let edict = story
         .content
         .as_ref()
-        .map(|content| sub_edict_creator.from(content).join("\n"));
+        .map(|content| state.sub_edict_creator.from(content).join("\n"));
     let enamdict = story
         .content
         .as_ref()
-        .map(|content| sub_enamdict_creator.from(content).join("\n"));
-    let t = MyTemplate {
-        debug: true,
-        title: story.title,
-        description: story.content,
-        image: story.image,
-        player: None,
-        header: "Single Story",
-        previous_story_id: Some(story.id - 1),
-        next_story_id: None,
-        edict: edict.as_deref(),
-        enamdict: enamdict.as_deref(),
-        story: &story,
-    }
-    .render()
-    .unwrap();
+        .map(|content| state.sub_enamdict_creator.from(content).join("\n"));
 
-    println!("{t}");
+    Html(
+        MyTemplate {
+            debug: true,
+            title: story.title,
+            description: story.content,
+            image: story.image,
+            player: None,
+            header: "Single Story",
+            previous_story_id: Some(story.id - 1),
+            next_story_id: None,
+            edict: edict.as_deref(),
+            enamdict: enamdict.as_deref(),
+            story: &story,
+        }
+        .render()
+        .unwrap(),
+    )
+}
 
-    Ok(())
+#[tokio::main]
+async fn main() {
+    let state = Arc::new(State {
+        pool: SqlitePoolOptions::new()
+            .max_connections(5)
+            .connect("db.sqlite3")
+            .await
+            .unwrap(),
+        sub_edict_creator: SubEdictCreator::from_files(),
+        sub_enamdict_creator: SubEnamdictCreator::from_files(),
+    });
+
+    // build our application with a single route
+    let app = Router::new()
+        .route("/story/:id/", get(story))
+        .with_state(state);
+
+    // run our app with hyper, listening globally on port 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }
