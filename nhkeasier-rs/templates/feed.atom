@@ -11,7 +11,13 @@
         <item>
             <title>{{ story.title|safe }}</title>
             <link>https://nhkeasier.com/story/{{ story.id|safe }}/</link>
-            <description>{% if let Some(content) = story.content_with_ruby %}{{ content }}{% else %}Content is missing{% endif %}</description>
+            <description>
+                {%- if furiganas -%}
+                    {% if let Some(content) = story.content_with_ruby %}{{ content }}{% else %}Content is missing{% endif %}
+                {%- else -%}
+                    {% if let Some(content) = story.content %}{{ content }}{% else %}Content is missing{% endif %}
+                {%- endif -%}
+            </description>
             <pubDate>Fri, 22 Dec 2023 07:00:00 +0000</pubDate>
             <guid>https://nhkeasier.com/story/{{ story.id|safe }}/</guid>
         </item>

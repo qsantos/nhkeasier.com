@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use askama_axum::Template;
@@ -112,6 +113,7 @@ struct StoryTemplate<'a> {
 #[template(path = "feed.atom", escape = "xml")]
 struct FeedTemplate<'a> {
     stories: Vec<Story<'a>>,
+    furiganas: bool,
 }
 
 struct State {
@@ -352,7 +354,10 @@ async fn contact_sent() -> impl IntoResponse {
     .await
 }
 
-async fn feed(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
+async fn feed(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Query(query): extract::Query<HashMap<String, String>>,
+) -> impl IntoResponse {
     let rows =
         sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published DESC, id DESC LIMIT 50")
             .fetch_all(&state.pool)
@@ -362,7 +367,12 @@ async fn feed(extract::State(state): extract::State<Arc<State>>) -> impl IntoRes
         .iter()
         .map(|row| Story::from_row(row).unwrap())
         .collect();
-    let content = FeedTemplate { stories }.render().unwrap();
+    let content = FeedTemplate {
+        stories,
+        furiganas: !query.contains_key("no-furiganas"),
+    }
+    .render()
+    .unwrap();
     ([(header::CONTENT_TYPE, "application/rss+xml")], content)
 }
 
