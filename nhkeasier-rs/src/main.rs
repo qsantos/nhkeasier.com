@@ -1,8 +1,9 @@
+use askama::Template;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::types::chrono::NaiveDateTime;
 use sqlx::FromRow;
 
-use askama::Template;
+use edict2::{SubEdictCreator, SubEnamdictCreator};
 
 #[derive(Debug, FromRow)]
 #[allow(dead_code)]
@@ -34,8 +35,8 @@ struct MyTemplate {
     story: Story,
     previous_story_id: Option<i64>,
     next_story_id: Option<i64>,
-    edict: String,
-    enamdict: String,
+    edict: Option<String>,
+    enamdict: Option<String>,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -44,6 +45,9 @@ async fn main() -> Result<(), sqlx::Error> {
         .max_connections(5)
         .connect("db.sqlite3")
         .await?;
+
+    let sub_edict_creator = SubEdictCreator::from_files();
+    let sub_enamdict_creator = SubEnamdictCreator::from_files();
 
     let story = sqlx::query_as!(Story, "SELECT * FROM nhkeasier_story ORDER BY id DESC")
         .fetch_one(&pool)
@@ -58,9 +62,15 @@ async fn main() -> Result<(), sqlx::Error> {
         header: "Single Story".to_string(),
         previous_story_id: Some(story.id - 1),
         next_story_id: None,
+        edict: story
+            .content
+            .as_ref()
+            .map(|content| sub_edict_creator.from(content).join("\n")),
+        enamdict: story
+            .content
+            .as_ref()
+            .map(|content| sub_enamdict_creator.from(content).join("\n")),
         story,
-        edict: "".to_string(),
-        enamdict: "".to_string(),
     };
     println!("{}", t.render().unwrap());
 

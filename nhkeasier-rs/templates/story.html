@@ -3,11 +3,15 @@
 {% include "widgets/nav_story.html" %}
 {% include "widgets/story.html" %}
 {% include "widgets/nav_story.html" %}
+{% if let Some(edict) = edict %}
 <script type="edict">
 {{ edict|safe }}
 </script>
+{% endif %}
+{% if let Some(enamdict) = enamdict %}
 <script type="enamdict">
 {{ enamdict|safe }}
 </script>
+{% endif %}
 <script async src="/static/scripts.js"></script>
 {% endblock %}
