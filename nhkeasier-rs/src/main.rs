@@ -1,6 +1,7 @@
 use std::any::Any;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::net::SocketAddr;
 use std::sync::Arc;
 
 use askama_axum::Template;
@@ -20,6 +21,7 @@ use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::FromRow;
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
+use tower_http::trace::TraceLayer;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
@@ -451,6 +453,14 @@ async fn feed(
 async fn main() {
     dotenvy::dotenv().unwrap();
 
+    // set up tracing
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
+    let trace = TraceLayer::new_for_http()
+        .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
+        .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO));
+
     let database_url = std::env::var("DATABASE_URL").unwrap();
     let state = Arc::new(State {
         pool: SqlitePoolOptions::new()
@@ -479,9 +489,12 @@ async fn main() {
         .nest_service("/static", ServeDir::new("static"))
         .fallback(handle_not_found)
         .layer(middleware)
+        .layer(trace)
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let listen: SocketAddr = "127.0.0.1:3000".parse().unwrap();
+    tracing::info!("Listening on http://{listen:?}");
+    let listener = tokio::net::TcpListener::bind(listen).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
