@@ -451,10 +451,11 @@ async fn feed(
 async fn main() {
     dotenvy::dotenv().unwrap();
 
+    let database_url = std::env::var("DATABASE_URL").unwrap();
     let state = Arc::new(State {
         pool: SqlitePoolOptions::new()
             .max_connections(5)
-            .connect("db.sqlite3")
+            .connect(&database_url)
             .await
             .unwrap(),
         sub_edict_creator: SubEdictCreator::from_files(),
