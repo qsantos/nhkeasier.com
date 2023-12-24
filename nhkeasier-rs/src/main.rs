@@ -1,11 +1,13 @@
+use std::any::Any;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 use askama_axum::Template;
 use axum::{
+    body::Body,
     extract,
-    http::header,
+    http::{header, Response, StatusCode},
     response::{Html, IntoResponse},
     routing::get,
     Router,
@@ -15,6 +17,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::FromRow;
+use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
@@ -122,7 +125,7 @@ struct State {
     sub_enamdict_creator: SubEnamdictCreator,
 }
 
-async fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoResponse {
+fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoResponse {
     Html(
         MessageTemplate {
             debug: true,
@@ -136,6 +139,18 @@ async fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoRespon
         .render()
         .unwrap(),
     )
+}
+
+fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
+    (
+        StatusCode::INTERNAL_SERVER_ERROR,
+        simple_message(
+            "Server Error",
+            "Sorry, something went very wrong on the server and we were not \
+            able to display the requested document.",
+        ),
+    )
+        .into_response()
 }
 
 fn remove_all_html(content: &str) -> Cow<'_, str> {
@@ -354,7 +369,6 @@ async fn contact_sent() -> impl IntoResponse {
         "Thank you for your feedback. We will take your message under \
         consideration as soon as possible.",
     )
-    .await
 }
 
 async fn feed(
@@ -391,6 +405,8 @@ async fn main() {
         sub_enamdict_creator: SubEnamdictCreator::from_files(),
     });
 
+    let middleware = tower::ServiceBuilder::new().layer(CatchPanicLayer::custom(handle_panic));
+
     // build our application with a single route
     let app = Router::new()
         .route("/", get(archive))
@@ -404,6 +420,7 @@ async fn main() {
         .route_service("/favicon.ico", ServeFile::new("static/favicon.ico"))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
+        .layer(middleware)
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
