@@ -1040,7 +1040,6 @@ dependencies = [
  "chrono",
  "dotenvy",
  "edict2",
- "http-body-util",
  "lazy_static",
  "lettre",
  "regex",
