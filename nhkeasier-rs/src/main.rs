@@ -141,6 +141,17 @@ fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoResponse {
     )
 }
 
+async fn handle_not_found() -> impl IntoResponse {
+    (
+        StatusCode::NOT_FOUND,
+        simple_message(
+            "Page Not Found",
+            "Sorry, we could not find the page you requested. Maybe the URL \
+            you followed is incomplete, or the document has been moved.",
+        ),
+    )
+}
+
 fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
     (
         StatusCode::INTERNAL_SERVER_ERROR,
@@ -420,6 +431,7 @@ async fn main() {
         .route_service("/favicon.ico", ServeFile::new("static/favicon.ico"))
         .nest_service("/media", ServeDir::new("../media"))
         .nest_service("/static", ServeDir::new("static"))
+        .fallback(handle_not_found)
         .layer(middleware)
         .with_state(state);
 
