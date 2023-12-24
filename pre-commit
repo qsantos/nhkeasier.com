@@ -20,6 +20,7 @@ GIT_ROOT=$(git rev-parse --show-toplevel)
 if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2 nhkeasier-rs Cargo.toml Cargo.lock; then
     pushd $TEMPDIR >/dev/null
     ln -fs $GIT_ROOT/db.sqlite3 $TEMPDIR/db.sqlite3
+    ln -fs $GIT_ROOT/.env $TEMPDIR/.env
     export CARGO_TARGET_DIR="${GIT_ROOT}/target"
     echo "Running cargo fmt"
     cargo fmt --check

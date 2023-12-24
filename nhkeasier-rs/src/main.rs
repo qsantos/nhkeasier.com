@@ -8,13 +8,14 @@ use axum::{
     body::Body,
     extract,
     http::{header, Response, StatusCode},
-    response::{Html, IntoResponse},
+    response::{Html, IntoResponse, Redirect},
     routing::get,
     Router,
 };
 use chrono::{Duration, FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone};
 use lazy_static::lazy_static;
 use regex::Regex;
+use serde::Deserialize;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::FromRow;
 use tower_http::catch_panic::CatchPanicLayer;
@@ -162,6 +163,32 @@ fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
         ),
     )
         .into_response()
+}
+
+async fn send_email(subject: &str, body: String) {
+    use lettre::message::header::ContentType;
+    use lettre::transport::smtp::authentication::Credentials;
+    use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
+
+    let host = std::env::var("EMAIL_HOST").unwrap();
+    let user = std::env::var("EMAIL_USER").unwrap();
+    let password = std::env::var("EMAIL_PASSWORD").unwrap();
+
+    let message = Message::builder()
+        .from("NHKEasier <bugs@nhkeasier.com>".parse().unwrap())
+        .to("NHKEasier <contact@nhkeasier.com>".parse().unwrap())
+        .subject(format!("[NHKEasier] {}", subject))
+        .header(ContentType::TEXT_PLAIN)
+        .body(body)
+        .unwrap();
+
+    let creds = Credentials::new(user, password);
+    let mailer = AsyncSmtpTransport::<Tokio1Executor>::relay(&host)
+        .unwrap()
+        .credentials(creds)
+        .build();
+
+    mailer.send(message).await.unwrap();
 }
 
 fn remove_all_html(content: &str) -> Cow<'_, str> {
@@ -374,6 +401,22 @@ async fn contact() -> impl IntoResponse {
     )
 }
 
+#[derive(Clone, Debug, Deserialize)]
+struct ContactForm {
+    from_email: String,
+    subject: String,
+    message: String,
+}
+
+async fn contact_send(form: extract::Form<ContactForm>) -> impl IntoResponse {
+    send_email(
+        &form.subject,
+        format!("From: {}\n\n{}", form.from_email, form.message),
+    )
+    .await;
+    Redirect::to("/contact/sent/")
+}
+
 async fn contact_sent() -> impl IntoResponse {
     simple_message(
         "Message Sent",
@@ -406,6 +449,8 @@ async fn feed(
 
 #[tokio::main]
 async fn main() {
+    dotenvy::dotenv().unwrap();
+
     let state = Arc::new(State {
         pool: SqlitePoolOptions::new()
             .max_connections(5)
@@ -424,7 +469,7 @@ async fn main() {
         .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
-        .route("/contact/", get(contact))
+        .route("/contact/", get(contact).post(contact_send))
         .route("/contact/sent/", get(contact_sent))
         .route("/feed/", get(feed))
         .route_service("/robots.txt", ServeFile::new("static/robots.txt"))
