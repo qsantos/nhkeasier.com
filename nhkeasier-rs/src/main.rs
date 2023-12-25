@@ -551,20 +551,27 @@ async fn main() {
         .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
         .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO));
 
+    tracing::info!("Connecting to database");
     let database_url = std::env::var("DATABASE_URL").unwrap();
+    let pool = SqlitePoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url)
+        .await
+        .unwrap();
+
+    tracing::info!("Loading EDICT2");
+    let sub_edict_creator = SubEdictCreator::from_files();
+
+    tracing::info!("Loading ENAMDICT");
+    let sub_enamdict_creator = SubEnamdictCreator::from_files();
+
+    tracing::info!("Preparing Web service");
     let state = Arc::new(State {
-        pool: SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect(&database_url)
-            .await
-            .unwrap(),
-        sub_edict_creator: SubEdictCreator::from_files(),
-        sub_enamdict_creator: SubEnamdictCreator::from_files(),
+        pool,
+        sub_edict_creator,
+        sub_enamdict_creator,
     });
-
     let middleware = tower::ServiceBuilder::new().layer(CatchPanicLayer::custom(handle_panic));
-
-    // build our application with a single route
     let app = Router::new()
         .route("/", get(archive))
         .route("/:year/:month/:day/", get(archive))
