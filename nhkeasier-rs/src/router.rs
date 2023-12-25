@@ -12,7 +12,7 @@ use axum::{
     routing::get,
     Router,
 };
-use chrono::{Duration, FixedOffset, Local, NaiveDate, NaiveDateTime, TimeZone};
+use chrono::{Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
@@ -23,8 +23,9 @@ use tower_http::trace::TraceLayer;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
+use crate::JST;
+
 lazy_static! {
-    static ref JST: FixedOffset = FixedOffset::east_opt(3600 * 9).unwrap();
     static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").unwrap();
 }
 
