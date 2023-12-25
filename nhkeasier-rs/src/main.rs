@@ -22,6 +22,8 @@ use sqlx::FromRow;
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
+use tracing::{Event, Subscriber};
+use tracing_subscriber::{layer::Context, Layer};
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
@@ -128,7 +130,7 @@ struct State {
     sub_enamdict_creator: SubEnamdictCreator,
 }
 
-fn simple_message<'a>(title: &'a str, message: &'a str) -> impl IntoResponse {
+fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
     Html(
         MessageTemplate {
             debug: true,
@@ -167,10 +169,11 @@ fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
         .into_response()
 }
 
-async fn send_email(subject: &str, body: String) {
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::Message;
+
+fn send_email_common(subject: &str, body: String) -> (Message, String, Credentials) {
     use lettre::message::header::ContentType;
-    use lettre::transport::smtp::authentication::Credentials;
-    use lettre::{AsyncSmtpTransport, AsyncTransport, Message, Tokio1Executor};
 
     let host = std::env::var("EMAIL_HOST").unwrap();
     let user = std::env::var("EMAIL_USER").unwrap();
@@ -185,11 +188,26 @@ async fn send_email(subject: &str, body: String) {
         .unwrap();
 
     let creds = Credentials::new(user, password);
+    (message, host, creds)
+}
+
+fn send_email_sync(subject: &str, body: String) {
+    let (message, host, creds) = send_email_common(subject, body);
+    use lettre::{SmtpTransport, Transport};
+    let mailer = SmtpTransport::relay(&host)
+        .unwrap()
+        .credentials(creds)
+        .build();
+    mailer.send(&message).unwrap();
+}
+
+async fn send_email_async(subject: &str, body: String) {
+    let (message, host, creds) = send_email_common(subject, body);
+    use lettre::{AsyncSmtpTransport, AsyncTransport, Tokio1Executor};
     let mailer = AsyncSmtpTransport::<Tokio1Executor>::relay(&host)
         .unwrap()
         .credentials(creds)
         .build();
-
     mailer.send(message).await.unwrap();
 }
 
@@ -202,7 +220,20 @@ async fn archive(
     maybe_ymd: Option<extract::Path<(i32, u32, u32)>>,
 ) -> impl IntoResponse {
     let date = if let Some(extract::Path((year, month, day))) = maybe_ymd {
-        NaiveDate::from_ymd_opt(year, month, day).unwrap()
+        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
+            date
+        } else {
+            return (
+                StatusCode::BAD_REQUEST,
+                simple_message(
+                    "Bad request",
+                    &format!(
+                        "{year}-{month}-{day} is not a valid date. \
+                        You might have stumbled there my mistyping the URL; please double-check!"
+                    ),
+                ),
+            );
+        }
     } else {
         let maybe_dt = sqlx::query_scalar!("SELECT max(published) FROM nhkeasier_story")
             .fetch_one(&state.pool)
@@ -276,26 +307,29 @@ async fn archive(
     let edict = state.sub_edict_creator.from(&content).join("\n");
     let enamdict = state.sub_enamdict_creator.from(&content).join("\n");
 
-    Html(
-        ArchiveTemplate {
-            debug: true,
-            title: "Easier Japanese Practice",
-            description: story
-                .content
-                .map(|content| remove_all_html(content))
-                .as_deref(),
-            image: story.image,
-            player: None, // TODO
-            header: &format!("Stories on {}", date.format("%Y-%m-%d")),
-            previous_day,
-            date,
-            next_day,
-            edict: Some(&edict),
-            enamdict: Some(&enamdict),
-            stories,
-        }
-        .render()
-        .unwrap(),
+    (
+        StatusCode::OK,
+        Html(
+            ArchiveTemplate {
+                debug: true,
+                title: "Easier Japanese Practice",
+                description: story
+                    .content
+                    .map(|content| remove_all_html(content))
+                    .as_deref(),
+                image: story.image,
+                player: None, // TODO
+                header: &format!("Stories on {}", date.format("%Y-%m-%d")),
+                previous_day,
+                date,
+                next_day,
+                edict: Some(&edict),
+                enamdict: Some(&enamdict),
+                stories,
+            }
+            .render()
+            .unwrap(),
+        ),
     )
 }
 
@@ -411,7 +445,7 @@ struct ContactForm {
 }
 
 async fn contact_send(form: extract::Form<ContactForm>) -> impl IntoResponse {
-    send_email(
+    send_email_async(
         &form.subject,
         format!("From: {}\n\n{}", form.from_email, form.message),
     )
@@ -449,15 +483,71 @@ async fn feed(
     ([(header::CONTENT_TYPE, "application/rss+xml")], content)
 }
 
+struct EmailLayer;
+
+#[derive(Default)]
+struct VecCollectVisitor {
+    fields: Vec<(String, String)>,
+}
+
+impl VecCollectVisitor {
+    fn new() -> Self {
+        Default::default()
+    }
+}
+
+impl tracing::field::Visit for VecCollectVisitor {
+    fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
+        self.fields
+            .push((field.name().to_string(), format!("{:?}", value)));
+    }
+}
+
+impl<S: Subscriber> Layer<S> for EmailLayer {
+    fn on_event(&self, event: &Event<'_>, _ctx: Context<'_, S>) {
+        let meta = event.metadata();
+        let level = meta.level();
+        let file = meta.file().unwrap_or("<none>");
+        let line = meta.line().unwrap_or(0);
+        let mut visitor = VecCollectVisitor::new();
+        event.record(&mut visitor);
+        let (_, message) = &visitor.fields[0];
+        send_email_sync(
+            &format!("[NHKEasier] {level} {message}"),
+            format!("{file}:{line}\n{:#?}", visitor.fields),
+        )
+    }
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().unwrap();
 
     // set up tracing
-    tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::INFO)
-        .init();
-    let trace = TraceLayer::new_for_http()
+    {
+        use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
+        use tracing_subscriber::util::SubscriberInitExt;
+        // debug to file
+        let file = std::fs::File::options()
+            .append(true)
+            .create(true)
+            .open("nhkeasier.com.log")
+            .unwrap();
+        let file_layer = tracing_subscriber::fmt::layer()
+            .with_writer(Arc::new(file))
+            .with_filter(tracing_subscriber::filter::LevelFilter::DEBUG);
+        // info to stdout
+        let stdout_layer = tracing_subscriber::fmt::layer()
+            .with_filter(tracing_subscriber::filter::LevelFilter::INFO);
+        // warn to email
+        let email_layer = EmailLayer.with_filter(tracing_subscriber::filter::LevelFilter::WARN);
+        tracing_subscriber::registry()
+            .with(stdout_layer)
+            .with(file_layer)
+            .with(email_layer)
+            .init();
+    }
+    let trace_http = TraceLayer::new_for_http()
         .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
         .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO));
 
@@ -489,7 +579,7 @@ async fn main() {
         .nest_service("/static", ServeDir::new("static"))
         .fallback(handle_not_found)
         .layer(middleware)
-        .layer(trace)
+        .layer(trace_http)
         .with_state(state);
 
     // run our app with hyper, listening globally on port 3000
