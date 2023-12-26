@@ -7,6 +7,8 @@ async fn main() {
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;
 
+    nhkeasier::update_stories(&pool).await;
+
     tracing::info!("Loading EDICT2");
     let sub_edict_creator = edict2::SubEdictCreator::from_files();
 
