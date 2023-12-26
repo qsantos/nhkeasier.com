@@ -1,3 +1,22 @@
+use sqlx::{Pool, Sqlite};
+use tokio::time::{Duration, Instant};
+
+const UPDATE_PERIOD: Duration = Duration::from_secs(3600);
+
+async fn update_job(pool: Pool<Sqlite>) {
+    nhkeasier::update_stories(&pool).await;
+    let mut last_run = Instant::now();
+    loop {
+        let elapsed = last_run.elapsed();
+        if elapsed >= UPDATE_PERIOD {
+            nhkeasier::update_stories(&pool).await;
+            last_run = Instant::now();
+        } else {
+            tokio::time::sleep_until(last_run + UPDATE_PERIOD).await;
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() {
     dotenvy::dotenv().unwrap();
@@ -7,7 +26,7 @@ async fn main() {
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;
 
-    nhkeasier::update_stories(&pool).await;
+    tokio::spawn(update_job(pool.clone()));
 
     tracing::info!("Loading EDICT2");
     let sub_edict_creator = edict2::SubEdictCreator::from_files();
