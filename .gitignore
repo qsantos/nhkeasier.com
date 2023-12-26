@@ -1,5 +1,5 @@
 /db.sqlite3
-/nhkeasier/media/
-target/
-.env
+/media/
+/target/
+/.env
 /nhkeasier.com.log
