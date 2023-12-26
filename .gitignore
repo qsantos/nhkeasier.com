@@ -1,4 +1,4 @@
 /db.sqlite3
-/nhkeasier-rs/media/
+/nhkeasier/media/
 target/
 .env

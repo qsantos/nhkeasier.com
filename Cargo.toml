@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "edict2",
-    "nhkeasier-rs",
+    "nhkeasier",
 ]
 
 [profile.release]
