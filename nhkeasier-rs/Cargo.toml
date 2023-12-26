@@ -23,4 +23,5 @@ tokio = { version = "1.35.1", default-features = false, features = ["macros", "r
 tower = "0.4.13"
 tower-http = { version = "0.5.0", features = ["fs", "catch-panic", "trace"] }
 tracing = "0.1.40"
+tracing-panic = "0.1.1"
 tracing-subscriber = { version = "0.3.18", features = ["tracing"] }

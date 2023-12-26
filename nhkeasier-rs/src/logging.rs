@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use tracing::{Event, Subscriber};
+use tracing_panic::panic_hook;
 use tracing_subscriber::layer::Context;
 use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -43,6 +44,9 @@ impl<S: Subscriber> Layer<S> for EmailLayer {
 }
 
 pub fn init_logging() {
+    // also log panics (especially for email notifications)
+    std::panic::set_hook(Box::new(panic_hook));
+
     // debug to file
     let file = std::fs::File::options()
         .append(true)
