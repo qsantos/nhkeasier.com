@@ -99,13 +99,14 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     }
 }
 
-async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>, html: &str) {
+async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
         return;
     }
+    let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
-    let captures = STORY_CONTENT_REGEX.captures(html).unwrap();
+    let captures = STORY_CONTENT_REGEX.captures(&html).unwrap();
     let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace(&captures[1], "");
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
@@ -224,8 +225,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 } else {
                     tracing::debug!("selected id={} for story_id={}", story.id, story.story_id);
                 }
-                let html = html_of_story(pool, &story).await;
-                extract_story_content(pool, &story, &html).await;
+                extract_story_content(pool, &story).await;
                 fetch_image_of_story(pool, info, &story).await;
                 fetch_voice_of_story(pool, info, &story).await;
             }
