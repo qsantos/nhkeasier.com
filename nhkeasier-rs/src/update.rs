@@ -7,6 +7,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
 use sqlx::FromRow;
+use tracing::Instrument;
 
 use crate::Story;
 
@@ -202,18 +203,23 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
     let j: NewsList = serde_json::from_str(&data).unwrap();
     for stories in j.0[0].values() {
         for info in stories {
-            tracing::debug!("searching story for news_id={}", info.news_id);
-            let (created, row) = upsert_story(pool, info).await;
-            let story = Story::from_row(&row).unwrap();
-            if created {
-                tracing::debug!("inserted id={} for story_id={}", story.id, story.story_id);
-            } else {
-                tracing::debug!("selected id={} for story_id={}", story.id, story.story_id);
+            let span = tracing::debug_span!("story", news_id = info.news_id);
+            async move {
+                tracing::debug!("searching story for news_id={}", info.news_id);
+                let (created, row) = upsert_story(pool, info).await;
+                let story = Story::from_row(&row).unwrap();
+                if created {
+                    tracing::debug!("inserted id={} for story_id={}", story.id, story.story_id);
+                } else {
+                    tracing::debug!("selected id={} for story_id={}", story.id, story.story_id);
+                }
+                let html = html_of_story(pool, &story).await;
+                extract_story_content(pool, &story, &html).await;
+                fetch_image_of_story(pool, info, &story).await;
+                fetch_voice_of_story(pool, info, &story).await;
             }
-            let html = html_of_story(pool, &story).await;
-            extract_story_content(pool, &story, &html).await;
-            fetch_image_of_story(pool, info, &story).await;
-            fetch_voice_of_story(pool, info, &story).await;
+            .instrument(span)
+            .await
         }
     }
 }
