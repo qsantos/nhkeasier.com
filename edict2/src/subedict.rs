@@ -3,7 +3,7 @@ use std::include_str;
 
 use ouroboros::self_referencing;
 
-use crate::{iter_fragments, Deinflector, Edict};
+use crate::{iter_fragments, Deinflector, Edict, Error};
 
 #[self_referencing]
 pub struct SubEdictCreator {
@@ -18,14 +18,13 @@ pub struct SubEdictCreator {
 }
 
 impl SubEdictCreator {
-    pub fn from_files() -> Self {
-        SubEdictCreatorBuilder {
-            edict2_data: include_str!("../data/edict2"),
-            deinflector_data: include_str!("../data/deinflect"),
-            edict2_builder: |data| Edict::parse(data),
-            deinflector_builder: |data| Deinflector::parse(data),
-        }
-        .build()
+    pub fn from_files() -> Result<Self, Error> {
+        SubEdictCreator::try_new(
+            include_str!("../data/edict2"),
+            include_str!("../data/deinflect"),
+            |data| Edict::parse(data),
+            |data| Deinflector::parse(data),
+        )
     }
 
     pub fn from(&self, content: &str) -> Vec<&str> {
@@ -65,12 +64,8 @@ pub struct SubEnamdictCreator {
 }
 
 impl SubEnamdictCreator {
-    pub fn from_files() -> Self {
-        SubEnamdictCreatorBuilder {
-            enamdict_data: include_str!("../data/enamdict"),
-            enamdict_builder: |data| Edict::parse(data),
-        }
-        .build()
+    pub fn from_files() -> Result<Self, Error> {
+        SubEnamdictCreator::try_new(include_str!("../data/enamdict"), |data| Edict::parse(data))
     }
 
     pub fn from(&self, content: &str) -> Vec<&str> {

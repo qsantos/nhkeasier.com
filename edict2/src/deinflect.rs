@@ -1,6 +1,8 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 
+use crate::Error;
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 struct Rule<'a> {
     from: &'a str,
@@ -44,7 +46,7 @@ pub struct Deinflector<'a> {
 }
 
 impl<'a> Deinflector<'a> {
-    pub fn parse(data: &'a str) -> Self {
+    pub fn parse(data: &'a str) -> Result<Self, Error> {
         fn aux<'a, I: Iterator<Item = char>>(
             chars: &mut I,
             rule: Rule<'a>,
@@ -61,20 +63,22 @@ impl<'a> Deinflector<'a> {
                     cur_suffix_to_rules.0.insert(c, (rules, suffix_to_rules));
                 }
             } else {
-                cur_rules.unwrap().push(rule);
+                cur_rules.expect("rules should not be None").push(rule);
             }
         }
 
         // NOTE: skip(1) for header on first line
         let mut suffix_to_rules = SuffixToRules(HashMap::new());
         let mut reasons = Vec::new();
-        for line in data.lines().skip(1) {
+        for (lineno, line) in data.lines().enumerate().skip(1) {
+            let lineno = lineno + 1;
             let fields: Vec<&str> = line.split('\t').collect();
             match fields[..] {
                 [_] => reasons.push(line),
                 [from, to, type_, reason] => {
-                    let type_: u32 = type_.parse().unwrap();
-                    let reason: usize = reason.parse().unwrap();
+                    let type_: u32 = type_.parse().map_err(|_| Error::ParseInteger { lineno })?;
+                    let reason: usize =
+                        reason.parse().map_err(|_| Error::ParseInteger { lineno })?;
                     let reason = reasons[reason];
                     let rule = Rule {
                         from,
@@ -87,7 +91,7 @@ impl<'a> Deinflector<'a> {
                 _ => panic!("unexpected line {line}"),
             }
         }
-        Deinflector { suffix_to_rules }
+        Ok(Deinflector { suffix_to_rules })
     }
 
     pub fn deinflect<'b, 'c>(

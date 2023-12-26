@@ -1,6 +1,8 @@
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
+use crate::Error;
+
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct EdictEntry<'a> {
     pub line: &'a str,
@@ -13,13 +15,20 @@ pub struct Edict<'a> {
 }
 
 impl<'a> Edict<'a> {
-    pub fn parse(data: &'a str) -> Self {
+    pub fn parse(data: &'a str) -> Result<Self, Error> {
         let mut entries = HashMap::new();
         // NOTE: skip(1) for header on first line
-        for line in data.lines().skip(1) {
-            let (_, meanings) = line.split_once(" /").unwrap();
+        for (lineno, line) in data.lines().enumerate().skip(1) {
+            let lineno = lineno + 1;
+            let (_, meanings) = line.split_once(" /").ok_or(Error::ParseError {
+                lineno,
+                expected: " /",
+            })?;
             let type_ = if let Some(rest) = meanings.strip_prefix('(') {
-                let (glosses, _) = rest.split_once(')').unwrap();
+                let (glosses, _) = rest.split_once(')').ok_or(Error::ParseError {
+                    lineno,
+                    expected: ")",
+                })?;
                 type_from_glosses(glosses)
             } else {
                 1 << 7
@@ -28,17 +37,23 @@ impl<'a> Edict<'a> {
             if let Some((writings, rest)) = line.split_once(" [") {
                 // both writings, and readings (within brackets); for example:
                 // 日本 [にほん(P);にっぽん] /(n) Japan/(P)/EntL1582710X/
-                let (readings, _) = rest.split_once("] /").unwrap();
+                let (readings, _) = rest.split_once("] /").ok_or(Error::ParseError {
+                    lineno,
+                    expected: "] /",
+                })?;
                 insert_line_at_keys(&mut entries, writings.split(';'), line, type_);
                 insert_line_at_keys(&mut entries, readings.split(';'), line, type_);
             } else {
                 // only writings; for example:
                 // あやかし /(n) (1) ghost that appears at sea during a shipwreck/(2) something strange or suspicious/(3) idiot/fool/(4) noh mask for roles involving dead or ghost characters/EntL2143630X/
-                let (writings, _) = line.split_once(' ').unwrap();
+                let (writings, _) = line.split_once(' ').ok_or(Error::ParseError {
+                    lineno,
+                    expected: " ",
+                })?;
                 insert_line_at_keys(&mut entries, writings.split(';'), line, type_);
             };
         }
-        Edict { entries }
+        Ok(Edict { entries })
     }
 
     pub fn lookup(&self, word: &str) -> Option<&Vec<EdictEntry<'_>>> {

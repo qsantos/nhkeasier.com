@@ -12,7 +12,7 @@ lazy_static! {
         "\u{ff66}-\u{ff9f}", // Halfwidth and Fullwidth Forms Block (hiragana and katakana)
         "]+",
     ))
-    .unwrap();
+    .expect("invalid FRAGMENT_PATTERN regex");
 }
 
 pub fn iter_fragments(data: &str) -> impl Iterator<Item = &str> {

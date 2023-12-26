@@ -18,7 +18,7 @@ async fn update_job(pool: Pool<Sqlite>) {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), edict2::Error> {
     dotenvy::dotenv().unwrap();
 
     nhkeasier::init_logging();
@@ -29,10 +29,10 @@ async fn main() {
     tokio::spawn(update_job(pool.clone()));
 
     tracing::info!("Loading EDICT2");
-    let sub_edict_creator = edict2::SubEdictCreator::from_files();
+    let sub_edict_creator = edict2::SubEdictCreator::from_files()?;
 
     tracing::info!("Loading ENAMDICT");
-    let sub_enamdict_creator = edict2::SubEnamdictCreator::from_files();
+    let sub_enamdict_creator = edict2::SubEnamdictCreator::from_files()?;
 
     tracing::info!("Preparing Web service");
     let state = nhkeasier::State {
@@ -47,4 +47,5 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(listen).await.unwrap();
     axum::serve(listener, app).await.unwrap();
+    Ok(())
 }
