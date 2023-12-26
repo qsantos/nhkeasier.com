@@ -2,7 +2,8 @@ use std::io::{stdout, BufWriter, Write};
 
 use edict2::SubEdictCreator;
 
-fn main() {
+#[test]
+fn test() {
     let sub_edict_creator = SubEdictCreator::from_files();
 
     let data = std::fs::read_to_string("test-input").unwrap();
