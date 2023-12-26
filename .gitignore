@@ -1,9 +1,4 @@
-__pycache__/
-.mypy_cache/
 /db.sqlite3
 /nhkeasier-rs/media/
-/static/
-nhkeasier/secrets.py
-/venv/
 target/
 .env
