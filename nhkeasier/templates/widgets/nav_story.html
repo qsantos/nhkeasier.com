@@ -1,5 +1,0 @@
-<nav><ul>
-    <li>{% if previous_story %}<a href="{% url 'story' previous_story.id %}">Previous Story</a>{% endif %}</li>
-    <li><a href="{{ story.published|date:'/Y/m/d/' }}">{{ story.published|date:'Y-m-d' }}</a></li>
-    <li>{% if next_story %}<a href="{% url 'story' next_story.id %}">Next story</a>{% endif %}</li>
-</ul></nav>

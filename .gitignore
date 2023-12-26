@@ -1,7 +1,7 @@
 __pycache__/
 .mypy_cache/
 /db.sqlite3
-/media/
+/nhkeasier-rs/media/
 /static/
 nhkeasier/secrets.py
 /venv/
