@@ -65,20 +65,24 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
 
 async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     if let Some(webpage) = story.webpage {
+        tracing::debug!("getting HTML from database");
         // TODO: use Tokio fs
         std::fs::read_to_string(format!("media/{webpage}")).unwrap()
     } else {
+        tracing::debug!("downloading HTML");
         let url = format!(
             "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
             story.story_id
         );
         let res = reqwest::get(url).await.unwrap();
         let html = res.bytes().await.unwrap();
+        tracing::debug!("saving HTML to file");
         let mut c = std::io::Cursor::new(&html);
         let filename = format!("html/{}.html", story.story_id);
         // TODO: use Tokio fs
         let mut f = std::fs::File::create(format!("media/{filename}")).unwrap();
         std::io::copy(&mut c, &mut f).unwrap();
+        tracing::debug!("saving HTML to database");
         // TODO: no need to wait for query to finish
         sqlx::query!(
             "UPDATE nhkeasier_story SET webpage = $1 WHERE id = $2",
@@ -88,18 +92,22 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         .execute(pool)
         .await
         .unwrap();
+        tracing::debug!("decoding UTF-8 HTML");
         String::from_utf8(html.into()).unwrap()
     }
 }
 
 async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>, html: &str) {
     if story.content_with_ruby.is_some() {
+        tracing::debug!("content already present");
         return;
     }
+    tracing::debug!("extracting content");
     let captures = STORY_CONTENT_REGEX.captures(html).unwrap();
     let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace(&captures[1], "");
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
+    tracing::debug!("saving content to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET content_with_ruby = $1, content = $2 WHERE id = $3",
@@ -110,26 +118,32 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>, html: &st
     .execute(pool)
     .await
     .unwrap();
+    tracing::debug!("saved content to database");
 }
 
 async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
     if story.image.is_some() {
+        tracing::debug!("image already present");
         return;
     }
+    tracing::debug!("downloading image");
     let res = reqwest::get(&info.news_web_image_uri).await.unwrap();
     let content = res.bytes().await.unwrap();
+    tracing::debug!("saving image to file");
     let mut c = std::io::Cursor::new(&content);
     let filename = format!("jpg/{}.jpg", story.story_id);
     let path = format!("media/{filename}");
     // TODO: use Tokio fs
     let mut f = std::fs::File::create(&path).unwrap();
     std::io::copy(&mut c, &mut f).unwrap();
+    tracing::debug!("making image progressive");
     assert!(Command::new("mogrify")
         .args(["-interlace", "plane", &path])
         .output()
         .unwrap()
         .status
         .success());
+    tracing::debug!("saving image to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET image = $1 WHERE id = $2",
@@ -139,12 +153,15 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     .execute(pool)
     .await
     .unwrap();
+    tracing::debug!("saved image to database");
 }
 
 async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
     if story.voice.is_some() {
+        tracing::debug!("voice already present");
         return;
     }
+    tracing::debug!("downloading voice to file");
     let voiceid = info.news_easy_voice_uri.strip_suffix(".m4a").unwrap();
     let url = format!("https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8");
     let filename = format!("mp3/{}.mp3", story.story_id);
@@ -163,6 +180,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         .unwrap()
         .status
         .success());
+    tracing::debug!("saving voice to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET voice = $1 WHERE id = $2",
@@ -172,16 +190,19 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     .execute(pool)
     .await
     .unwrap();
+    tracing::debug!("saved voice to database");
 }
 
 pub async fn update_stories(pool: &Pool<Sqlite>) {
     tracing::info!("Updating stories");
+    tracing::debug!("downloading list of stories");
     let res = reqwest::get(STORY_LIST_URL).await.unwrap();
     let data = res.text().await.unwrap();
+    tracing::debug!("downloaded list of stories");
     let j: NewsList = serde_json::from_str(&data).unwrap();
     for stories in j.0[0].values() {
         for info in stories {
-            tracing::debug!("Searching story for news_id={}", info.news_id);
+            tracing::debug!("searching story for news_id={}", info.news_id);
             let (created, row) = upsert_story(pool, info).await;
             let story = Story::from_row(&row).unwrap();
             if created {
