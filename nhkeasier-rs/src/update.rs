@@ -27,7 +27,8 @@ struct StoryInfo<'a> {
     // for some reason, they escape the slashes, so URLs can never be zero-copy parsed
     // TODO: https://github.com/dtolnay/request-for-implementation/issues/7
     pub news_web_image_uri: String,
-    // this is actually not a full URLs but just a filename, so no need to unescape
+    // these are actually not full URLs but just filenames, so no need to unescape
+    pub news_easy_image_uri: &'a str,
     pub news_easy_voice_uri: &'a str,
     // there might be escapes in the titles, but we might get away with zero-copy in some cases
     #[serde(borrow)]
@@ -128,7 +129,16 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         return;
     }
     tracing::debug!("downloading image");
-    let res = reqwest::get(&info.news_web_image_uri).await.unwrap();
+    let req = if info.news_web_image_uri.is_empty() {
+        let url = format!(
+            "http://www3.nhk.or.jp/news/easy/{}/{}",
+            story.story_id, info.news_easy_image_uri
+        );
+        reqwest::get(url).await
+    } else {
+        reqwest::get(&info.news_web_image_uri).await
+    };
+    let res = req.unwrap();
     let content = res.bytes().await.unwrap();
     tracing::debug!("saving image to file");
     let mut c = std::io::Cursor::new(&content);
@@ -205,6 +215,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
         for info in stories {
             let span = tracing::debug_span!("story", news_id = info.news_id);
             async move {
+                tracing::debug!("info={:?}", info);
                 tracing::debug!("searching story for news_id={}", info.news_id);
                 let (created, row) = upsert_story(pool, info).await;
                 let story = Story::from_row(&row).unwrap();
