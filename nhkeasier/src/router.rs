@@ -2,6 +2,7 @@ use std::any::Any;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::time::Instant;
 
 use askama_axum::Template;
 use axum::{
@@ -257,33 +258,40 @@ async fn archive(
         .collect::<Vec<_>>()
         .join("\n");
     let content = titles + &contents;
-    let edict = state.sub_edict_creator.from(&content).join("\n");
-    let enamdict = state.sub_enamdict_creator.from(&content).join("\n");
 
-    (
-        StatusCode::OK,
-        Html(
-            ArchiveTemplate {
-                debug: true,
-                title: "Easier Japanese Practice",
-                description: story
-                    .content
-                    .map(|content| remove_all_html(content))
-                    .as_deref(),
-                image: story.image,
-                player: None, // TODO
-                header: &format!("Stories on {}", date.format("%Y-%m-%d")),
-                previous_day,
-                date,
-                next_day,
-                edict: Some(&edict),
-                enamdict: Some(&enamdict),
-                stories,
-            }
-            .render()
-            .expect("failed to render index.html template"),
-        ),
-    )
+    let edict = state.sub_edict_creator.from(&content);
+    let start = Instant::now();
+    let edict = edict.join("\n");
+    tracing::debug!("edict joined in {:?}", start.elapsed());
+
+    let enamdict = state.sub_enamdict_creator.from(&content);
+    let start = Instant::now();
+    let enamdict = enamdict.join("\n");
+    tracing::debug!("enamdict joined in {:?}", start.elapsed());
+
+    let start = Instant::now();
+    let html = ArchiveTemplate {
+        debug: true,
+        title: "Easier Japanese Practice",
+        description: story
+            .content
+            .map(|content| remove_all_html(content))
+            .as_deref(),
+        image: story.image,
+        player: None, // TODO
+        header: &format!("Stories on {}", date.format("%Y-%m-%d")),
+        previous_day,
+        date,
+        next_day,
+        edict: Some(&edict),
+        enamdict: Some(&enamdict),
+        stories,
+    }
+    .render()
+    .expect("failed to render index.html template");
+    tracing::debug!("template index.html rendered in {:?}", start.elapsed());
+
+    (StatusCode::OK, Html(html))
 }
 
 async fn story(
@@ -334,38 +342,48 @@ async fn story(
     .await
     .expect("failed to query database for next story");
 
-    let edict = story
-        .content
-        .as_ref()
-        .map(|content| state.sub_edict_creator.from(content).join("\n"));
-    let enamdict = story
-        .content
-        .as_ref()
-        .map(|content| state.sub_enamdict_creator.from(content).join("\n"));
+    let edict = if let Some(content) = story.content {
+        let edict = state.sub_edict_creator.from(content);
+        let start = Instant::now();
+        let edict = edict.join("\n");
+        tracing::debug!("edict joined in {:?}", start.elapsed());
+        Some(edict)
+    } else {
+        None
+    };
 
-    (
-        StatusCode::OK,
-        Html(
-            StoryTemplate {
-                debug: true,
-                title: story.title,
-                description: story
-                    .content
-                    .map(|content| remove_all_html(content))
-                    .as_deref(),
-                image: story.image,
-                player: None,
-                header: "Single Story",
-                previous_story_id,
-                next_story_id,
-                edict: edict.as_deref(),
-                enamdict: enamdict.as_deref(),
-                story: &story,
-            }
-            .render()
-            .expect("failed to render story.html template"),
-        ),
-    )
+    let enamdict = if let Some(content) = story.content {
+        let enamdict = state.sub_enamdict_creator.from(content);
+        let start = Instant::now();
+        let enamdict = enamdict.join("\n");
+        tracing::debug!("enamdict joined in {:?}", start.elapsed());
+        Some(enamdict)
+    } else {
+        None
+    };
+
+    let start = Instant::now();
+    let html = StoryTemplate {
+        debug: true,
+        title: story.title,
+        description: story
+            .content
+            .map(|content| remove_all_html(content))
+            .as_deref(),
+        image: story.image,
+        player: None,
+        header: "Single Story",
+        previous_story_id,
+        next_story_id,
+        edict: edict.as_deref(),
+        enamdict: enamdict.as_deref(),
+        story: &story,
+    }
+    .render()
+    .expect("failed to render story.html template");
+    tracing::debug!("template story.html rendered in {:?}", start.elapsed());
+
+    (StatusCode::OK, Html(html))
 }
 
 async fn about() -> impl IntoResponse {
