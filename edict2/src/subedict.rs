@@ -50,16 +50,9 @@ impl SubEdictCreator {
                 }
             }
 
-            let mut lines: Vec<&str> = lines.into_iter().collect();
+            let lines: Vec<&str> = lines.into_iter().collect();
             tracing::debug!(
                 "sub-edict with {} entries generated in {:?}",
-                lines.len(),
-                start.elapsed()
-            );
-            let start = Instant::now();
-            lines.sort();
-            tracing::debug!(
-                "sub-edict with {} entries collected in {:?}",
                 lines.len(),
                 start.elapsed()
             );
@@ -95,16 +88,9 @@ impl SubEnamdictCreator {
                 }
             }
 
-            let mut lines: Vec<&str> = lines.into_iter().collect();
+            let lines: Vec<&str> = lines.into_iter().collect();
             tracing::debug!(
                 "sub-enamdict with {} entries generated in {:?}",
-                lines.len(),
-                start.elapsed()
-            );
-            let start = Instant::now();
-            lines.sort();
-            tracing::debug!(
-                "sub-enamdict with {} entries collected in {:?}",
                 lines.len(),
                 start.elapsed()
             );
