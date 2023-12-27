@@ -124,6 +124,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     .await
     .expect("failed to update content (story was removed from database while updating it)");
     tracing::debug!("saved content to database");
+    tracing::info!("found content for story");
 }
 
 async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
@@ -168,6 +169,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     .await
     .expect("failed to update image (story was removed from database while updating it)");
     tracing::debug!("saved image to database");
+    tracing::info!("found image for story");
 }
 
 async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
@@ -205,6 +207,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     .await
     .expect("failed to update voice (story was removed from database while updating it)");
     tracing::debug!("saved voice to database");
+    tracing::info!("found voice for story");
 }
 
 pub async fn update_stories(pool: &Pool<Sqlite>) {
@@ -223,7 +226,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 let (created, row) = upsert_story(pool, info).await;
                 let story = Story::from_row(&row).expect("failed to convert row into Story");
                 if created {
-                    tracing::debug!("inserted id={} for story_id={}", story.id, story.story_id);
+                    tracing::info!("new story id={} for story_id={}", story.id, story.story_id);
                 } else {
                     tracing::debug!("selected id={} for story_id={}", story.id, story.story_id);
                 }
