@@ -26,7 +26,7 @@ use edict2::{SubEdictCreator, SubEnamdictCreator};
 use crate::JST;
 
 lazy_static! {
-    static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").unwrap();
+    static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX");
 }
 
 #[derive(Clone, Debug, FromRow)]
@@ -133,7 +133,7 @@ fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
             message,
         }
         .render()
-        .unwrap(),
+        .expect("failed to render message.html template"),
     )
 }
 
@@ -187,9 +187,10 @@ async fn archive(
         let maybe_dt = sqlx::query_scalar!("SELECT max(published) FROM nhkeasier_story")
             .fetch_one(&state.pool)
             .await
-            .unwrap();
-        NaiveDateTime::parse_from_str(maybe_dt.as_ref().unwrap(), "%Y-%m-%d %H:%M:%S")
-            .unwrap()
+            .expect("failed to query database for max(published)");
+        let dt = maybe_dt.as_ref().unwrap();
+        NaiveDateTime::parse_from_str(dt, "%Y-%m-%d %H:%M:%S")
+            .expect("failed to parse published column from database")
             .date()
     };
     let tomorrow = date + Duration::days(1);
@@ -200,10 +201,10 @@ async fn archive(
             .bind(tomorrow)
             .fetch_all(&state.pool)
             .await
-            .unwrap();
+            .expect("failed to query database for day stories");
     let stories: Vec<Story> = rows
         .iter()
-        .map(|row| Story::from_row(row).unwrap())
+        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
 
     // find previous and next days with stories
@@ -219,7 +220,7 @@ async fn archive(
     )
     .fetch_optional(&state.pool)
     .await
-    .unwrap()
+    .expect("failed to query database for previous day")
     .map(|dt| dt.date());
     let next_day = sqlx::query_scalar!(
         "
@@ -233,14 +234,14 @@ async fn archive(
     )
     .fetch_optional(&state.pool)
     .await
-    .unwrap()
+    .expect("failed to query database for next day")
     .map(|dt| dt.date());
 
     let story = stories
         .iter()
         .find(|story| story.video_reencoded.is_some())
         .or_else(|| stories.iter().find(|story| story.image.is_some()))
-        .unwrap_or_else(|| &stories[0]);
+        .unwrap_or_else(|| stories.get(0).unwrap());
 
     let titles = stories
         .iter()
@@ -277,7 +278,7 @@ async fn archive(
                 stories,
             }
             .render()
-            .unwrap(),
+            .expect("failed to render index.html template"),
         ),
     )
 }
@@ -288,10 +289,11 @@ async fn story(
 ) -> impl IntoResponse {
     let row = sqlx::query("SELECT * FROM nhkeasier_story WHERE id = $1")
         .bind(id)
-        .fetch_one(&state.pool)
+        .fetch_optional(&state.pool)
         .await
+        .expect("failed to query database for specific story")
         .unwrap();
-    let story = Story::from_row(&row).unwrap();
+    let story = Story::from_row(&row).expect("failed to convert row to Story");
 
     // find ids of previous and next stories
     // dt = story.published.strftime('%Y-%m-%d %H:%M:%S')
@@ -309,7 +311,7 @@ async fn story(
     )
     .fetch_optional(&state.pool)
     .await
-    .unwrap();
+    .expect("failed to query database for previous story");
     let next_story_id = sqlx::query_scalar!(
         "
             SELECT id
@@ -323,7 +325,7 @@ async fn story(
     )
     .fetch_optional(&state.pool)
     .await
-    .unwrap();
+    .expect("failed to query database for next story");
 
     let edict = story
         .content
@@ -352,7 +354,7 @@ async fn story(
             story: &story,
         }
         .render()
-        .unwrap(),
+        .expect("failed to render story.html template"),
     )
 }
 
@@ -367,7 +369,7 @@ async fn about() -> impl IntoResponse {
             header: "About",
         }
         .render()
-        .unwrap(),
+        .expect("failed to render about.html template"),
     )
 }
 
@@ -382,7 +384,7 @@ async fn contact() -> impl IntoResponse {
             header: "Contact",
         }
         .render()
-        .unwrap(),
+        .expect("failed to render contact.html template"),
     )
 }
 
@@ -418,17 +420,17 @@ async fn feed(
         sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published DESC, id DESC LIMIT 50")
             .fetch_all(&state.pool)
             .await
-            .unwrap();
+            .expect("failed to query database for last stories");
     let stories: Vec<Story> = rows
         .iter()
-        .map(|row| Story::from_row(row).unwrap())
+        .map(|row| Story::from_row(row).expect("failed to convert row to Story"))
         .collect();
     let content = FeedTemplate {
         stories,
         furiganas: !query.contains_key("no-furiganas"),
     }
     .render()
-    .unwrap();
+    .expect("failed to render feed.rss template");
     ([(header::CONTENT_TYPE, "application/rss+xml")], content)
 }
 
@@ -454,7 +456,10 @@ pub fn router(state: State) -> Router {
         .route("/contact/sent/", get(contact_sent))
         .route("/feed/", get(feed))
         .route_service("/robots.txt", ServeFile::new("nhkeasier/static/robots.txt"))
-        .route_service("/favicon.ico", ServeFile::new("nhkeasier/static/favicon.ico"))
+        .route_service(
+            "/favicon.ico",
+            ServeFile::new("nhkeasier/static/favicon.ico"),
+        )
         .nest_service("/media", ServeDir::new("media"))
         .nest_service("/static", ServeDir::new("nhkeasier/static"))
         .fallback(handle_not_found)

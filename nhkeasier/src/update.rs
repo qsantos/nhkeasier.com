@@ -14,8 +14,8 @@ use crate::Story;
 const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
 
 lazy_static! {
-    static ref STORY_CONTENT_REGEX: Regex = Regex::new(r#"(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>"#).unwrap();
-    static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|<span>|<p></p>").unwrap();
+    static ref STORY_CONTENT_REGEX: Regex = Regex::new(r#"(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>"#).expect("invalid STORY_CONTENT_REGEX");
+    static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|<span>|<p></p>").expect("invalid CLEAN_UP_CONTENT_REGEX");
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -47,9 +47,12 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
         .bind(info.news_id)
         .fetch_all(pool)
         .await
-        .unwrap();
+        .expect("failed to query database for existing story");
     // TODO: make story_id UNIQUE and use ON CONFLICT
-    if rows.is_empty() {
+    if let Some(row) = rows.pop() {
+        assert!(rows.is_empty());
+        (false, row)
+    } else {
         let published = crate::parse_datetime_nhk(info.news_prearranged_time);
         (true, sqlx::query("INSERT INTO nhkeasier_story (story_id, published, title_with_ruby, title, subedict_created) VALUES ($1, $2, $3, $4, 0) RETURNING *")
             .bind(info.news_id)
@@ -58,10 +61,8 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
             .bind(info.title.as_ref())
             .fetch_one(pool)
             .await
-            .unwrap())
-    } else {
-        assert_eq!(rows.len(), 1);
-        (false, rows.pop().unwrap())
+            .expect("failed to create new story")
+        )
     }
 }
 
@@ -69,7 +70,7 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     if let Some(webpage) = story.webpage {
         tracing::debug!("getting HTML from database");
         // TODO: use Tokio fs
-        std::fs::read_to_string(format!("media/{webpage}")).unwrap()
+        std::fs::read_to_string(format!("media/{webpage}")).expect("failed to read existing HTML")
     } else {
         tracing::debug!("downloading HTML");
         let url = format!(
@@ -82,8 +83,9 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         let mut c = std::io::Cursor::new(&html);
         let filename = format!("html/{}.html", story.story_id);
         // TODO: use Tokio fs
-        let mut f = std::fs::File::create(format!("media/{filename}")).unwrap();
-        std::io::copy(&mut c, &mut f).unwrap();
+        let mut f = std::fs::File::create(format!("media/{filename}"))
+            .expect("failed to create file to save HTML");
+        std::io::copy(&mut c, &mut f).expect("failed to save HTML");
         tracing::debug!("saving HTML to database");
         // TODO: no need to wait for query to finish
         sqlx::query!(
@@ -93,7 +95,7 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         )
         .execute(pool)
         .await
-        .unwrap();
+        .expect("failed to update webpage (story was removed from database while updating it)");
         tracing::debug!("decoding UTF-8 HTML");
         String::from_utf8(html.into()).unwrap()
     }
@@ -120,7 +122,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     )
     .execute(pool)
     .await
-    .unwrap();
+    .expect("failed to update content (story was removed from database while updating it)");
     tracing::debug!("saved content to database");
 }
 
@@ -146,8 +148,8 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let filename = format!("jpg/{}.jpg", story.story_id);
     let path = format!("media/{filename}");
     // TODO: use Tokio fs
-    let mut f = std::fs::File::create(&path).unwrap();
-    std::io::copy(&mut c, &mut f).unwrap();
+    let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
+    std::io::copy(&mut c, &mut f).expect("failed to save image");
     tracing::debug!("making image progressive");
     assert!(Command::new("mogrify")
         .args(["-interlace", "plane", &path])
@@ -164,7 +166,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     )
     .execute(pool)
     .await
-    .unwrap();
+    .expect("failed to update image (story was removed from database while updating it)");
     tracing::debug!("saved image to database");
 }
 
@@ -201,7 +203,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     )
     .execute(pool)
     .await
-    .unwrap();
+    .expect("failed to update voice (story was removed from database while updating it)");
     tracing::debug!("saved voice to database");
 }
 
@@ -219,7 +221,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 tracing::debug!("info={:?}", info);
                 tracing::debug!("searching story for news_id={}", info.news_id);
                 let (created, row) = upsert_story(pool, info).await;
-                let story = Story::from_row(&row).unwrap();
+                let story = Story::from_row(&row).expect("failed to convert row into Story");
                 if created {
                     tracing::debug!("inserted id={} for story_id={}", story.id, story.story_id);
                 } else {

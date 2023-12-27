@@ -5,17 +5,24 @@ use lettre::{
 };
 
 fn send_email_common(subject: &str, body: String) -> (Message, String, Credentials) {
-    let host = std::env::var("EMAIL_HOST").unwrap();
-    let user = std::env::var("EMAIL_USER").unwrap();
-    let password = std::env::var("EMAIL_PASSWORD").unwrap();
+    let host = std::env::var("EMAIL_HOST").expect("missing environment variable EMAIL_HOST");
+    let user = std::env::var("EMAIL_USER").expect("missing environment variable EMAIL_USER");
+    let password =
+        std::env::var("EMAIL_PASSWORD").expect("missing environment variable EMAIL_PASSWORD");
 
     let message = Message::builder()
-        .from("NHKEasier <bugs@nhkeasier.com>".parse().unwrap())
-        .to("NHKEasier <contact@nhkeasier.com>".parse().unwrap())
+        .from(
+            "NHKEasier <bugs@nhkeasier.com>"
+                .parse()
+                .expect("failed to parse from address"),
+        )
+        .to("NHKEasier <contact@nhkeasier.com>"
+            .parse()
+            .expect("failed to parse to address"))
         .subject(format!("[NHKEasier] {}", subject))
         .header(ContentType::TEXT_PLAIN)
         .body(body)
-        .unwrap();
+        .expect("failed to create email message");
 
     let creds = Credentials::new(user, password);
     (message, host, creds)

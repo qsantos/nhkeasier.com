@@ -21,10 +21,11 @@ pub struct Story<'a> {
 }
 
 pub async fn connect_to_database() -> Pool<Sqlite> {
-    let database_url = std::env::var("DATABASE_URL").unwrap();
+    let database_url =
+        std::env::var("DATABASE_URL").expect("missing environment variable DATABASE_URL");
     SqlitePoolOptions::new()
         .max_connections(5)
         .connect(&database_url)
         .await
-        .unwrap()
+        .expect("failed to connect to database")
 }
