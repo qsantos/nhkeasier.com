@@ -437,6 +437,7 @@ dependencies = [
  "lazy_static",
  "ouroboros",
  "regex",
+ "tracing",
 ]
 
 [[package]]

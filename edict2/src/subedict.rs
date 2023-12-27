@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::include_str;
+use std::time::Instant;
 
 use ouroboros::self_referencing;
 
@@ -29,6 +30,7 @@ impl SubEdictCreator {
 
     pub fn from(&self, content: &str) -> Vec<&str> {
         self.with(|fields| {
+            let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
 
             let mut candidates = Vec::new();
@@ -49,7 +51,18 @@ impl SubEdictCreator {
             }
 
             let mut lines: Vec<&str> = lines.into_iter().collect();
+            tracing::debug!(
+                "sub-edict with {} entries generated in {:?}",
+                lines.len(),
+                start.elapsed()
+            );
+            let start = Instant::now();
             lines.sort();
+            tracing::debug!(
+                "sub-edict with {} entries collected in {:?}",
+                lines.len(),
+                start.elapsed()
+            );
             lines
         })
     }
@@ -70,6 +83,7 @@ impl SubEnamdictCreator {
 
     pub fn from(&self, content: &str) -> Vec<&str> {
         self.with(|fields| {
+            let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
 
             let mut lines = HashSet::new();
@@ -82,7 +96,18 @@ impl SubEnamdictCreator {
             }
 
             let mut lines: Vec<&str> = lines.into_iter().collect();
+            tracing::debug!(
+                "sub-enamdict with {} entries generated in {:?}",
+                lines.len(),
+                start.elapsed()
+            );
+            let start = Instant::now();
             lines.sort();
+            tracing::debug!(
+                "sub-enamdict with {} entries collected in {:?}",
+                lines.len(),
+                start.elapsed()
+            );
             lines
         })
     }
