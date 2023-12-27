@@ -188,7 +188,7 @@ async fn archive(
             .fetch_one(&state.pool)
             .await
             .expect("failed to query database for max(published)");
-        let dt = maybe_dt.as_ref().unwrap();
+        let dt = maybe_dt.as_ref().expect("database is empty");
         NaiveDateTime::parse_from_str(dt, "%Y-%m-%d %H:%M:%S")
             .expect("failed to parse published column from database")
             .date()
