@@ -137,7 +137,7 @@ fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
     )
 }
 
-async fn handle_not_found() -> impl IntoResponse {
+async fn handle_not_found() -> (StatusCode, Html<String>) {
     (
         StatusCode::NOT_FOUND,
         simple_message(
@@ -206,6 +206,9 @@ async fn archive(
         .iter()
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
+    if stories.is_empty() {
+        return handle_not_found().await;
+    }
 
     // find previous and next days with stories
     let previous_day = sqlx::query_scalar!(
@@ -241,7 +244,7 @@ async fn archive(
         .iter()
         .find(|story| story.video_reencoded.is_some())
         .or_else(|| stories.iter().find(|story| story.image.is_some()))
-        .unwrap_or_else(|| stories.get(0).unwrap());
+        .unwrap_or_else(|| stories.first().expect("day stories should not be empty"));
 
     let titles = stories
         .iter()
