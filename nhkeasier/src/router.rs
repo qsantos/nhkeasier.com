@@ -290,12 +290,16 @@ async fn story(
     extract::State(state): extract::State<Arc<State>>,
     extract::Path(id): extract::Path<i64>,
 ) -> impl IntoResponse {
-    let row = sqlx::query("SELECT * FROM nhkeasier_story WHERE id = $1")
+    let maybe_row = sqlx::query("SELECT * FROM nhkeasier_story WHERE id = $1")
         .bind(id)
         .fetch_optional(&state.pool)
         .await
-        .expect("failed to query database for specific story")
-        .unwrap();
+        .expect("failed to query database for specific story");
+    let row = if let Some(row) = maybe_row {
+        row
+    } else {
+        return handle_not_found().await;
+    };
     let story = Story::from_row(&row).expect("failed to convert row to Story");
 
     // find ids of previous and next stories
@@ -339,25 +343,28 @@ async fn story(
         .as_ref()
         .map(|content| state.sub_enamdict_creator.from(content).join("\n"));
 
-    Html(
-        StoryTemplate {
-            debug: true,
-            title: story.title,
-            description: story
-                .content
-                .map(|content| remove_all_html(content))
-                .as_deref(),
-            image: story.image,
-            player: None,
-            header: "Single Story",
-            previous_story_id,
-            next_story_id,
-            edict: edict.as_deref(),
-            enamdict: enamdict.as_deref(),
-            story: &story,
-        }
-        .render()
-        .expect("failed to render story.html template"),
+    (
+        StatusCode::OK,
+        Html(
+            StoryTemplate {
+                debug: true,
+                title: story.title,
+                description: story
+                    .content
+                    .map(|content| remove_all_html(content))
+                    .as_deref(),
+                image: story.image,
+                player: None,
+                header: "Single Story",
+                previous_story_id,
+                next_story_id,
+                edict: edict.as_deref(),
+                enamdict: enamdict.as_deref(),
+                story: &story,
+            }
+            .render()
+            .expect("failed to render story.html template"),
+        ),
     )
 }
 
