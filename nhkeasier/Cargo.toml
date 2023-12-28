@@ -10,6 +10,7 @@ askama = { version = "0.12.1", default-features = false, features = ["with-axum"
 askama_axum = "0.4.0"
 axum = { version = "0.7.2", default-features = false, features = ["http1", "tokio", "query", "form", "tracing"] }
 chrono = { version = "0.4.31", default-features = false, features = ["serde"] }
+clap = { version = "4.4.12", features = ["derive"] }
 dotenvy = "0.15.7"
 edict2 = { version = "0.1.0", path = "../edict2" }
 lazy_static = "1.4.0"

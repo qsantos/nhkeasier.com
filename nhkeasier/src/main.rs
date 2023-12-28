@@ -1,3 +1,6 @@
+use std::net::SocketAddr;
+
+use clap::Parser;
 use sqlx::{Pool, Sqlite};
 use tokio::time::{Duration, Instant};
 
@@ -17,8 +20,16 @@ async fn update_job(pool: Pool<Sqlite>) {
     }
 }
 
+#[derive(Clone, Debug, Parser)]
+struct Args {
+    #[arg(short, long, default_value = "127.0.0.1:3000")]
+    listen_addr: SocketAddr,
+}
+
 #[tokio::main]
 async fn main() -> Result<(), edict2::Error> {
+    let args = Args::parse();
+
     dotenvy::dotenv().unwrap();
 
     nhkeasier::init_logging();
@@ -42,10 +53,11 @@ async fn main() -> Result<(), edict2::Error> {
     };
     let app = nhkeasier::router(state);
 
-    let listen: std::net::SocketAddr = "127.0.0.1:3000".parse().unwrap();
-    tracing::info!("Listening on http://{listen:?}");
+    tracing::info!("Listening on http://{:?}", args.listen_addr);
 
-    let listener = tokio::net::TcpListener::bind(listen).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(args.listen_addr)
+        .await
+        .unwrap();
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
