@@ -1,0 +1,15 @@
+[Unit]
+Description=NHKEasier
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=www-data
+AmbientCapabilities=CAP_SYS_RAWIO
+WorkingDirectory=/var/www/nhkeasier.com
+ExecStart=/var/www/nhkeasier.com/bin --listen-addr=127.0.0.1:49507
+
+[Install]
+WantedBy=multi-user.target
