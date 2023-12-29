@@ -57,11 +57,13 @@ async fn main() -> Result<(), edict2::Error> {
     };
     let app = nhkeasier::router(state);
 
-    tracing::info!("Listening on http://{:?}", args.listen_addr);
-
     let listener = tokio::net::TcpListener::bind(args.listen_addr)
         .await
-        .unwrap();
+        .unwrap_or_else(|e| {
+            tracing::error!("could not bind to {}: {}", args.listen_addr, e);
+            exit(1);
+        });
+    tracing::info!("Listening on http://{:?}", args.listen_addr);
     axum::serve(listener, app).await.unwrap();
     Ok(())
 }
