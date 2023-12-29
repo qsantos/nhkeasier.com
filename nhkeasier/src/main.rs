@@ -1,4 +1,5 @@
 use std::net::SocketAddr;
+use std::process::exit;
 
 use clap::Parser;
 use sqlx::{Pool, Sqlite};
@@ -30,7 +31,10 @@ struct Args {
 async fn main() -> Result<(), edict2::Error> {
     let args = Args::parse();
 
-    dotenvy::dotenv().unwrap();
+    if dotenvy::dotenv().is_err() {
+        tracing::error!(".env file is missing");
+        exit(1);
+    }
 
     nhkeasier::init_logging();
 
