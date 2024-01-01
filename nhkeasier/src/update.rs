@@ -187,7 +187,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
             "-I",
             "dummy",
             &url,
-            &(String::from(":sout=#transcode{acodec=mpga,ab=192}:std{dst=")
+            &(String::from(":sout=#transcode{acodec=mp3,ab=192}:std{dst=")
                 + &path
                 + ",access=file}"),
             "vlc://quit",
