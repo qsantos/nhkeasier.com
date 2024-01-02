@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="ja">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="generator" content="pandoc"/>
+  <title>NHK Easier</title>
+  <link rel="stylesheet" type="text/css" href="styles/stylesheet.css"/>
+</head>
+<body epub:type="frontmatter">
+<nav epub:type="toc" id="toc">
+    <h1>目次</h1>
+    <ol>
+{%- for story in stories %}
+        <li><a href="text/{{ story.story_id|safe }}.xhtml">{{ story.published.date().to_string()|safe }}: {{ story.title }}</a></li>
+{%- endfor %}
+    </ol>
+</nav>
+<nav epub:type="landmarks" id="landmarks" hidden="hidden">
+  <ol>
+    <li><a href="nav.xhtml">目次</a></li>
+  </ol>
+</nav>
+</body>
+</html>

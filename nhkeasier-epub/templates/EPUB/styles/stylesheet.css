@@ -1,0 +1,16 @@
+body {
+    /* ensure there is enough room for furigana */
+    padding-top: 10px;
+}
+@font-face {
+	font-family: "Noto Sans CJK";
+	font-weight: normal;
+	font-style: normal;
+	src: url("../Fonts/NotoSansCJKjp-VF.otf");
+}
+.japanese {
+    font-family: "Noto Sans CJK";
+}
+img {
+    max-width: 100%;
+}

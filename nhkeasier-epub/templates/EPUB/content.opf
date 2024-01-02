@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="3.0" unique-identifier="epub-id-1" prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/" xmlns="http://www.idpf.org/2007/opf">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:identifier>urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7</dc:identifier>
+    <dc:title>NHK Easier</dc:title>
+    <dc:date>{{ Utc::now().to_rfc3339()|safe }}</dc:date>
+    <dc:language>ja</dc:language>
+    <dc:creator opf:role="aut">Japan Broadcasting Corporation</dc:creator>
+    <dc:contributor opf:role="edc">NHK Easier</dc:contributor>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
+    <item id="stylesheet" href="styles/stylesheet.css" media-type="text/css"/>
+    <item id="cjk-font" href="fonts/NotoSansCJKjp-VF.otf" media-type="application/vnd.ms-opentype"/>
+    <item id="title_page" href="text/title_page.xhtml" media-type="application/xhtml+xml"/>
+{%- for story in stories %}
+    <item id="{{ story.story_id|safe }}" href="text/{{ story.story_id|safe }}.xhtml" media-type="application/xhtml+xml"/>
+{%- if !story.image.unwrap_or("").is_empty() -%}
+    <item id="{{ story.story_id|safe }}-image" href="images/{{ story.story_id|safe }}.jpg" media-type="image/jpeg"/>
+{% endif -%}
+{%- endfor %}
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="title_page"/>
+{%- for story in stories %}
+    <itemref idref="{{ story.story_id|safe }}"/>
+{%- endfor %}
+  </spine>
+  <guide>
+    <reference type="toc" title="目次" href="nav.xhtml"/>
+  </guide>
+</package>

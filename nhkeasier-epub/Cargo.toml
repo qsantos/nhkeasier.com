@@ -1,0 +1,19 @@
+[package]
+name = "nhkeasier-epub"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+askama = { version = "0.12.1", default-features = false }
+askama_axum = { version = "0.4.0", default-features = false }
+chrono = { version = "0.4.31", default-features = false, features = ["serde"] }
+dotenvy = "0.15.7"
+lazy_static = { version = "1.4.0", default-features = false }
+sqlx = { version = "0.7.3", features = ["sqlite", "runtime-tokio", "macros", "chrono"], default-features = false }
+tokio = { version = "1.35.1", default-features = false, features = ["macros", "rt", "rt-multi-thread"] }
+tracing = "0.1.40"
+tracing-panic = "0.1.1"
+tracing-subscriber = { version = "0.3.18", features = ["tracing"] }
+zip = { version = "0.6.6", default-features = false, features = ["deflate"] }
