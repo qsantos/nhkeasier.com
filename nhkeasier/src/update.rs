@@ -109,7 +109,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
     let captures = STORY_CONTENT_REGEX.captures(&html).unwrap();
-    let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace(&captures[1], "");
+    let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace_all(&captures[1], "");
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
     tracing::debug!("saving content to database");
