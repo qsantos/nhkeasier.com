@@ -15,7 +15,7 @@ pub use update::update_stories;
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone};
 
 lazy_static::lazy_static! {
-    pub static ref JST: FixedOffset = chrono::FixedOffset::east_opt(3600 * 9).unwrap();
+    pub static ref JST: FixedOffset = FixedOffset::east_opt(3600 * 9).unwrap();
 }
 
 pub fn parse_datetime_nhk(s: &str) -> DateTime<FixedOffset> {
