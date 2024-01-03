@@ -17,7 +17,7 @@
     <img src="../images/{{ story.story_id|safe }}.jpg" alt="Story illustration" width="640" height="360"/>
 {% endif -%}
 {% if let Some(content) = story.content_with_ruby -%}
-{{ content|safe }}
+{{ FIX_IMG_TAGS_REGEX.replace_all(content, "<$1/>")|safe }}
 {%- endif %}
 <ul>
     <li>

@@ -1,5 +1,6 @@
 use askama::Template;
 use chrono::{FixedOffset, NaiveDateTime, TimeZone, Utc};
+use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::{FromRow, Pool, Sqlite};
 
@@ -64,6 +65,10 @@ struct StoryTemplate<'a> {
 
 use std::fs::File;
 use std::io::Write;
+
+lazy_static::lazy_static! {
+    static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
+}
 
 #[tokio::main]
 async fn main() {

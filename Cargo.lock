@@ -1317,6 +1317,7 @@ dependencies = [
  "chrono",
  "dotenvy",
  "lazy_static",
+ "regex",
  "sqlx",
  "tokio",
  "tracing",
