@@ -151,8 +151,7 @@ async fn main() {
     }
 
     // EPUB/images/logo.png
-    zip.start_file("EPUB/images/logo.png", options)
-        .unwrap();
+    zip.start_file("EPUB/images/logo.png", options).unwrap();
     zip.write_all(include_bytes!("../templates/EPUB/images/logo.png"))
         .unwrap();
 
