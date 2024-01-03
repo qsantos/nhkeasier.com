@@ -150,6 +150,12 @@ async fn main() {
         zip.write_all(content.as_bytes()).unwrap();
     }
 
+    // EPUB/images/logo.png
+    zip.start_file("EPUB/images/logo.png", options)
+        .unwrap();
+    zip.write_all(include_bytes!("../templates/EPUB/images/logo.png"))
+        .unwrap();
+
     // EPUB/images/k*.jpg
     for story in stories {
         if let Some(image) = story.image {

@@ -7,11 +7,13 @@
     <dc:language>ja</dc:language>
     <dc:creator opf:role="aut">Japan Broadcasting Corporation</dc:creator>
     <dc:contributor opf:role="edc">NHK Easier</dc:contributor>
+    <meta name="cover" content="images/logo.png" />
   </metadata>
   <manifest>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>
     <item id="stylesheet" href="styles/stylesheet.css" media-type="text/css"/>
+    <item id="logo" href="images/logo.png" properties="cover-image" media-type="image/png"/>
     <item id="cjk-font" href="fonts/NotoSansCJKjp-VF.otf" media-type="application/vnd.ms-opentype"/>
     <item id="title_page" href="text/title_page.xhtml" media-type="application/xhtml+xml"/>
 {%- for story in stories %}
