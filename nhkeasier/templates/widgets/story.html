@@ -9,17 +9,19 @@
 </h4>
 {%- let video = story.video_reencoded.unwrap_or("") -%}
 {%- let image = story.image.unwrap_or("") -%}
-{%- if !video.is_empty() -%}
-    <video src="/media/{{ video|safe }}"{% if let Some(image) = story.image %} poster="/media/{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
-{%- else if !image.is_empty() -%}
-    <img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
-{%- endif -%}
-{%- if let Some(content) = story.content_with_ruby -%}
+{%- if !video.is_empty() %}
+<video src="/media/{{ video|safe }}"{% if let Some(image) = story.image %} poster="/media/{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
+{%- else if !image.is_empty() %}
+<img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
+{%- endif %}
+{%- if let Some(content) = story.content_with_ruby %}
 {{ content|safe }}
-{%- else -%}
+{%- else %}
 Missing content
-{%- endif -%}
-{% if let Some(voice) = story.voice %}<audio src="/media/{{ voice|safe }}" controls preload="none"></audio>{% endif %}
+{%- endif %}
+{%- if let Some(voice) = story.voice %}
+<audio src="/media/{{ voice|safe }}" controls preload="none"></audio>
+{%- endif %}
 <table class="links">
     <td>
         {# left empty  #}
