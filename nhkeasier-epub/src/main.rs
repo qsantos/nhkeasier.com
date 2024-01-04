@@ -68,6 +68,28 @@ use std::io::Write;
 
 lazy_static::lazy_static! {
     static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
+    static ref OPTIONS: zip::write::FileOptions =
+        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+}
+
+fn zip_bytes(zip: &mut zip::ZipWriter<File>, filename: &str, bytes: &[u8]) {
+    zip.start_file(filename, *OPTIONS).unwrap();
+    zip.write_all(bytes).unwrap();
+}
+
+fn zip_template<T: Template>(zip: &mut zip::ZipWriter<File>, filename: &str, template: T) {
+    let content = template.render().unwrap();
+    zip_bytes(zip, filename, content.as_bytes());
+}
+
+macro_rules! zip_copy {
+    ( $zip:expr, $filename:expr ) => {
+        zip_bytes(
+            $zip,
+            $filename,
+            include_bytes!(concat!("../templates/", $filename)),
+        );
+    };
 }
 
 #[tokio::main]
@@ -88,88 +110,32 @@ async fn main() {
     let f = File::create("a.epub").unwrap();
     let mut zip = zip::ZipWriter::new(f);
 
-    let options =
-        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
-
-    // mimetype
-    zip.start_file("mimetype", options).unwrap();
-    zip.write_all(b"application/epub+zip").unwrap();
-
-    // META-INF/container.xml
-    zip.start_file("META-INF/container.xml", options).unwrap();
-    zip.write_all(include_bytes!("../templates/META-INF/container.xml"))
-        .unwrap();
-
-    // META-INF/com.apple.ibooks.display-options.xml
-    zip.start_file("META-INF/com.apple.ibooks.display-options.xml", options)
-        .unwrap();
-    zip.write_all(include_bytes!(
-        "../templates/META-INF/com.apple.ibooks.display-options.xml"
-    ))
-    .unwrap();
-
-    // TODO
-    // EPUB/content.opf
-    zip.start_file("EPUB/content.opf", options).unwrap();
-    let content = ContentOpfTemplate { stories: &stories }.render().unwrap();
-    zip.write_all(content.as_bytes()).unwrap();
-
-    // EPUB/nav.xhtml
-    zip.start_file("EPUB/nav.xhtml", options).unwrap();
-    let content = NavXhtmlTemplate { stories: &stories }.render().unwrap();
-    zip.write_all(content.as_bytes()).unwrap();
-
-    // EPUB/toc.ncx
-    zip.start_file("EPUB/toc.ncx", options).unwrap();
-    let content = TocNcxTemplate { stories: &stories }.render().unwrap();
-    zip.write_all(content.as_bytes()).unwrap();
-
-    // EPUB/styles/stylesheet.css
-    zip.start_file("EPUB/styles/stylesheet.css", options)
-        .unwrap();
-    zip.write_all(include_bytes!("../templates/EPUB/styles/stylesheet.css"))
-        .unwrap();
-
-    // TODO
-    if false {
-        // EPUB/styles/NotoSansCJKjp-VF.css
-        zip.start_file("EPUB/fonts/NotoSansCJKjp-VF.otf", options)
-            .unwrap();
-        zip.write_all(include_bytes!(
-            "../templates/EPUB/fonts/NotoSansCJKjp-VF.otf"
-        ))
-        .unwrap();
-    }
-
-    // EPUB/text/title_page.xhtml
-    zip.start_file("EPUB/text/title_page.xhtml", options)
-        .unwrap();
-    zip.write_all(include_bytes!("../templates/EPUB/text/title_page.xhtml"))
-        .unwrap();
-
-    // EPUB/text/k*.xhtml
+    zip.start_file("mimetype", *OPTIONS).unwrap();
+    zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
+    zip_copy!(&mut zip, "META-INF/container.xml");
+    zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
+    let template = ContentOpfTemplate { stories: &stories };
+    zip_template(&mut zip, "EPUB/content.opf", template);
+    let template = NavXhtmlTemplate { stories: &stories };
+    zip_template(&mut zip, "EPUB/nav.xhtml", template);
+    let template = TocNcxTemplate { stories: &stories };
+    zip_template(&mut zip, "EPUB/toc.ncx", template);
+    zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
+    zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
+    zip_copy!(&mut zip, "EPUB/text/title_page.xhtml");
     for story in stories.iter() {
-        zip.start_file(format!("EPUB/text/{}.xhtml", story.story_id), options)
-            .unwrap();
-        let content = StoryTemplate { story }.render().unwrap();
-        zip.write_all(content.as_bytes()).unwrap();
+        let filename = format!("EPUB/text/{}.xhtml", story.story_id);
+        zip_template(&mut zip, &filename, StoryTemplate { story });
     }
-
-    // EPUB/images/logo.png
-    zip.start_file("EPUB/images/logo.png", options).unwrap();
-    zip.write_all(include_bytes!("../templates/EPUB/images/logo.png"))
-        .unwrap();
-
-    // EPUB/images/k*.jpg
+    zip_copy!(&mut zip, "EPUB/images/logo.png");
     for story in stories {
         if let Some(image) = story.image {
             if image.is_empty() {
                 continue;
             }
-            zip.start_file(format!("EPUB/images/{}.jpg", story.story_id), options)
-                .unwrap();
             let data = std::fs::read(format!("media/{}", image)).unwrap();
-            zip.write_all(&data).unwrap();
+            let filename = format!("EPUB/images/{}.jpg", story.story_id);
+            zip_bytes(&mut zip, &filename, &data);
         }
     }
 
