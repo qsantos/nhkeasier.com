@@ -68,12 +68,19 @@ use std::io::Write;
 
 lazy_static::lazy_static! {
     static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
-    static ref OPTIONS: zip::write::FileOptions =
-        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::Deflated);
+    static ref ZIP_STORE: zip::write::FileOptions =
+        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::STORE);
+    static ref ZIP_DEFLATE: zip::write::FileOptions =
+        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::DEFLATE);
 }
 
 fn zip_bytes(zip: &mut zip::ZipWriter<File>, filename: &str, bytes: &[u8]) {
-    zip.start_file(filename, *OPTIONS).unwrap();
+    zip.start_file(filename, *ZIP_DEFLATE).unwrap();
+    zip.write_all(bytes).unwrap();
+}
+
+fn zip_bytes_store(zip: &mut zip::ZipWriter<File>, filename: &str, bytes: &[u8]) {
+    zip.start_file(filename, *ZIP_STORE).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
@@ -134,7 +141,7 @@ async fn main() {
             }
             let data = std::fs::read(format!("media/{}", image)).unwrap();
             let filename = format!("EPUB/images/{}.jpg", story.story_id);
-            zip_bytes(&mut zip, &filename, &data);
+            zip_bytes_store(&mut zip, &filename, &data);
         }
     }
 
