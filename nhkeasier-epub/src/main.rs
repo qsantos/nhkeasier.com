@@ -71,6 +71,18 @@ lazy_static::lazy_static! {
     static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
 }
 
+impl<'a> Story<'a> {
+    fn xml_content_with_ruby(&self) -> String {
+        let parser = libxml::parser::Parser::default_html();
+        let content = self.content_with_ruby.unwrap();
+        let document = parser.parse_string(content.as_bytes()).unwrap();
+        let html = document.get_root_element().unwrap();
+        let mut body = html.get_first_child().unwrap();
+        body.set_name("div").unwrap();
+        document.node_to_string(&body)
+    }
+}
+
 fn zip_bytes(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
     let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
     zip.start_file(filename, options).unwrap();
