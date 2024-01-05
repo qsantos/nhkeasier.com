@@ -120,7 +120,7 @@ async fn main() {
     let template = TocNcxTemplate { stories: &stories };
     zip_template(&mut zip, "EPUB/toc.ncx", template);
     zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
-    zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
+    // zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
     zip_copy!(&mut zip, "EPUB/text/title_page.xhtml");
     for story in stories.iter() {
         let filename = format!("EPUB/text/{}.xhtml", story.story_id);
