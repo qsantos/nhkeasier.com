@@ -110,7 +110,6 @@ async fn main() {
     let f = File::create("a.epub").unwrap();
     let mut zip = zip::ZipWriter::new(f);
 
-    zip.start_file("mimetype", *OPTIONS).unwrap();
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
     zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
