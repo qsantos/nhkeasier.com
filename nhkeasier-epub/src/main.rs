@@ -69,19 +69,17 @@ struct StoryTemplate<'a> {
 
 lazy_static::lazy_static! {
     static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
-    static ref ZIP_STORE: FileOptions =
-        FileOptions::default().compression_method(CompressionMethod::STORE);
-    static ref ZIP_DEFLATE: FileOptions =
-        FileOptions::default().compression_method(CompressionMethod::DEFLATE);
 }
 
 fn zip_bytes(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
-    zip.start_file(filename, *ZIP_DEFLATE).unwrap();
+    let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
+    zip.start_file(filename, options).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
 fn zip_bytes_store(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
-    zip.start_file(filename, *ZIP_STORE).unwrap();
+    let options = FileOptions::default().compression_method(CompressionMethod::STORE);
+    zip.start_file(filename, options).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
