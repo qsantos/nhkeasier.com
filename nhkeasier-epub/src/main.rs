@@ -1,8 +1,12 @@
+use std::fs::File;
+use std::io::Write;
+
 use askama::Template;
 use chrono::{FixedOffset, NaiveDateTime, TimeZone, Utc};
 use regex::Regex;
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::{FromRow, Pool, Sqlite};
+use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
 // TODO: deduplicate
 #[derive(Clone, Debug, FromRow)]
@@ -63,28 +67,25 @@ struct StoryTemplate<'a> {
     story: &'a Story<'a>,
 }
 
-use std::fs::File;
-use std::io::Write;
-
 lazy_static::lazy_static! {
     static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
-    static ref ZIP_STORE: zip::write::FileOptions =
-        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::STORE);
-    static ref ZIP_DEFLATE: zip::write::FileOptions =
-        zip::write::FileOptions::default().compression_method(zip::CompressionMethod::DEFLATE);
+    static ref ZIP_STORE: FileOptions =
+        FileOptions::default().compression_method(CompressionMethod::STORE);
+    static ref ZIP_DEFLATE: FileOptions =
+        FileOptions::default().compression_method(CompressionMethod::DEFLATE);
 }
 
-fn zip_bytes(zip: &mut zip::ZipWriter<File>, filename: &str, bytes: &[u8]) {
+fn zip_bytes(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
     zip.start_file(filename, *ZIP_DEFLATE).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
-fn zip_bytes_store(zip: &mut zip::ZipWriter<File>, filename: &str, bytes: &[u8]) {
+fn zip_bytes_store(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
     zip.start_file(filename, *ZIP_STORE).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
-fn zip_template<T: Template>(zip: &mut zip::ZipWriter<File>, filename: &str, template: T) {
+fn zip_template<T: Template>(zip: &mut ZipWriter<File>, filename: &str, template: T) {
     let content = template.render().unwrap();
     zip_bytes(zip, filename, content.as_bytes());
 }
@@ -115,7 +116,7 @@ async fn main() {
 
     // let mut buf = [0; 65536];
     let f = File::create("a.epub").unwrap();
-    let mut zip = zip::ZipWriter::new(f);
+    let mut zip = ZipWriter::new(f);
 
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
