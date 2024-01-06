@@ -32,7 +32,8 @@ async fn normalize_voices(pool: &Pool<Sqlite>) {
         let voice = story.voice.unwrap();
         let media = std::path::Path::new("media");
         let old = media.join(voice);
-        let new = media.join(format!("mp3/{}.mp3", story.story_id));
+        let new_name = format!("mp3/{}.mp3", story.story_id);
+        let new = media.join(&new_name);
         assert!(old.exists());
         if new.exists() {
             let oldc = std::fs::read(&old).unwrap();
@@ -51,7 +52,7 @@ async fn normalize_voices(pool: &Pool<Sqlite>) {
         }
         tracing::debug!("using {new:?} instead of {old:?} for story {}", story.id);
         sqlx::query("UPDATE nhkeasier_story SET voice = $1 WHERE id = $2")
-            .bind(new.to_str().unwrap())
+            .bind(&new_name)
             .bind(story.id)
             .execute(pool)
             .await
