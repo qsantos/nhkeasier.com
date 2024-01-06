@@ -3,7 +3,6 @@ use std::io::Write;
 
 use askama::Template;
 use chrono::{TimeZone, Utc};
-use regex::Regex;
 use sqlx::FromRow;
 use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
@@ -31,10 +30,6 @@ struct TocNcxTemplate<'a> {
 #[template(path = "epub/EPUB/text/story.xhtml", escape = "xml")]
 struct StoryTemplate<'a> {
     story: &'a Story<'a>,
-}
-
-lazy_static::lazy_static! {
-    static ref FIX_IMG_TAGS_REGEX: Regex = Regex::new("<(img .*?)/?>").unwrap();
 }
 
 impl<'a> Story<'a> {
