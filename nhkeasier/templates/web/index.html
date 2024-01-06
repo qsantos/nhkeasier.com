@@ -11,6 +11,12 @@ and laptops) or touching them (smartphones and tablets). You can also subscribe 
 <p>
 For some more stories, visit <a href="https://slow-communication.jp/">Slow Communication</a>.
 </p>
+<p>
+    <strong>New:</strong>
+    <a href="{{ date.format("/%Y/%m/epub") }}">
+        Download all stories of {{ date.format("%B %Y") }} as EPUB
+    </a>
+</p>
 {% include "widgets/nav_day.html" %}
 {% for story in stories %}
 {% include "widgets/story.html" %}

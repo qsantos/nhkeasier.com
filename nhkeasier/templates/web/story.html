@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+{%- let date = story.published.date() -%}
+<p>
+    <strong>New:</strong>
+    <a href="{{ date.format("/%Y/%m/epub") }}">
+        Download all stories of {{ date.format("%B %Y") }} as EPUB
+    </a>
+</p>
 {% include "widgets/nav_story.html" %}
 {% include "widgets/story.html" %}
 {% include "widgets/nav_story.html" %}

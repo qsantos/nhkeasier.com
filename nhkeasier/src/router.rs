@@ -147,6 +147,40 @@ fn remove_all_html(content: &str) -> Cow<'_, str> {
     REMOVE_HTML_REGEX.replace_all(content, "")
 }
 
+async fn epub_month(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Path((year, month)): extract::Path<(i32, u32)>,
+) -> Response<Body> {
+    let rows =
+        sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE $1 || '-' || $2 || '-%' ORDER BY published ASC")
+            .bind(year)
+            .bind(month)
+            .fetch_all(&state.pool)
+            .await
+            .expect("failed to query database for day stories");
+    if rows.is_empty() {
+        return handle_not_found().await.into_response();
+    }
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
+        .collect();
+    let mut buf = Vec::new();
+    let output = std::io::Cursor::new(&mut buf);
+    crate::make_epub(&stories, output);
+    (
+        [
+            (header::CONTENT_TYPE, "application/epub+zip"),
+            (
+                header::CONTENT_DISPOSITION,
+                &format!("attachment; filename=nhkeasier-{year}-{month}.epub"),
+            ),
+        ],
+        buf,
+    )
+        .into_response()
+}
+
 async fn archive(
     extract::State(state): extract::State<Arc<State>>,
     maybe_ymd: Option<extract::Path<(i32, u32, u32)>>,
@@ -459,6 +493,7 @@ pub fn router(state: State) -> Router {
 
     Router::new()
         .route("/", get(archive))
+        .route("/:year/:month/epub", get(epub_month))
         .route("/:year/:month/:day/", get(archive))
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
