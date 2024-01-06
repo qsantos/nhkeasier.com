@@ -17,7 +17,7 @@ git checkout-index --prefix="$TEMPDIR/" -af
 GIT_ROOT=$(git rev-parse --show-toplevel)
 
 # lint Rust
-if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2 nhkeasier nhkeasier-epub Cargo.toml Cargo.lock; then
+if ! git diff --cached --name-only --diff-filter=AM --quiet -- edict2 nhkeasier Cargo.toml Cargo.lock; then
     pushd $TEMPDIR >/dev/null
     ln -fs $GIT_ROOT/db.sqlite3 $TEMPDIR/db.sqlite3
     ln -fs $GIT_ROOT/.env $TEMPDIR/.env

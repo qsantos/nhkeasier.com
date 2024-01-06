@@ -49,7 +49,7 @@ struct Story<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "message.html")]
+#[template(path = "web/message.html")]
 struct MessageTemplate<'a> {
     debug: bool,
     title: &'a str,
@@ -61,7 +61,7 @@ struct MessageTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "about.html")]
+#[template(path = "web/about.html")]
 struct AboutTemplate<'a> {
     debug: bool,
     title: &'a str,
@@ -72,7 +72,7 @@ struct AboutTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "contact.html")]
+#[template(path = "web/contact.html")]
 struct ContactTemplate<'a> {
     debug: bool,
     title: &'a str,
@@ -83,7 +83,7 @@ struct ContactTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "index.html")]
+#[template(path = "web/index.html")]
 struct ArchiveTemplate<'a> {
     debug: bool,
     title: &'a str,
@@ -100,7 +100,7 @@ struct ArchiveTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "story.html")]
+#[template(path = "web/story.html")]
 struct StoryTemplate<'a> {
     debug: bool,
     title: &'a str,
@@ -116,7 +116,7 @@ struct StoryTemplate<'a> {
 }
 
 #[derive(Template)]
-#[template(path = "feed.rss", escape = "xml")]
+#[template(path = "web/feed.rss", escape = "xml")]
 struct FeedTemplate<'a> {
     stories: Vec<Story<'a>>,
     furiganas: bool,

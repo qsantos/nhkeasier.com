@@ -1306,6 +1306,7 @@ dependencies = [
  "edict2",
  "lazy_static",
  "lettre",
+ "libxml",
  "regex",
  "reqwest",
  "serde",
@@ -1314,24 +1315,6 @@ dependencies = [
  "tokio",
  "tower",
  "tower-http",
- "tracing",
- "tracing-panic",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "nhkeasier-epub"
-version = "0.1.0"
-dependencies = [
- "askama",
- "askama_axum",
- "chrono",
- "dotenvy",
- "lazy_static",
- "libxml",
- "regex",
- "sqlx",
- "tokio",
  "tracing",
  "tracing-panic",
  "tracing-subscriber",

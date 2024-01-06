@@ -15,6 +15,7 @@ dotenvy = "0.15.7"
 edict2 = { version = "0.1.0", path = "../edict2" }
 lazy_static = "1.4.0"
 lettre = { version = "0.11.2", default-features = false, features = ["smtp-transport", "tokio1-native-tls", "builder", "tracing"] }
+libxml = "0.3.3"
 regex = { version = "1.10.2", default-features = false, features = ["perf", "std"] }
 reqwest = "0.11.23"
 serde = "1.0.193"
@@ -26,3 +27,4 @@ tower-http = { version = "0.5.0", features = ["fs", "catch-panic", "trace"] }
 tracing = "0.1.40"
 tracing-panic = "0.1.1"
 tracing-subscriber = { version = "0.3.18", features = ["tracing"] }
+zip = { version = "0.6.6", default-features = false, features = ["deflate"] }

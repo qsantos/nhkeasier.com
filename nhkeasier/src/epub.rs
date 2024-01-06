@@ -44,25 +44,25 @@ lazy_static::lazy_static! {
 }
 
 #[derive(Template)]
-#[template(path = "EPUB/content.opf", escape = "xml")]
+#[template(path = "epub/EPUB/content.opf", escape = "xml")]
 struct ContentOpfTemplate<'a> {
     stories: &'a Vec<Story<'a>>,
 }
 
 #[derive(Template)]
-#[template(path = "EPUB/nav.xhtml", escape = "xml")]
+#[template(path = "epub/EPUB/nav.xhtml", escape = "xml")]
 struct NavXhtmlTemplate<'a> {
     stories: &'a Vec<Story<'a>>,
 }
 
 #[derive(Template)]
-#[template(path = "EPUB/toc.ncx", escape = "xml")]
+#[template(path = "epub/EPUB/toc.ncx", escape = "xml")]
 struct TocNcxTemplate<'a> {
     stories: &'a Vec<Story<'a>>,
 }
 
 #[derive(Template)]
-#[template(path = "EPUB/text/story.xhtml", escape = "xml")]
+#[template(path = "epub/EPUB/text/story.xhtml", escape = "xml")]
 struct StoryTemplate<'a> {
     story: &'a Story<'a>,
 }
@@ -105,13 +105,12 @@ macro_rules! zip_copy {
         zip_bytes(
             $zip,
             $filename,
-            include_bytes!(concat!("../templates/", $filename)),
+            include_bytes!(concat!("../templates/epub/", $filename)),
         );
     };
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn make_epub() {
     dotenvy::dotenv().unwrap();
 
     let pool = connect_to_database().await;
