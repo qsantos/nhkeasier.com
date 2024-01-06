@@ -20,12 +20,12 @@ pub struct Candidate<'a> {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct SuffixToRules<'a>(HashMap<char, (Vec<Rule<'a>>, SuffixToRules<'a>)>);
 
-// deinflect.dat countains instructions to remove inflections from words
+// deinflect.dat contains instructions to remove inflections from words
 // the first line is a header
-// the next few lines (without '\t') are a string array refereced to later
+// the next few lines (without '\t') are a string array referenced to later
 // the rest are made of four fields separated by '\t'
-//   * first field incdicates the suffix to look for in a candidate
-//   * second field indicates when the suffix should be remplaced with
+//   * first field indicates the suffix to look for in a candidate
+//   * second field indicates when the suffix should be replaced with
 //   * third field helps narrowing down the grammatical class of the candidate
 //   * fourth field points to the array string and gives a user-friendly
 //     explanation of the removed suffix
