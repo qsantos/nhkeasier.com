@@ -24,28 +24,10 @@ use tower_http::trace::TraceLayer;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
-use crate::JST;
+use crate::{Story, JST};
 
 lazy_static! {
     static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX");
-}
-
-#[derive(Clone, Debug, FromRow)]
-#[allow(dead_code)]
-struct Story<'a> {
-    id: i64,
-    story_id: &'a str,
-    published: NaiveDateTime,
-    title_with_ruby: &'a str,
-    title: &'a str,
-    content_with_ruby: Option<&'a str>,
-    content: Option<&'a str>,
-    image: Option<&'a str>,
-    voice: Option<&'a str>,
-    video_original: Option<&'a str>,
-    video_reencoded: Option<&'a str>,
-    subedict_created: bool,
-    webpage: Option<&'a str>,
 }
 
 #[derive(Template)]
