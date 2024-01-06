@@ -1,7 +1,7 @@
 use std::io::{Seek, Write};
 
 use askama::Template;
-use chrono::{TimeZone, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
 use crate::{Story, JST};
@@ -9,6 +9,7 @@ use crate::{Story, JST};
 #[derive(Template)]
 #[template(path = "epub/EPUB/content.opf", escape = "xml")]
 struct ContentOpfTemplate<'a> {
+    now: DateTime<Utc>,
     title: &'a str,
     stories: &'a [Story<'a>],
 }
@@ -30,6 +31,7 @@ struct TocNcxTemplate<'a> {
 #[derive(Template)]
 #[template(path = "epub/EPUB/text/title_page.xhtml", escape = "xml")]
 struct TitlePageTemplate<'a> {
+    now: DateTime<Utc>,
     title: &'a str,
 }
 
@@ -79,12 +81,17 @@ macro_rules! zip_copy {
 }
 
 pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], title: &str, output: W) {
+    let now = Utc::now();
     let mut zip = ZipWriter::new(output);
 
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
     zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
-    let template = ContentOpfTemplate { title, stories };
+    let template = ContentOpfTemplate {
+        now,
+        title,
+        stories,
+    };
     zip_template(&mut zip, "EPUB/content.opf", template);
     let template = NavXhtmlTemplate { title, stories };
     zip_template(&mut zip, "EPUB/nav.xhtml", template);
@@ -92,7 +99,7 @@ pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], title: &str, output: W)
     zip_template(&mut zip, "EPUB/toc.ncx", template);
     zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
     // zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
-    let template = TitlePageTemplate { title };
+    let template = TitlePageTemplate { now, title };
     zip_template(&mut zip, "EPUB/text/title_page.xhtml", template);
     for story in stories.iter() {
         let filename = format!("EPUB/text/{}.xhtml", story.story_id);

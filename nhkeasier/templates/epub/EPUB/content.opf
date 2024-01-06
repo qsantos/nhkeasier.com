@@ -3,7 +3,7 @@
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
     <dc:identifier>urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7</dc:identifier>
     <dc:title>{{ title }}</dc:title>
-    <dc:date>{{ Utc::now().to_rfc3339()|safe }}</dc:date>
+    <dc:date>{{ now.to_rfc3339()|safe }}</dc:date>
     <dc:language>ja</dc:language>
     <dc:creator opf:role="aut">Japan Broadcasting Corporation</dc:creator>
     <dc:contributor opf:role="edc">{{ title }}</dc:contributor>
