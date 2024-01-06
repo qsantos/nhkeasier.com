@@ -120,6 +120,6 @@ async fn test() {
 
     //let mut buf = Vec::new();
     //let f = std::io::Cursor::new(&mut buf);
-    let f = std::fs::File::create("a.epub").unwrap();
+    let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
     make_epub(&stories, f).await;
 }
