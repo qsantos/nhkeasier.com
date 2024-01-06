@@ -42,7 +42,7 @@ struct MessageTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     player: Option<&'a str>,
-    header: &'a str,
+    heading: &'a str,
     message: &'a str,
 }
 
@@ -53,7 +53,7 @@ struct AboutTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     player: Option<&'a str>,
-    header: &'a str,
+    heading: &'a str,
 }
 
 #[derive(Template)]
@@ -63,7 +63,7 @@ struct ContactTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     player: Option<&'a str>,
-    header: &'a str,
+    heading: &'a str,
 }
 
 #[derive(Template)]
@@ -73,7 +73,7 @@ struct ArchiveTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     player: Option<&'a str>,
-    header: &'a str,
+    heading: &'a str,
     stories: Vec<Story<'a>>,
     previous_day: Option<NaiveDate>,
     date: NaiveDate,
@@ -89,7 +89,7 @@ struct StoryTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     player: Option<&'a str>,
-    header: &'a str,
+    heading: &'a str,
     story: &'a Story<'a>,
     previous_story_id: Option<i64>,
     next_story_id: Option<i64>,
@@ -111,7 +111,7 @@ fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
             description: None,
             image: None,
             player: None,
-            header: title,
+            heading: title,
             message,
         }
         .render()
@@ -297,7 +297,7 @@ async fn archive(
             .as_deref(),
         image: story.image,
         player: None, // TODO
-        header: &format!("Stories on {}", date.format("%Y-%m-%d")),
+        heading: &format!("Stories on {}", date.format("%Y-%m-%d")),
         previous_day,
         date,
         next_day,
@@ -389,7 +389,7 @@ async fn story(
             .as_deref(),
         image: story.image,
         player: None,
-        header: "Single Story",
+        heading: "Single Story",
         previous_story_id,
         next_story_id,
         edict: edict.as_deref(),
@@ -410,7 +410,7 @@ async fn about() -> impl IntoResponse {
             description: None,
             image: None,
             player: None,
-            header: "About",
+            heading: "About",
         }
         .render()
         .expect("failed to render about.html template"),
@@ -424,7 +424,7 @@ async fn contact() -> impl IntoResponse {
             description: None,
             image: None,
             player: None,
-            header: "Contact",
+            heading: "Contact",
         }
         .render()
         .expect("failed to render contact.html template"),
