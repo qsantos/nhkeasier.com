@@ -152,7 +152,7 @@ async fn epub_month(
     extract::Path((year, month)): extract::Path<(i32, u32)>,
 ) -> Response<Body> {
     let rows =
-        sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE $1 || '-' || $2 || '-%' ORDER BY published ASC")
+        sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE printf('%04d-%02d-%%', $1, $2) ORDER BY published ASC")
             .bind(year)
             .bind(month)
             .fetch_all(&state.pool)
@@ -177,7 +177,7 @@ async fn epub_month(
             (header::CONTENT_TYPE, "application/epub+zip"),
             (
                 header::CONTENT_DISPOSITION,
-                &format!("attachment; filename=nhkeasier-{year}-{month}.epub"),
+                &format!("attachment; filename=nhkeasier-{year:04}-{month:02}.epub"),
             ),
         ],
         buf,
