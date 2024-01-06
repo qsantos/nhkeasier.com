@@ -7,6 +7,8 @@ use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 
+use crate::DEBUG;
+
 struct EmailLayer;
 
 #[derive(Default)]
@@ -61,11 +63,19 @@ pub fn init_logging() {
     let stdout_layer =
         tracing_subscriber::fmt::layer().with_filter(tracing_subscriber::filter::LevelFilter::INFO);
 
-    // warn to email
-    let email_layer = EmailLayer.with_filter(tracing_subscriber::filter::LevelFilter::WARN);
-    tracing_subscriber::registry()
-        .with(stdout_layer)
-        .with(file_layer)
-        .with(email_layer)
-        .init();
+    if DEBUG {
+        tracing_subscriber::registry()
+            .with(stdout_layer)
+            .with(file_layer)
+            .init();
+    } else {
+        // warn to email
+        let email_layer = EmailLayer.with_filter(tracing_subscriber::filter::LevelFilter::WARN);
+
+        tracing_subscriber::registry()
+            .with(stdout_layer)
+            .with(file_layer)
+            .with(email_layer)
+            .init();
+    }
 }
