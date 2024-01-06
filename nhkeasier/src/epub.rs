@@ -69,7 +69,7 @@ macro_rules! zip_copy {
     };
 }
 
-pub async fn make_epub<W: Write + Seek>(stories: &[Story<'_>], output: W) {
+pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], output: W) {
     let mut zip = ZipWriter::new(output);
 
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
@@ -121,5 +121,5 @@ async fn test() {
     //let mut buf = Vec::new();
     //let f = std::io::Cursor::new(&mut buf);
     let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
-    make_epub(&stories, f).await;
+    make_epub(&stories, f);
 }
