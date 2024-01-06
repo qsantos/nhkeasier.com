@@ -21,45 +21,6 @@ async fn update_job(pool: Pool<Sqlite>) {
     }
 }
 
-async fn normalize_voices(pool: &Pool<Sqlite>) {
-    use sqlx::FromRow;
-    let rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE voice GLOB 'mp3/*_*.mp3'")
-        .fetch_all(pool)
-        .await
-        .unwrap();
-    for row in rows {
-        let story = nhkeasier::Story::from_row(&row).unwrap();
-        let voice = story.voice.unwrap();
-        let media = std::path::Path::new("media");
-        let old = media.join(voice);
-        let new_name = format!("mp3/{}.mp3", story.story_id);
-        let new = media.join(&new_name);
-        assert!(old.exists());
-        if new.exists() {
-            let oldc = std::fs::read(&old).unwrap();
-            let newc = std::fs::read(&new).unwrap();
-            if oldc != newc {
-                tracing::warn!(
-                    "{old:?} ({} bytes) != {new:?} ({} bytes) for story {}",
-                    oldc.len(),
-                    newc.len(),
-                    story.id,
-                );
-            }
-        } else {
-            tracing::info!("renaming {old:?} to {new:?} for story {}", story.id);
-            std::fs::rename(&old, &new).unwrap();
-        }
-        tracing::debug!("using {new:?} instead of {old:?} for story {}", story.id);
-        sqlx::query("UPDATE nhkeasier_story SET voice = $1 WHERE id = $2")
-            .bind(&new_name)
-            .bind(story.id)
-            .execute(pool)
-            .await
-            .unwrap();
-    }
-}
-
 #[derive(Clone, Debug, Parser)]
 struct Args {
     #[arg(short, long, default_value = "127.0.0.1:3000")]
@@ -79,8 +40,6 @@ async fn main() -> Result<(), edict2::Error> {
 
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;
-
-    normalize_voices(&pool).await;
 
     tokio::spawn(update_job(pool.clone()));
 
