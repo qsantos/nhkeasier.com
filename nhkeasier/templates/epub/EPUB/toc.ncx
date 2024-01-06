@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/" xml:lang="ja">
   <head>
-    <title>NHK Easier</title>
+    <title>{{ title }}</title>
   </head>
   <docTitle>
-    <text>NHK Easier</text>
+    <text>{{ title }}</text>
   </docTitle>
   <navMap>
 {%- for story in stories %}

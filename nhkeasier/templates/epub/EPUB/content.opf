@@ -2,11 +2,11 @@
 <package version="3.0" unique-identifier="epub-id-1" prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/" xmlns="http://www.idpf.org/2007/opf">
   <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
     <dc:identifier>urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7</dc:identifier>
-    <dc:title>NHK Easier</dc:title>
+    <dc:title>{{ title }}</dc:title>
     <dc:date>{{ Utc::now().to_rfc3339()|safe }}</dc:date>
     <dc:language>ja</dc:language>
     <dc:creator opf:role="aut">Japan Broadcasting Corporation</dc:creator>
-    <dc:contributor opf:role="edc">NHK Easier</dc:contributor>
+    <dc:contributor opf:role="edc">{{ title }}</dc:contributor>
     <meta name="cover" content="images/logo.png" />
   </metadata>
   <manifest>

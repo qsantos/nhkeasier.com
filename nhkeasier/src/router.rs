@@ -166,8 +166,12 @@ async fn epub_month(
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
     let mut buf = Vec::new();
+    let title = stories[0]
+        .published
+        .format("NHK Easier stories of %B %Y")
+        .to_string();
     let output = std::io::Cursor::new(&mut buf);
-    crate::make_epub(&stories, output);
+    crate::make_epub(&stories, &title, output);
     (
         [
             (header::CONTENT_TYPE, "application/epub+zip"),

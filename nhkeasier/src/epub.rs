@@ -9,19 +9,28 @@ use crate::{Story, JST};
 #[derive(Template)]
 #[template(path = "epub/EPUB/content.opf", escape = "xml")]
 struct ContentOpfTemplate<'a> {
+    title: &'a str,
     stories: &'a [Story<'a>],
 }
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/nav.xhtml", escape = "xml")]
 struct NavXhtmlTemplate<'a> {
+    title: &'a str,
     stories: &'a [Story<'a>],
 }
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/toc.ncx", escape = "xml")]
 struct TocNcxTemplate<'a> {
+    title: &'a str,
     stories: &'a [Story<'a>],
+}
+
+#[derive(Template)]
+#[template(path = "epub/EPUB/text/title_page.xhtml", escape = "xml")]
+struct TitlePageTemplate<'a> {
+    title: &'a str,
 }
 
 #[derive(Template)]
@@ -69,21 +78,22 @@ macro_rules! zip_copy {
     };
 }
 
-pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], output: W) {
+pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], title: &str, output: W) {
     let mut zip = ZipWriter::new(output);
 
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
     zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
-    let template = ContentOpfTemplate { stories };
+    let template = ContentOpfTemplate { title, stories };
     zip_template(&mut zip, "EPUB/content.opf", template);
-    let template = NavXhtmlTemplate { stories };
+    let template = NavXhtmlTemplate { title, stories };
     zip_template(&mut zip, "EPUB/nav.xhtml", template);
-    let template = TocNcxTemplate { stories };
+    let template = TocNcxTemplate { title, stories };
     zip_template(&mut zip, "EPUB/toc.ncx", template);
     zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
     // zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
-    zip_copy!(&mut zip, "EPUB/text/title_page.xhtml");
+    let template = TitlePageTemplate { title };
+    zip_template(&mut zip, "EPUB/text/title_page.xhtml", template);
     for story in stories.iter() {
         let filename = format!("EPUB/text/{}.xhtml", story.story_id);
         zip_template(&mut zip, &filename, StoryTemplate { story });
@@ -121,5 +131,5 @@ async fn test() {
     //let mut buf = Vec::new();
     //let f = std::io::Cursor::new(&mut buf);
     let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
-    make_epub(&stories, f);
+    make_epub(&stories, "NHK Easier latest stories", f);
 }
