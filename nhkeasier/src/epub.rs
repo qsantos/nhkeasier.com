@@ -118,7 +118,8 @@ async fn test() {
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
 
-    // let mut buf = [0; 65536];
+    //let mut buf = Vec::new();
+    //let f = std::io::Cursor::new(&mut buf);
     let f = std::fs::File::create("a.epub").unwrap();
     make_epub(&stories, f).await;
 }
