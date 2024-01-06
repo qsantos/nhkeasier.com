@@ -1,29 +1,27 @@
-use std::fs::File;
-use std::io::Write;
+use std::io::{Seek, Write};
 
 use askama::Template;
 use chrono::{TimeZone, Utc};
-use sqlx::FromRow;
 use zip::{write::FileOptions, CompressionMethod, ZipWriter};
 
-use crate::{connect_to_database, Story, JST};
+use crate::{Story, JST};
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/content.opf", escape = "xml")]
 struct ContentOpfTemplate<'a> {
-    stories: &'a Vec<Story<'a>>,
+    stories: &'a [Story<'a>],
 }
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/nav.xhtml", escape = "xml")]
 struct NavXhtmlTemplate<'a> {
-    stories: &'a Vec<Story<'a>>,
+    stories: &'a [Story<'a>],
 }
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/toc.ncx", escape = "xml")]
 struct TocNcxTemplate<'a> {
-    stories: &'a Vec<Story<'a>>,
+    stories: &'a [Story<'a>],
 }
 
 #[derive(Template)]
@@ -44,19 +42,19 @@ impl<'a> Story<'a> {
     }
 }
 
-fn zip_bytes(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
+fn zip_bytes<W: Write + Seek>(zip: &mut ZipWriter<W>, filename: &str, bytes: &[u8]) {
     let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
     zip.start_file(filename, options).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
-fn zip_bytes_store(zip: &mut ZipWriter<File>, filename: &str, bytes: &[u8]) {
+fn zip_bytes_store<W: Write + Seek>(zip: &mut ZipWriter<W>, filename: &str, bytes: &[u8]) {
     let options = FileOptions::default().compression_method(CompressionMethod::STORE);
     zip.start_file(filename, options).unwrap();
     zip.write_all(bytes).unwrap();
 }
 
-fn zip_template<T: Template>(zip: &mut ZipWriter<File>, filename: &str, template: T) {
+fn zip_template<W: Write + Seek, T: Template>(zip: &mut ZipWriter<W>, filename: &str, template: T) {
     let content = template.render().unwrap();
     zip_bytes(zip, filename, content.as_bytes());
 }
@@ -71,31 +69,17 @@ macro_rules! zip_copy {
     };
 }
 
-pub async fn make_epub() {
-    dotenvy::dotenv().unwrap();
-
-    let pool = connect_to_database().await;
-    let rows = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published DESC LIMIT 20")
-        .fetch_all(&pool)
-        .await
-        .unwrap();
-    let stories: Vec<Story> = rows
-        .iter()
-        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
-        .collect();
-
-    // let mut buf = [0; 65536];
-    let f = File::create("a.epub").unwrap();
-    let mut zip = ZipWriter::new(f);
+pub async fn make_epub<W: Write + Seek>(stories: &[Story<'_>], output: W) {
+    let mut zip = ZipWriter::new(output);
 
     zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
     zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
-    let template = ContentOpfTemplate { stories: &stories };
+    let template = ContentOpfTemplate { stories };
     zip_template(&mut zip, "EPUB/content.opf", template);
-    let template = NavXhtmlTemplate { stories: &stories };
+    let template = NavXhtmlTemplate { stories };
     zip_template(&mut zip, "EPUB/nav.xhtml", template);
-    let template = TocNcxTemplate { stories: &stories };
+    let template = TocNcxTemplate { stories };
     zip_template(&mut zip, "EPUB/toc.ncx", template);
     zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
     // zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
@@ -117,4 +101,24 @@ pub async fn make_epub() {
     }
 
     zip.finish().unwrap();
+}
+
+#[tokio::test]
+async fn test() {
+    dotenvy::dotenv().unwrap();
+
+    let pool = crate::connect_to_database().await;
+    let rows = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published LIMIT 20")
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+    use sqlx::FromRow;
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
+        .collect();
+
+    // let mut buf = [0; 65536];
+    let f = std::fs::File::create("a.epub").unwrap();
+    make_epub(&stories, f).await;
 }
