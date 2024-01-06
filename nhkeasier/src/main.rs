@@ -41,7 +41,9 @@ async fn main() -> Result<(), edict2::Error> {
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;
 
-    tokio::spawn(update_job(pool.clone()));
+    if !nhkeasier::DEBUG {
+        tokio::spawn(update_job(pool.clone()));
+    }
 
     tracing::info!("Loading EDICT2");
     let sub_edict_creator = edict2::SubEdictCreator::from_files()?;

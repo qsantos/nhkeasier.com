@@ -24,12 +24,7 @@ use tower_http::trace::TraceLayer;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
-use crate::{Story, JST};
-
-#[cfg(debug_assertions)]
-const DEBUG: bool = true;
-#[cfg(not(debug_assertions))]
-const DEBUG: bool = false;
+use crate::{Story, DEBUG, JST};
 
 lazy_static! {
     static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX");

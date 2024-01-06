@@ -16,6 +16,11 @@ pub use update::update_stories;
 
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone};
 
+#[cfg(debug_assertions)]
+pub const DEBUG: bool = true;
+#[cfg(not(debug_assertions))]
+pub const DEBUG: bool = false;
+
 lazy_static::lazy_static! {
     pub static ref JST: FixedOffset = FixedOffset::east_opt(3600 * 9).unwrap();
 }
