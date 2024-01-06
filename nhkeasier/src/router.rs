@@ -26,6 +26,11 @@ use edict2::{SubEdictCreator, SubEnamdictCreator};
 
 use crate::{Story, JST};
 
+#[cfg(debug_assertions)]
+const DEBUG: bool = true;
+#[cfg(not(debug_assertions))]
+const DEBUG: bool = false;
+
 lazy_static! {
     static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX");
 }
@@ -33,7 +38,6 @@ lazy_static! {
 #[derive(Template)]
 #[template(path = "web/message.html")]
 struct MessageTemplate<'a> {
-    debug: bool,
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
@@ -45,7 +49,6 @@ struct MessageTemplate<'a> {
 #[derive(Template)]
 #[template(path = "web/about.html")]
 struct AboutTemplate<'a> {
-    debug: bool,
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
@@ -56,7 +59,6 @@ struct AboutTemplate<'a> {
 #[derive(Template)]
 #[template(path = "web/contact.html")]
 struct ContactTemplate<'a> {
-    debug: bool,
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
@@ -67,7 +69,6 @@ struct ContactTemplate<'a> {
 #[derive(Template)]
 #[template(path = "web/index.html")]
 struct ArchiveTemplate<'a> {
-    debug: bool,
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
@@ -84,7 +85,6 @@ struct ArchiveTemplate<'a> {
 #[derive(Template)]
 #[template(path = "web/story.html")]
 struct StoryTemplate<'a> {
-    debug: bool,
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
@@ -107,7 +107,6 @@ struct FeedTemplate<'a> {
 fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
     Html(
         MessageTemplate {
-            debug: true,
             title,
             description: None,
             image: None,
@@ -291,7 +290,6 @@ async fn archive(
 
     let start = Instant::now();
     let html = ArchiveTemplate {
-        debug: true,
         title: "Easier Japanese Practice",
         description: story
             .content
@@ -384,7 +382,6 @@ async fn story(
 
     let start = Instant::now();
     let html = StoryTemplate {
-        debug: true,
         title: story.title,
         description: story
             .content
@@ -409,7 +406,6 @@ async fn story(
 async fn about() -> impl IntoResponse {
     Html(
         AboutTemplate {
-            debug: true,
             title: "About",
             description: None,
             image: None,
@@ -424,7 +420,6 @@ async fn about() -> impl IntoResponse {
 async fn contact() -> impl IntoResponse {
     Html(
         ContactTemplate {
-            debug: true,
             title: "Contact",
             description: None,
             image: None,
