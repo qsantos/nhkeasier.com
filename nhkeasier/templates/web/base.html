@@ -19,12 +19,6 @@
     <meta property="og:image:height" content="360" />
     <meta name="twitter:card" content="summary_large_image" />
 {%- endif -%}
-{%- if let Some(player) = player -%}
-    <meta name="twitter:card" content="player">
-    <meta name="twitter:player" content="{{ player|safe }}">
-    <meta name="twitter:player:width" content="640">
-    <meta name="twitter:player:height" content="360">
-{%- endif -%}
 <link rel="icon" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/bootstrap.min.css">
 <link rel="stylesheet" href="/static/style.css">

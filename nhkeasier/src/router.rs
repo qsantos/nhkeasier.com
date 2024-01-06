@@ -41,7 +41,6 @@ struct MessageTemplate<'a> {
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
-    player: Option<&'a str>,
     heading: &'a str,
     message: &'a str,
 }
@@ -52,7 +51,6 @@ struct AboutTemplate<'a> {
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
-    player: Option<&'a str>,
     heading: &'a str,
 }
 
@@ -62,7 +60,6 @@ struct ContactTemplate<'a> {
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
-    player: Option<&'a str>,
     heading: &'a str,
 }
 
@@ -72,7 +69,6 @@ struct ArchiveTemplate<'a> {
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
-    player: Option<&'a str>,
     heading: &'a str,
     stories: Vec<Story<'a>>,
     previous_day: Option<NaiveDate>,
@@ -88,7 +84,6 @@ struct StoryTemplate<'a> {
     title: &'a str,
     description: Option<&'a str>,
     image: Option<&'a str>,
-    player: Option<&'a str>,
     heading: &'a str,
     story: &'a Story<'a>,
     previous_story_id: Option<i64>,
@@ -110,7 +105,6 @@ fn simple_message<'a>(title: &'a str, message: &'a str) -> Html<String> {
             title,
             description: None,
             image: None,
-            player: None,
             heading: title,
             message,
         }
@@ -296,7 +290,6 @@ async fn archive(
             .map(|content| remove_all_html(content))
             .as_deref(),
         image: story.image,
-        player: None, // TODO
         heading: &format!("Stories on {}", date.format("%Y-%m-%d")),
         previous_day,
         date,
@@ -388,7 +381,6 @@ async fn story(
             .map(|content| remove_all_html(content))
             .as_deref(),
         image: story.image,
-        player: None,
         heading: "Single Story",
         previous_story_id,
         next_story_id,
@@ -409,7 +401,6 @@ async fn about() -> impl IntoResponse {
             title: "About",
             description: None,
             image: None,
-            player: None,
             heading: "About",
         }
         .render()
@@ -423,7 +414,6 @@ async fn contact() -> impl IntoResponse {
             title: "Contact",
             description: None,
             image: None,
-            player: None,
             heading: "Contact",
         }
         .render()
