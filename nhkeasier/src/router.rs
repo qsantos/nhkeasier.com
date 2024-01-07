@@ -138,6 +138,7 @@ fn remove_all_html(content: &str) -> Cow<'_, str> {
 async fn epub_month(
     extract::State(state): extract::State<Arc<State>>,
     extract::Path((year, month)): extract::Path<(i32, u32)>,
+    extract::Query(query): extract::Query<HashMap<String, String>>,
 ) -> Response<Body> {
     let rows =
         sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE printf('%04d-%02d-%%', $1, $2) ORDER BY published ASC")
@@ -153,13 +154,25 @@ async fn epub_month(
         .iter()
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
+
     let mut buf = Vec::new();
     let title = stories[0]
         .published
         .format("NHK Easier stories of %B %Y")
         .to_string();
     let output = std::io::Cursor::new(&mut buf);
-    crate::make_epub(&stories, &title, output, false, false, false);
+    let with_furigana = query.contains_key("furigana");
+    let with_images = query.contains_key("images");
+    let with_cjk_font = query.contains_key("cjk-font");
+    crate::make_epub(
+        &stories,
+        &title,
+        output,
+        with_furigana,
+        with_images,
+        with_cjk_font,
+    );
+
     (
         [
             (header::CONTENT_TYPE, "application/epub+zip"),
