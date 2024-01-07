@@ -1,6 +1,6 @@
 # NHKEasier.com
 
-Learner friendly interface for NHK News Web Easy 
+Learner friendly interface for NHK News Web Easy
 
 News Web Easy is a Japanese news website targeted at Japanese children.
 The short articles and the simple sentence structures make is a good candidate to practice Japanese as a beginner.
