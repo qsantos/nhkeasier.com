@@ -159,7 +159,7 @@ async fn epub_month(
         .format("NHK Easier stories of %B %Y")
         .to_string();
     let output = std::io::Cursor::new(&mut buf);
-    crate::make_epub(&stories, &title, output);
+    crate::make_epub(&stories, &title, output, false, false, false);
     (
         [
             (header::CONTENT_TYPE, "application/epub+zip"),

@@ -8,16 +8,28 @@
 </head>
 <body epub:type="bodymatter">
 <section>
+{%- if with_furigana %}
 <h3>{{ story.title_with_ruby|safe }}</h3>
+{%- else %}
+<h3>{{ story.title|safe }}</h3>
+{%- endif %}
 <time datetime="{{ story.published.format("%Y-%m-%dT%H:%M:%S+00:00")|safe }}">
     {{ JST.from_utc_datetime(story.published).format("%Y-%m-%d %H:%M:%S %z") }} (JST)
 </time>
-{% let image = story.image.unwrap_or("") -%}
-{%- if !image.is_empty() -%}
+{%- if with_images %}
+{%- let image = story.image.unwrap_or("") %}
+{%- if !image.is_empty() %}
     <img src="../images/{{ story.story_id|safe }}.jpg" alt="Story illustration" width="640" height="360"/>
-{% endif -%}
-{% if let Some(content) = story.content_with_ruby -%}
+{%- endif %}
+{%- endif %}
+{%- if with_furigana %}
+{%- if let Some(content) = story.content_with_ruby %}
 {{ story.xml_content_with_ruby()|safe }}
+{%- endif %}
+{%- else %}
+{%- if let Some(content) = story.content %}
+{{ story.xml_content()|safe }}
+{%- endif %}
 {%- endif %}
 <ul>
     <li>

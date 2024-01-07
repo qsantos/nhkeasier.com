@@ -12,6 +12,8 @@ struct ContentOpfTemplate<'a> {
     now: DateTime<Utc>,
     title: &'a str,
     stories: &'a [Story<'a>],
+    with_images: bool,
+    with_cjk_font: bool,
 }
 
 #[derive(Template)]
@@ -29,6 +31,12 @@ struct TocNcxTemplate<'a> {
 }
 
 #[derive(Template)]
+#[template(path = "epub/EPUB/styles/stylesheet.css", escape = "none")]
+struct StylesheetTemplate {
+    with_cjk_font: bool,
+}
+
+#[derive(Template)]
 #[template(path = "epub/EPUB/text/title_page.xhtml", escape = "xml")]
 struct TitlePageTemplate<'a> {
     now: DateTime<Utc>,
@@ -39,9 +47,21 @@ struct TitlePageTemplate<'a> {
 #[template(path = "epub/EPUB/text/story.xhtml", escape = "xml")]
 struct StoryTemplate<'a> {
     story: &'a Story<'a>,
+    with_furigana: bool,
+    with_images: bool,
 }
 
 impl<'a> Story<'a> {
+    // TODO: use a filter instead
+    fn xml_content(&self) -> String {
+        let parser = libxml::parser::Parser::default_html();
+        let content = self.content.unwrap();
+        let document = parser.parse_string(content.as_bytes()).unwrap();
+        let html = document.get_root_element().unwrap();
+        let mut body = html.get_first_child().unwrap();
+        body.set_name("div").unwrap();
+        document.node_to_string(&body)
+    }
     fn xml_content_with_ruby(&self) -> String {
         let parser = libxml::parser::Parser::default_html();
         let content = self.content_with_ruby.unwrap();
@@ -80,7 +100,14 @@ macro_rules! zip_copy {
     };
 }
 
-pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], title: &str, output: W) {
+pub fn make_epub<W: Write + Seek>(
+    stories: &[Story<'_>],
+    title: &str,
+    output: W,
+    with_furigana: bool,
+    with_images: bool,
+    with_cjk_font: bool,
+) {
     let now = Utc::now();
     let mut zip = ZipWriter::new(output);
 
@@ -91,29 +118,44 @@ pub fn make_epub<W: Write + Seek>(stories: &[Story<'_>], title: &str, output: W)
         now,
         title,
         stories,
+        with_images,
+        with_cjk_font,
     };
     zip_template(&mut zip, "EPUB/content.opf", template);
     let template = NavXhtmlTemplate { title, stories };
     zip_template(&mut zip, "EPUB/nav.xhtml", template);
     let template = TocNcxTemplate { title, stories };
     zip_template(&mut zip, "EPUB/toc.ncx", template);
-    zip_copy!(&mut zip, "EPUB/styles/stylesheet.css");
-    // zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
+    let template = StylesheetTemplate { with_cjk_font };
+    zip_template(&mut zip, "EPUB/styles/stylesheet.css", template);
+    if with_cjk_font {
+        zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
+    }
     let template = TitlePageTemplate { now, title };
     zip_template(&mut zip, "EPUB/text/title_page.xhtml", template);
     for story in stories.iter() {
         let filename = format!("EPUB/text/{}.xhtml", story.story_id);
-        zip_template(&mut zip, &filename, StoryTemplate { story });
+        zip_template(
+            &mut zip,
+            &filename,
+            StoryTemplate {
+                story,
+                with_furigana,
+                with_images,
+            },
+        );
     }
     zip_copy!(&mut zip, "EPUB/images/logo.png");
-    for story in stories {
-        if let Some(image) = story.image {
-            if image.is_empty() {
-                continue;
+    if with_images {
+        for story in stories {
+            if let Some(image) = story.image {
+                if image.is_empty() {
+                    continue;
+                }
+                let data = std::fs::read(format!("media/{}", image)).unwrap();
+                let filename = format!("EPUB/images/{}.jpg", story.story_id);
+                zip_bytes_store(&mut zip, &filename, &data);
             }
-            let data = std::fs::read(format!("media/{}", image)).unwrap();
-            let filename = format!("EPUB/images/{}.jpg", story.story_id);
-            zip_bytes_store(&mut zip, &filename, &data);
         }
     }
 
@@ -138,5 +180,5 @@ async fn test() {
     //let mut buf = Vec::new();
     //let f = std::io::Cursor::new(&mut buf);
     let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
-    make_epub(&stories, "NHK Easier latest stories", f);
+    make_epub(&stories, "NHK Easier latest stories", f, false, true, true);
 }

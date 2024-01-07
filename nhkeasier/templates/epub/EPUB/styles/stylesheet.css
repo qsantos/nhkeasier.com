@@ -2,6 +2,7 @@ p {
     /* ensure there is enough room for furigana */
     line-height: 1.8;
 }
+{%- if with_cjk_font %}
 @font-face {
 	font-family: "Noto Sans CJK";
 	font-weight: normal;
@@ -11,6 +12,7 @@ p {
 .japanese {
     font-family: "Noto Sans CJK";
 }
+{%- endif %}
 img {
     max-width: 100%;
 }
