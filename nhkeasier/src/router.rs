@@ -13,7 +13,7 @@ use axum::{
     routing::get,
     Router,
 };
-use chrono::{Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
+use chrono::{Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
@@ -56,6 +56,17 @@ struct ContactTemplate<'a> {
     description: Option<&'a str>,
     image: Option<&'a str>,
     heading: &'a str,
+}
+
+#[derive(Template)]
+#[template(path = "web/epub-form.html")]
+struct EpubFormTemplate<'a> {
+    title: &'a str,
+    description: Option<&'a str>,
+    image: Option<&'a str>,
+    heading: &'a str,
+    min_date: NaiveDate,
+    max_date: NaiveDate,
 }
 
 #[derive(Template)]
@@ -133,6 +144,33 @@ fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
 
 fn remove_all_html(content: &str) -> Cow<'_, str> {
     REMOVE_HTML_REGEX.replace_all(content, "")
+}
+
+async fn epub_form(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
+    #[derive(FromRow)]
+    struct MinMaxDate {
+        min: NaiveDateTime,
+        max: NaiveDateTime,
+    }
+    let MinMaxDate { min, max } = sqlx::query_as!(
+        MinMaxDate,
+        "SELECT MIN(published) as 'min!: _', MAX(published) as 'max!: _' FROM nhkeasier_story"
+    )
+    .fetch_one(&state.pool)
+    .await
+    .unwrap();
+    Html(
+        EpubFormTemplate {
+            title: &format!("Generate an EPUB {min:?} {max:?}"),
+            description: None,
+            image: None,
+            heading: "Generate an EPUB",
+            min_date: min.date(),
+            max_date: max.date(),
+        }
+        .render()
+        .expect("failed to render web-form.html template"),
+    )
 }
 
 async fn epub_month(
@@ -492,6 +530,7 @@ pub fn router(state: State) -> Router {
         .route("/", get(archive))
         .route("/:year/:month/epub", get(epub_month))
         .route("/:year/:month/:day/", get(archive))
+        .route("/epub/", get(epub_form))
         .route("/story/:id/", get(story))
         .route("/about/", get(about))
         .route("/contact/", get(contact).post(contact_send))

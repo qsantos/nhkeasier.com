@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<form>
+    <div class="form-group">
+        <label for="year">Year</label>
+        <select id="year" class="form-control">
+{%- for year in min_date.year()..=max_date.year() %}
+            <option>{{ year }}</option>
+{%- endfor %}
+        </select>
+        <small class="form-text text-muted">
+            Please select the year before the month.
+        </small>
+    </div>
+    <div class="form-group">
+        <label for="month">Month</label>
+        <select id="month" class="form-control">
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+        </select>
+        <small class="form-text text-muted">
+            The available months will be updated as you set the year.
+        </small>
+    </div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="enableFurigana">
+        <label class="form-check-label" for="enableFurigana">
+            Include furigana
+        </label>
+        <div class="form-text text-muted">
+            They cannot be toggled on hover, nor disabled from the eReader.
+        </div>
+    </div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="enableImages">
+        <label class="form-check-label" for="enableImages">
+            Include images
+        </label>
+        <div class="form-text text-muted">
+            This adds about <span class="text-warning">+4 MB</Span> to the size of the file.
+        </div>
+    </div>
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="enableCJKFont">
+        <label class="form-check-label" for="enableCJKFont">
+            Embed CJK cont
+        </label>
+        <div class="form-text text-muted">
+            Compatibility with old eReaders; this adds <span class="text-danger">+30 MB</span> to the size of the file.
+        </div>
+    </div>
+    <input type="button" id="download" class="btn btn-primary" value="Download" />
+</form>
+<script>
+const min_date = new Date({{ min_date }});
+const max_date = new Date({{ max_date }});
+document.addEventListener('DOMContentLoaded', () => {
+    const yearSelect = document.getElementById('year');
+    const monthSelect = document.getElementById('month');
+    const downloadButton = document.getElementById('download');
+    const enableFuriganaCheck = document.getElementById('enableFurigana');
+    const enableImagesCheck = document.getElementById('enableImages');
+    const enableCJKFontCheck = document.getElementById('enableCJKFont');
+    yearSelect.addEventListener('input', () => {
+        const year = parseInt(yearSelect.value);
+        const minMonth = (year === min_date.getYear() + 1900) ? min_date.getMonth() : 0;
+        const maxMonth = (year === max_date.getYear() + 1900) ? max_date.getMonth() : 11;
+        for (const monthOption of monthSelect.children) {
+            const month = monthOption.value;
+            if (minMonth <= month && month <= maxMonth) {
+                monthOption.disabled = false;
+            } else {
+                monthOption.disabled = true;
+                monthOption.selected = false;
+            }
+        }
+    });
+    downloadButton.addEventListener('click', () => {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const options = [];
+        if (enableFuriganaCheck.checked) {
+            options.push('furigana');
+        }
+        if (enableImagesCheck.checked) {
+            options.push('images');
+        }
+        if (enableCJKFontCheck.checked) {
+            options.push('cjk-font');
+        }
+        const queryString = options.length === 0 ? '' : '?' + options.join('&');
+        document.location = `/${year}/${String(month + 1).padStart(2, '0')}/epub${queryString}`;
+    });
+});
+</script>
+{% endblock %}

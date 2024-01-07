@@ -67,6 +67,9 @@ main h2 { font-size:28px; color:#24447a; font-weight:bold; letter-spacing:4px; w
 }
 .feed-icon { max-width:20px; }
 
+/* fix for checkbox alignment when using non-default line-height */
+.form-check { line-height: var(--bs-body-line-height); }
+
 /* stories */
 article { margin-bottom:100px; overflow-wrap:break-word; }
 article h3 { font:24px sans-serif; margin:0; color:#24447a; }
