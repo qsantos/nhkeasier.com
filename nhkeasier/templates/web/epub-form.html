@@ -62,8 +62,8 @@
     <input type="button" id="download" class="btn btn-primary" value="Download" />
 </form>
 <script>
-const min_date = new Date({{ min_date }});
-const max_date = new Date({{ max_date }});
+const min_date = new Date("{{ min_date }}");
+const max_date = new Date("{{ max_date }}");
 document.addEventListener('DOMContentLoaded', () => {
     const yearSelect = document.getElementById('year');
     const monthSelect = document.getElementById('month');
