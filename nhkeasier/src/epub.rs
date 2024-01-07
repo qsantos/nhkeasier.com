@@ -100,6 +100,16 @@ macro_rules! zip_copy {
     };
 }
 
+macro_rules! zip_copy_store {
+    ( $zip:expr, $filename:expr ) => {
+        zip_bytes_store(
+            $zip,
+            $filename,
+            include_bytes!(concat!("../templates/epub/", $filename)),
+        );
+    };
+}
+
 pub fn make_epub<W: Write + Seek>(
     stories: &[Story<'_>],
     title: &str,
@@ -129,7 +139,7 @@ pub fn make_epub<W: Write + Seek>(
     let template = StylesheetTemplate { with_cjk_font };
     zip_template(&mut zip, "EPUB/styles/stylesheet.css", template);
     if with_cjk_font {
-        zip_copy!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
+        zip_copy_store!(&mut zip, "EPUB/fonts/NotoSansCJKjp-VF.otf");
     }
     let template = TitlePageTemplate { now, title };
     zip_template(&mut zip, "EPUB/text/title_page.xhtml", template);
