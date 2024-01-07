@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>NHK News Web Easier</title>
+        <title>NHK Easier</title>
         <link>https://nhkeasier.com/</link>
         <description>Latest stories from NHK News Web easy</description>
         <atom:link href="https://nhkeasier.com/feed/" rel="self"/>

@@ -12,14 +12,14 @@ fn send_email_common(subject: &str, body: String) -> (Message, String, Credentia
 
     let message = Message::builder()
         .from(
-            "NHKEasier <bugs@nhkeasier.com>"
+            "NHK Easier <bugs@nhkeasier.com>"
                 .parse()
                 .expect("failed to parse from address"),
         )
-        .to("NHKEasier <contact@nhkeasier.com>"
+        .to("NHK Easier <contact@nhkeasier.com>"
             .parse()
             .expect("failed to parse to address"))
-        .subject(format!("[NHKEasier] {}", subject))
+        .subject(format!("[NHK Easier] {}", subject))
         .header(ContentType::TEXT_PLAIN)
         .body(body)
         .expect("failed to create email message");
