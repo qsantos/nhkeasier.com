@@ -62,8 +62,8 @@
     <input type="button" id="download" class="btn btn-primary" value="Download" />
 </form>
 <script>
-const min_date = new Date("{{ min_date }}");
-const max_date = new Date("{{ max_date }}");
+const minDate = new Date("{{ min_date }}");
+const maxDate = new Date("{{ max_date }}");
 document.addEventListener('DOMContentLoaded', () => {
     const yearSelect = document.getElementById('year');
     const monthSelect = document.getElementById('month');
@@ -73,8 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const enableCJKFontCheck = document.getElementById('enableCJKFont');
     yearSelect.addEventListener('input', () => {
         const year = parseInt(yearSelect.value);
-        const minMonth = (year === min_date.getYear() + 1900) ? min_date.getMonth() : 0;
-        const maxMonth = (year === max_date.getYear() + 1900) ? max_date.getMonth() : 11;
+        const minMonth = (year === minDate.getYear() + 1900) ? minDate.getMonth() : 0;
+        const maxMonth = (year === maxDate.getYear() + 1900) ? maxDate.getMonth() : 11;
         for (const monthOption of monthSelect.children) {
             const month = monthOption.value;
             if (minMonth <= month && month <= maxMonth) {
