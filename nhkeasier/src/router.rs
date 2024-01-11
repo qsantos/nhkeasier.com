@@ -396,25 +396,21 @@ async fn story(
     .await
     .expect("failed to query database for next story");
 
-    let edict = if let Some(content) = story.content {
+    let edict = story.content.map(|content| {
         let edict = state.sub_edict_creator.from(content);
         let start = Instant::now();
         let edict = edict.join("\n");
         tracing::debug!("edict joined in {:?}", start.elapsed());
-        Some(edict)
-    } else {
-        None
-    };
+        edict
+    });
 
-    let enamdict = if let Some(content) = story.content {
+    let enamdict = story.content.map(|content| {
         let enamdict = state.sub_enamdict_creator.from(content);
         let start = Instant::now();
         let enamdict = enamdict.join("\n");
         tracing::debug!("enamdict joined in {:?}", start.elapsed());
-        Some(enamdict)
-    } else {
-        None
-    };
+        enamdict
+    });
 
     let start = Instant::now();
     let html = StoryTemplate {
