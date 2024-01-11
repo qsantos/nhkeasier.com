@@ -229,9 +229,7 @@ async fn archive(
     maybe_ymd: Option<extract::Path<(i32, u32, u32)>>,
 ) -> impl IntoResponse {
     let date = if let Some(extract::Path((year, month, day))) = maybe_ymd {
-        if let Some(date) = NaiveDate::from_ymd_opt(year, month, day) {
-            date
-        } else {
+        let Some(date) = NaiveDate::from_ymd_opt(year, month, day) else {
             return (
                 StatusCode::BAD_REQUEST,
                 simple_message(
@@ -242,7 +240,8 @@ async fn archive(
                     ),
                 ),
             );
-        }
+        };
+        date
     } else {
         let maybe_dt = sqlx::query_scalar!("SELECT max(published) FROM nhkeasier_story")
             .fetch_one(&state.pool)
@@ -360,9 +359,7 @@ async fn story(
         .fetch_optional(&state.pool)
         .await
         .expect("failed to query database for specific story");
-    let row = if let Some(row) = maybe_row {
-        row
-    } else {
+    let Some(row) = maybe_row else {
         return handle_not_found().await;
     };
     let story = Story::from_row(&row).expect("failed to convert row to Story");
