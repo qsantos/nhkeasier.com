@@ -51,25 +51,14 @@ struct StoryTemplate<'a> {
     with_images: bool,
 }
 
-impl<'a> Story<'a> {
-    // TODO: use a filter instead
-    fn xml_content(&self) -> String {
+mod filters {
+    pub fn xhtml_sanitize(content: &str) -> ::askama::Result<String> {
         let parser = libxml::parser::Parser::default_html();
-        let content = self.content.unwrap();
         let document = parser.parse_string(content.as_bytes()).unwrap();
         let html = document.get_root_element().unwrap();
         let mut body = html.get_first_child().unwrap();
         body.set_name("div").unwrap();
-        document.node_to_string(&body)
-    }
-    fn xml_content_with_ruby(&self) -> String {
-        let parser = libxml::parser::Parser::default_html();
-        let content = self.content_with_ruby.unwrap();
-        let document = parser.parse_string(content.as_bytes()).unwrap();
-        let html = document.get_root_element().unwrap();
-        let mut body = html.get_first_child().unwrap();
-        body.set_name("div").unwrap();
-        document.node_to_string(&body)
+        Ok(document.node_to_string(&body))
     }
 }
 

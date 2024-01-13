@@ -24,11 +24,11 @@
 {%- endif %}
 {%- if with_furigana %}
 {%- if let Some(content) = story.content_with_ruby %}
-{{ story.xml_content_with_ruby()|safe }}
+{{ content|xhtml_sanitize|safe }}
 {%- endif %}
 {%- else %}
 {%- if let Some(content) = story.content %}
-{{ story.xml_content()|safe }}
+{{ content|xhtml_sanitize|safe }}
 {%- endif %}
 {%- endif %}
 <ul>
