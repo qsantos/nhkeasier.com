@@ -9,9 +9,9 @@
 <body epub:type="bodymatter">
 <section>
 {%- if with_furigana %}
-<h3>{{ story.title_with_ruby|safe }}</h3>
+<h3>{{ story.title_with_ruby|xhtml_sanitize|safe }}</h3>
 {%- else %}
-<h3>{{ story.title|safe }}</h3>
+<h3>{{ story.title|xhtml_sanitize|safe }}</h3>
 {%- endif %}
 <time datetime="{{ story.published.format("%Y-%m-%dT%H:%M:%S+00:00")|safe }}">
     {{ JST.from_utc_datetime(story.published).format("%Y-%m-%d %H:%M:%S %z") }} (JST)
