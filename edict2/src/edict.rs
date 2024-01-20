@@ -11,7 +11,7 @@ pub struct EdictEntry<'a> {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Edict<'a> {
-    entries: HashMap<&'a str, Vec<EdictEntry<'a>>>,
+    entries: HashMap<&'a str, Box<[EdictEntry<'a>]>>,
 }
 
 impl<'a> Edict<'a> {
@@ -53,11 +53,15 @@ impl<'a> Edict<'a> {
                 insert_line_at_keys(&mut entries, writings.split(';'), line, type_);
             };
         }
+        let entries = entries
+            .into_iter()
+            .map(|(key, entries)| (key, entries.into_boxed_slice()))
+            .collect();
         Ok(Edict { entries })
     }
 
-    pub fn lookup(&self, word: &str) -> Option<&Vec<EdictEntry<'_>>> {
-        self.entries.get(word)
+    pub fn lookup(&self, word: &str) -> Option<&[EdictEntry<'_>]> {
+        self.entries.get(word).map(|b| b.as_ref())
     }
 }
 
