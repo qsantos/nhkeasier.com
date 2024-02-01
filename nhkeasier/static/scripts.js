@@ -59,7 +59,7 @@ if (!String.prototype.endsWith) {
     $$('input', toggles).forEach(function(element) {
         element.addEventListener('click', update);
     });
-    set_mode(localStorage.getItem('ruby-toggle') || 'hover');
+    set_mode(localStorage.getItem('ruby-toggle') ?? 'hover');
 
     document.addEventListener('keyup', mousekey_toggler);
     $('#ruby-toggles-helper .key').addEventListener('click', mousekey_toggler);
