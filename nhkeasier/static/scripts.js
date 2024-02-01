@@ -54,7 +54,7 @@ if (!String.prototype.endsWith) {
 
 /* Toggle <rt> in <ruby> elements depending on <input type="radio"> */
 (function(){
-    const toggles = $('#rubby-toggles');
+    const toggles = $('#ruby-toggles');
     let last_mode = null;
     $$('input', toggles).forEach(function(element) {
         element.addEventListener('click', update);
