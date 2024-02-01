@@ -64,7 +64,7 @@ if (!String.prototype.endsWith) {
     set_mode(localStorage.getItem('ruby-toggle') ?? 'hover');
 
     document.addEventListener('keyup', mousekey_toggler);
-    $('#ruby-toggles-helper .key').addEventListener('click', mousekey_toggler);
+    $('#ruby-toggles-helper kbd').addEventListener('click', mousekey_toggler);
 
     function mousekey_toggler(event) {
         if (event.key !== undefined && event.key != 'f' && event.key != 'F') {
@@ -153,7 +153,7 @@ if (!String.prototype.endsWith) {
     set_mode(localStorage.getItem('dict-toggle') == 'on');
 
     document.addEventListener('keyup', mousekey_toggler);
-    $('#dict-toggle-helper .key').addEventListener('click', mousekey_toggler);
+    $('#dict-toggle-helper kbd').addEventListener('click', mousekey_toggler);
 
     function mousekey_toggler(event) {
         if (event.key !== undefined && event.key != 'd' && event.key != 'D') {
