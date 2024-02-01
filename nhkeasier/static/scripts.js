@@ -204,15 +204,6 @@ const edict = {};
 const enamdict = {};
 const deinflect = [];
 
-function fetch(url, callback) {
-    const req = new XMLHttpRequest();
-    req.addEventListener('load', function(event) {
-        callback(req.response);
-    });
-    req.open('GET', url);
-    req.send();
-}
-
 function dict_set_or_append(dict, key, value) {
     dict[key] = dict[key] || [];
     dict[key].push(value);
@@ -506,7 +497,7 @@ function rikai_html(text) {
 
 function main() {
     /* Start downloading data */
-    fetch('/static/deinflect.dat', load_deinflect);
+    fetch('/static/deinflect.dat').then(response => response.text().then(load_deinflect));
 
     /* Parse EDICT2 data */
     const edict_data = document.querySelector('script[type=edict]');
