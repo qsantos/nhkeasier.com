@@ -1,5 +1,7 @@
 "use strict";
 
+let rikai_enabled = true;
+
 /* Define $, $$ and ensure forEach exists */
 function $(selector, context) {
     /* Standard element selector */
@@ -139,6 +141,59 @@ if (!String.prototype.endsWith) {
             document.body.classList.add('ruby-always');
         } else if (mode == 'never') {
             document.body.classList.add('ruby-never');
+        }
+    }
+})();
+
+/* Toggle on-hover dictionary depending on <input type="checkbox"> */
+(function(){
+    const toggle = $('#dict-toggle input');
+    let last_mode = null;
+    toggle.addEventListener('click', update);
+    set_mode(localStorage.getItem('dict-toggle') == 'on');
+
+    document.addEventListener('keyup', mousekey_toggler);
+    $('#dict-toggle-helper .key').addEventListener('click', mousekey_toggler);
+
+    function mousekey_toggler(event) {
+        if (event.key !== undefined && event.key != 'd' && event.key != 'D') {
+            return;
+        }
+        set_mode(!toggle.checked);
+        event.preventDefault();
+    }
+
+    // try to immediately detect touch devices
+    if ('ontouchstart' in window) {
+        set_touchdevice_helper_message();
+    }
+    let tap_start = null;
+    let triple_tap = false;
+    document.addEventListener('touchend', function(event) {
+        if (event.touches.length != 0) {
+            return;
+        }
+        set_mode(!toggle.checked);
+        event.preventDefault();
+    });
+    function set_touchdevice_helper_message() {
+        $('#dict-toggles-helper').innerHTML = 'Double-finger tap to toggle dictionary';
+    }
+
+    function set_mode(mode) {
+        toggle.checked = mode;
+        update();
+    }
+
+    function update(event) {
+        const mode = toggle.checked;
+        localStorage.setItem('dict-toggle', mode ? 'on' : 'off');
+        rikai_enabled = mode;
+        if (!mode) {
+            const rikai = $('#rikai');
+            if (rikai) {
+                rikai.style.display = 'none';
+            }
         }
     }
 })();
@@ -471,6 +526,9 @@ function main() {
 
     let last_click = 0;
     function update_rikai(cursorX, cursorY) {
+        if (!rikai_enabled) {
+            return;
+        }
         const now = new Date().getTime();
         if (now - last_click < 1000) {  // 1 second
             return;
