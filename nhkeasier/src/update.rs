@@ -14,8 +14,11 @@ use crate::Story;
 const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
 
 lazy_static! {
-    static ref STORY_CONTENT_REGEX: Regex = Regex::new(r#"(?s)<div class="article-main__body article-body" id="js-article-body">(.*?)            </div>"#).expect("invalid STORY_CONTENT_REGEX");
-    static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>").expect("invalid CLEAN_UP_CONTENT_REGEX");
+    static ref STORY_CONTENT_REGEX: Regex =
+        Regex::new(r#"(?s)<div class="article-body" id="js-article-body">(.*?)          </div>"#)
+            .expect("invalid STORY_CONTENT_REGEX");
+    static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>")
+        .expect("invalid CLEAN_UP_CONTENT_REGEX");
 }
 
 #[derive(Clone, Debug, Deserialize)]
