@@ -12,7 +12,7 @@
     <h1>目次</h1>
     <ol>
 {%- for story in stories %}
-        <li><a href="text/{{ story.story_id|safe }}.xhtml">{{ story.published.date().to_string()|safe }}: {{ story.title }}</a></li>
+        <li><a href="text/{{ story.news_id|safe }}.xhtml">{{ story.published.date().to_string()|safe }}: {{ story.title }}</a></li>
 {%- endfor %}
     </ol>
 </nav>

@@ -19,16 +19,16 @@
 {%- endif %}
     <item id="title_page" href="text/title_page.xhtml" media-type="application/xhtml+xml"/>
 {%- for story in stories %}
-    <item id="{{ story.story_id|safe }}" href="text/{{ story.story_id|safe }}.xhtml" media-type="application/xhtml+xml"/>
+    <item id="{{ story.news_id|safe }}" href="text/{{ story.news_id|safe }}.xhtml" media-type="application/xhtml+xml"/>
 {%- if with_images && !story.image.unwrap_or("").is_empty() %}
-    <item id="{{ story.story_id|safe }}-image" href="images/{{ story.story_id|safe }}.jpg" media-type="image/jpeg"/>
+    <item id="{{ story.news_id|safe }}-image" href="images/{{ story.news_id|safe }}.jpg" media-type="image/jpeg"/>
 {%- endif %}
 {%- endfor %}
   </manifest>
   <spine toc="ncx">
     <itemref idref="title_page"/>
 {%- for story in stories %}
-    <itemref idref="{{ story.story_id|safe }}"/>
+    <itemref idref="{{ story.news_id|safe }}"/>
 {%- endfor %}
   </spine>
   <guide>

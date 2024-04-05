@@ -12,7 +12,7 @@
       <navLabel>
           <text>{{ story.published.date().to_string()|safe }}: {{ story.title }}</text>
       </navLabel>
-      <content src="text/{{ story.story_id|safe }}.xhtml"/>
+      <content src="text/{{ story.news_id|safe }}.xhtml"/>
     </navPoint>
 {%- endfor %}
   </navMap>

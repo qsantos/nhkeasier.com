@@ -92,8 +92,8 @@ struct StoryTemplate<'a> {
     image: Option<&'a str>,
     heading: &'a str,
     story: &'a Story<'a>,
-    previous_story_id: Option<i64>,
-    next_story_id: Option<i64>,
+    previous_news_id: Option<i64>,
+    next_news_id: Option<i64>,
     edict: Option<&'a str>,
     enamdict: Option<&'a str>,
 }
@@ -367,7 +367,7 @@ async fn story(
     // find ids of previous and next stories
     // dt = story.published.strftime('%Y-%m-%d %H:%M:%S')
     let dt = story.published;
-    let previous_story_id = sqlx::query_scalar!(
+    let previous_news_id = sqlx::query_scalar!(
         "
             SELECT id
             FROM nhkeasier_story
@@ -381,7 +381,7 @@ async fn story(
     .fetch_optional(&state.pool)
     .await
     .expect("failed to query database for previous story");
-    let next_story_id = sqlx::query_scalar!(
+    let next_news_id = sqlx::query_scalar!(
         "
             SELECT id
             FROM nhkeasier_story
@@ -421,8 +421,8 @@ async fn story(
             .as_deref(),
         image: story.image,
         heading: "Single Story",
-        previous_story_id,
-        next_story_id,
+        previous_news_id,
+        next_news_id,
         edict: edict.as_deref(),
         enamdict: enamdict.as_deref(),
         story: &story,

@@ -46,18 +46,18 @@ struct NewsList<'a>(#[serde(borrow)] [HashMap<NaiveDate, Vec<StoryInfo<'a>>>; 1]
 use sqlx::{sqlite::SqliteRow, Pool, Sqlite};
 
 async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, SqliteRow) {
-    let mut rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE story_id = $1")
+    let mut rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE news_id = $1")
         .bind(info.news_id)
         .fetch_all(pool)
         .await
         .expect("failed to query database for existing story");
-    // TODO: make story_id UNIQUE and use ON CONFLICT
+    // TODO: make news_id UNIQUE and use ON CONFLICT
     if let Some(row) = rows.pop() {
         assert!(rows.is_empty());
         (false, row)
     } else {
         let published = crate::parse_datetime_nhk(info.news_prearranged_time);
-        (true, sqlx::query("INSERT INTO nhkeasier_story (story_id, published, title_with_ruby, title, subedict_created) VALUES ($1, $2, $3, $4, 0) RETURNING *")
+        (true, sqlx::query("INSERT INTO nhkeasier_story (news_id, published, title_with_ruby, title, subedict_created) VALUES ($1, $2, $3, $4, 0) RETURNING *")
             .bind(info.news_id)
             .bind(published.naive_utc())
             .bind(info.title_with_ruby.as_ref())
@@ -78,13 +78,13 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         tracing::debug!("downloading HTML");
         let url = format!(
             "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
-            story.story_id
+            story.news_id
         );
         let res = reqwest::get(url).await.unwrap();
         let html = res.bytes().await.unwrap();
         tracing::debug!("saving HTML to file");
         let mut c = std::io::Cursor::new(&html);
-        let filename = format!("html/{}.html", story.story_id);
+        let filename = format!("html/{}.html", story.news_id);
         // TODO: use Tokio fs
         let mut f = std::fs::File::create(format!("media/{filename}"))
             .expect("failed to create file to save HTML");
@@ -139,7 +139,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let req = if info.news_web_image_uri.is_empty() {
         let url = format!(
             "http://www3.nhk.or.jp/news/easy/{}/{}",
-            story.story_id, info.news_easy_image_uri
+            story.news_id, info.news_easy_image_uri
         );
         reqwest::get(url).await
     } else {
@@ -149,7 +149,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let content = res.bytes().await.unwrap();
     tracing::debug!("saving image to file");
     let mut c = std::io::Cursor::new(&content);
-    let filename = format!("jpg/{}.jpg", story.story_id);
+    let filename = format!("jpg/{}.jpg", story.news_id);
     let path = format!("media/{filename}");
     // TODO: use Tokio fs
     let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
@@ -183,7 +183,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     tracing::debug!("downloading voice to file");
     let voiceid = info.news_easy_voice_uri.strip_suffix(".m4a").unwrap();
     let url = format!("https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8");
-    let filename = format!("mp3/{}.mp3", story.story_id);
+    let filename = format!("mp3/{}.mp3", story.news_id);
     let path = format!("media/{filename}");
     assert!(Command::new("vlc")
         .args([
@@ -229,9 +229,9 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 let (created, row) = upsert_story(pool, info).await;
                 let story = Story::from_row(&row).expect("failed to convert row into Story");
                 if created {
-                    tracing::info!("new story id={} for story_id={}", story.id, story.story_id);
+                    tracing::info!("new story id={} for news_id={}", story.id, story.news_id);
                 } else {
-                    tracing::debug!("selected id={} for story_id={}", story.id, story.story_id);
+                    tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
                 extract_story_content(pool, &story).await;
                 fetch_image_of_story(pool, info, &story).await;

@@ -31,7 +31,7 @@
                 {%- endif -%}
                 &lt;ul&gt;
                     {%- if story.published.date() >= NaiveDate::from_ymd_opt(2017, 12, 5).unwrap() %}
-                        &lt;li&gt;&lt;a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id }}/{{ story.story_id }}.html"&gt;Original&lt;/a&gt;&lt;/li&gt;
+                        &lt;li&gt;&lt;a href="https://www3.nhk.or.jp/news/easy/{{ story.news_id }}/{{ story.news_id }}.html"&gt;Original&lt;/a&gt;&lt;/li&gt;
                     {%- endif -%}
                     &lt;li&gt;&lt;a href="/story/{{ story.id }}/" class="permalink"&gt;Permalink&lt;/a&gt;&lt;/li&gt;
                 &lt;/ul&gt;

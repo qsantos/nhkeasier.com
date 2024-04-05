@@ -19,7 +19,7 @@
 {%- if with_images %}
 {%- let image = story.image.unwrap_or("") %}
 {%- if !image.is_empty() %}
-    <img src="../images/{{ story.story_id|safe }}.jpg" alt="Story illustration" width="640" height="360"/>
+    <img src="../images/{{ story.news_id|safe }}.jpg" alt="Story illustration" width="640" height="360"/>
 {%- endif %}
 {%- endif %}
 {%- if with_furigana %}
@@ -33,7 +33,7 @@
 {%- endif %}
 <ul>
     <li>
-        <a href="https://www3.nhk.or.jp/news/easy/{{ story.story_id|safe }}/{{ story.story_id|safe }}.html">Original ({{ story.story_id|safe }})</a>
+        <a href="https://www3.nhk.or.jp/news/easy/{{ story.news_id|safe }}/{{ story.news_id|safe }}.html">Original ({{ story.news_id|safe }})</a>
     </li>
     <li>
         <a href="https://nhkeasier.com/story/{{ story.id|safe }}/" class="permalink">NHK Easier Permalink ({{ story.id|safe }})</a>

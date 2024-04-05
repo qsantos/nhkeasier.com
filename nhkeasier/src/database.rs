@@ -6,7 +6,7 @@ use sqlx::{FromRow, Pool, Sqlite};
 #[allow(dead_code)]
 pub struct Story<'a> {
     pub id: i64,
-    pub story_id: &'a str,
+    pub news_id: &'a str,
     pub published: NaiveDateTime,
     pub title_with_ruby: &'a str,
     pub title: &'a str,

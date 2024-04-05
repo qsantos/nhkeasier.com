@@ -133,7 +133,7 @@ pub fn make_epub<W: Write + Seek>(
     let template = TitlePageTemplate { now, title };
     zip_template(&mut zip, "EPUB/text/title_page.xhtml", template);
     for story in stories.iter() {
-        let filename = format!("EPUB/text/{}.xhtml", story.story_id);
+        let filename = format!("EPUB/text/{}.xhtml", story.news_id);
         zip_template(
             &mut zip,
             &filename,
@@ -152,7 +152,7 @@ pub fn make_epub<W: Write + Seek>(
                     continue;
                 }
                 let data = std::fs::read(format!("media/{}", image)).unwrap();
-                let filename = format!("EPUB/images/{}.jpg", story.story_id);
+                let filename = format!("EPUB/images/{}.jpg", story.news_id);
                 zip_bytes_store(&mut zip, &filename, &data);
             }
         }
