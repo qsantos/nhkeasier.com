@@ -16,7 +16,6 @@ pub struct Story<'a> {
     pub voice: Option<&'a str>,
     pub video_original: Option<&'a str>,
     pub video_reencoded: Option<&'a str>,
-    pub subedict_created: bool,
     pub webpage: Option<&'a str>,
 }
 

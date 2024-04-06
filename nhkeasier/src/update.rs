@@ -57,7 +57,7 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
         (false, row)
     } else {
         let published = crate::parse_datetime_nhk(info.news_prearranged_time);
-        (true, sqlx::query("INSERT INTO nhkeasier_story (news_id, published, title_with_ruby, title, subedict_created) VALUES ($1, $2, $3, $4, 0) RETURNING *")
+        (true, sqlx::query("INSERT INTO nhkeasier_story (news_id, published, title_with_ruby, title) VALUES ($1, $2, $3, $4) RETURNING *")
             .bind(info.news_id)
             .bind(published.naive_utc())
             .bind(info.title_with_ruby.as_ref())
