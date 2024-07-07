@@ -81,7 +81,7 @@ impl SubEnamdictCreator {
 
             let mut lines = HashSet::new();
             for fragment in fragments {
-                if let Some(entries) = fields.enamdict.lookup(&fragment as &str) {
+                if let Some(entries) = fields.enamdict.lookup(fragment as &str) {
                     for entry in entries.iter() {
                         lines.insert(entry.line);
                     }
