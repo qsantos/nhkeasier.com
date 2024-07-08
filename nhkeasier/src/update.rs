@@ -104,6 +104,15 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     }
 }
 
+fn raw_content_of_html(html: &str) -> &str {
+    STORY_CONTENT_REGEX
+        .captures(html)
+        .unwrap()
+        .get(1)
+        .unwrap()
+        .as_str()
+}
+
 async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
@@ -111,8 +120,8 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     }
     let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
-    let captures = STORY_CONTENT_REGEX.captures(&html).unwrap();
-    let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace_all(&captures[1], "");
+    let raw_content = raw_content_of_html(&html);
+    let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace_all(raw_content, "");
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
     tracing::debug!("saving content to database");
