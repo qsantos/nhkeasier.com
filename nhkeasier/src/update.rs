@@ -103,24 +103,27 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     }
 }
 
-fn raw_content_of_html(html: &str) -> String {
+fn raw_content_of_html(html: &str) -> Result<String, ()> {
     let document = scraper::Html::parse_document(html);
-    let fragment = document.select(&CONTENT_SELECTOR).next().unwrap();
-    fragment.inner_html()
+    if let Some(fragment) = document.select(&CONTENT_SELECTOR).next() {
+        Ok(fragment.inner_html())
+    } else {
+        Err(())
+    }
 }
 
 fn clean_up_html(content: &str) -> Cow<'_, str> {
     CLEAN_UP_CONTENT_REGEX.replace_all(content, "")
 }
 
-async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
+async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) -> Result<(), ()> {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
-        return;
+        return Ok(());
     }
     let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
-    let raw_content = raw_content_of_html(&html);
+    let raw_content = raw_content_of_html(&html)?;
     let content_with_ruby = clean_up_html(&raw_content);
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
@@ -137,6 +140,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     .expect("failed to update content (story was removed from database while updating it)");
     tracing::debug!("saved content to database");
     tracing::info!("found content for story");
+    Ok(())
 }
 
 async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
@@ -242,7 +246,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 } else {
                     tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
-                extract_story_content(pool, &story).await;
+                extract_story_content(pool, &story).await.unwrap();
                 fetch_image_of_story(pool, info, &story).await;
                 fetch_voice_of_story(pool, info, &story).await;
             }
