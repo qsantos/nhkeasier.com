@@ -113,6 +113,10 @@ fn raw_content_of_html(html: &str) -> &str {
         .as_str()
 }
 
+fn clean_up_html(content: &str) -> Cow<'_, str> {
+    CLEAN_UP_CONTENT_REGEX.replace_all(content, "")
+}
+
 async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
@@ -121,7 +125,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
     let raw_content = raw_content_of_html(&html);
-    let content_with_ruby = CLEAN_UP_CONTENT_REGEX.replace_all(raw_content, "");
+    let content_with_ruby = clean_up_html(raw_content);
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
     tracing::debug!("saving content to database");
