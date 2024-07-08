@@ -14,9 +14,8 @@ use crate::Story;
 const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
 
 lazy_static! {
-    static ref STORY_CONTENT_REGEX: Regex =
-        Regex::new(r#"(?s)<div class="article-body" id="js-article-body">(.*?)          </div>"#)
-            .expect("invalid STORY_CONTENT_REGEX");
+    static ref CONTENT_SELECTOR: scraper::Selector =
+        scraper::Selector::parse(".article-body").unwrap();
     static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>")
         .expect("invalid CLEAN_UP_CONTENT_REGEX");
 }
@@ -104,13 +103,10 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
     }
 }
 
-fn raw_content_of_html(html: &str) -> &str {
-    STORY_CONTENT_REGEX
-        .captures(html)
-        .unwrap()
-        .get(1)
-        .unwrap()
-        .as_str()
+fn raw_content_of_html(html: &str) -> String {
+    let document = scraper::Html::parse_document(html);
+    let fragment = document.select(&CONTENT_SELECTOR).next().unwrap();
+    fragment.inner_html()
 }
 
 fn clean_up_html(content: &str) -> Cow<'_, str> {
@@ -125,7 +121,7 @@ async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) {
     let html = html_of_story(pool, story).await;
     tracing::debug!("extracting content");
     let raw_content = raw_content_of_html(&html);
-    let content_with_ruby = clean_up_html(raw_content);
+    let content_with_ruby = clean_up_html(&raw_content);
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
     tracing::debug!("saving content to database");
