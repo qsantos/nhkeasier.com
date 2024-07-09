@@ -116,7 +116,7 @@ fn clean_up_html(content: &str) -> Cow<'_, str> {
     CLEAN_UP_CONTENT_REGEX.replace_all(content, "")
 }
 
-async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) -> Result<(), ()> {
+pub async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) -> Result<(), ()> {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
         return Ok(());

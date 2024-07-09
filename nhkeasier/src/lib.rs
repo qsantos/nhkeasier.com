@@ -12,7 +12,7 @@ pub use epub::make_epub;
 pub use logging::init_logging;
 pub use router::{router, State};
 pub use ruby::remove_ruby;
-pub use update::update_stories;
+pub use update::{extract_story_content, update_stories};
 
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone};
 
