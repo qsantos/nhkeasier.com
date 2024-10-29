@@ -182,6 +182,53 @@ async fn epub_form(extract::State(state): extract::State<Arc<State>>) -> impl In
     )
 }
 
+async fn epub_all(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Query(query): extract::Query<HashMap<String, String>>,
+) -> Response<Body> {
+    let rows = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published ASC")
+        .fetch_all(&state.pool)
+        .await
+        .expect("failed to query database for day stories");
+    if rows.is_empty() {
+        return handle_not_found().await.into_response();
+    }
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
+        .collect();
+
+    let mut buf = Vec::new();
+    let title = stories[0]
+        .published
+        .format("NHK Easier stories")
+        .to_string();
+    let output = std::io::Cursor::new(&mut buf);
+    let with_furigana = query.contains_key("furigana");
+    let with_images = query.contains_key("images");
+    let with_cjk_font = query.contains_key("cjk-font");
+    crate::make_epub(
+        &stories,
+        &title,
+        output,
+        with_furigana,
+        with_images,
+        with_cjk_font,
+    );
+
+    (
+        [
+            (header::CONTENT_TYPE, "application/epub+zip"),
+            (
+                header::CONTENT_DISPOSITION,
+                "attachment; filename=nhkeasier.epub",
+            ),
+        ],
+        buf,
+    )
+        .into_response()
+}
+
 async fn epub_year(
     extract::State(state): extract::State<Arc<State>>,
     extract::Path(year): extract::Path<u32>,
@@ -580,6 +627,7 @@ pub fn router(state: State) -> Router {
 
     Router::new()
         .route("/", get(archive))
+        .route("/all/epub", get(epub_all))
         .route("/:year/epub", get(epub_year))
         .route("/:year/:month/epub", get(epub_month))
         .route("/:year/:month/:day/", get(archive))
