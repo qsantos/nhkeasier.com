@@ -122,24 +122,23 @@ impl<'a, 'b, 'c: 'a> Iterator for Iter<'a, 'b, 'c> {
         let candidate = self.candidates.pop()?;
         let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
         for c in candidate.word.chars().rev() {
-            if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get(&c) {
-                cur_suffix_to_rules = suffix_to_rules;
-                for rule in rules {
-                    if candidate.type_ & rule.type_ == 0 {
-                        continue;
-                    }
-                    let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
-                    let prefix = &candidate.word[..prefix_len];
-                    let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
-                    word.push_str(prefix);
-                    word.push_str(rule.to);
-                    self.candidates.push(Candidate {
-                        word: Cow::Owned(word),
-                        type_: rule.type_ >> 8,
-                    })
-                }
-            } else {
+            let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get(&c) else {
                 break;
+            };
+            cur_suffix_to_rules = suffix_to_rules;
+            for rule in rules {
+                if candidate.type_ & rule.type_ == 0 {
+                    continue;
+                }
+                let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
+                let prefix = &candidate.word[..prefix_len];
+                let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
+                word.push_str(prefix);
+                word.push_str(rule.to);
+                self.candidates.push(Candidate {
+                    word: Cow::Owned(word),
+                    type_: rule.type_ >> 8,
+                })
             }
         }
         Some(candidate)

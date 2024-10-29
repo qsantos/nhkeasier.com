@@ -147,14 +147,15 @@ pub fn make_epub<W: Write + Seek>(
     zip_copy!(&mut zip, "EPUB/images/logo.png");
     if with_images {
         for story in stories {
-            if let Some(image) = story.image {
-                if image.is_empty() {
-                    continue;
-                }
-                let data = std::fs::read(format!("media/{}", image)).unwrap();
-                let filename = format!("EPUB/images/{}.jpg", story.news_id);
-                zip_bytes_store(&mut zip, &filename, &data);
+            let Some(image) = story.image else {
+                continue;
+            };
+            if image.is_empty() {
+                continue;
             }
+            let data = std::fs::read(format!("media/{}", image)).unwrap();
+            let filename = format!("EPUB/images/{}.jpg", story.news_id);
+            zip_bytes_store(&mut zip, &filename, &data);
         }
     }
 
