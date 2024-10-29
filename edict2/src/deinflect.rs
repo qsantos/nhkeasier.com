@@ -119,32 +119,29 @@ pub struct Iter<'a, 'b, 'c> {
 impl<'a, 'b, 'c: 'a> Iterator for Iter<'a, 'b, 'c> {
     type Item = Candidate<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(candidate) = self.candidates.pop() {
-            let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
-            for c in candidate.word.chars().rev() {
-                if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get(&c) {
-                    cur_suffix_to_rules = suffix_to_rules;
-                    for rule in rules {
-                        if candidate.type_ & rule.type_ == 0 {
-                            continue;
-                        }
-                        let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
-                        let prefix = &candidate.word[..prefix_len];
-                        let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
-                        word.push_str(prefix);
-                        word.push_str(rule.to);
-                        self.candidates.push(Candidate {
-                            word: Cow::Owned(word),
-                            type_: rule.type_ >> 8,
-                        })
+        let candidate = self.candidates.pop()?;
+        let mut cur_suffix_to_rules = &self.deinflector.suffix_to_rules;
+        for c in candidate.word.chars().rev() {
+            if let Some((rules, suffix_to_rules)) = cur_suffix_to_rules.0.get(&c) {
+                cur_suffix_to_rules = suffix_to_rules;
+                for rule in rules {
+                    if candidate.type_ & rule.type_ == 0 {
+                        continue;
                     }
-                } else {
-                    break;
+                    let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
+                    let prefix = &candidate.word[..prefix_len];
+                    let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
+                    word.push_str(prefix);
+                    word.push_str(rule.to);
+                    self.candidates.push(Candidate {
+                        word: Cow::Owned(word),
+                        type_: rule.type_ >> 8,
+                    })
                 }
+            } else {
+                break;
             }
-            Some(candidate)
-        } else {
-            None
         }
+        Some(candidate)
     }
 }
