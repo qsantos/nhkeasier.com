@@ -125,7 +125,12 @@ async fn handle_not_found() -> (StatusCode, Html<String>) {
         simple_message(
             "Page Not Found",
             "Sorry, we could not find the page you requested. Maybe the URL \
-            you followed is incomplete, or the document has been moved.",
+            you followed is incomplete, or the document has been moved. If you ended up here by \
+            following a link within NHK Easier, please \
+            <a href=\"https://github.com/qsantos/nhkeasier.com/issues/new?title=Page%20Not%20Found&body=I%20encountered%20a%20page%20not%20found%20while%20visiting%20%3CREPLACE%20WITH%20THE%20URL%20WHERE%20YOU%20SAW%20THE%20ERROR%3E.%20I%20got%20there%20by%20following%20a%20link%20on%20%3CREPLACE%20WITH%20THE%20URL%20FROM%20WHERE%20YOU%20GOT%20THERE%3E.\">\
+            report by opening an issue on GitHub</a> or send an email to \
+            <a href=\"mailto:contact@nhkeasier.com?subject=Page%20Not%20Found&body=I%20encountered%20a%20page%20not%20found%20while%20visiting%20%3CREPLACE%20WITH%20THE%20URL%20WHERE%20YOU%20SAW%20THE%20ERROR%3E.%20I%20got%20there%20by%20following%20a%20link%20on%20%3CREPLACE%20WITH%20THE%20URL%20FROM%20WHERE%20YOU%20GOT%20THERE%3E.\">\
+            contact@nhkeasier.com</a>.",
         ),
     )
 }
@@ -136,7 +141,11 @@ fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
         simple_message(
             "Server Error",
             "Sorry, something went very wrong on the server and we were not \
-            able to display the requested document.",
+            able to display the requested document. Please \
+            <a href=\"https://github.com/qsantos/nhkeasier.com/issues/new?title=Server%20Error&body=I%20encountered%20a%20server%20error%20while%20visiting%20%3CREPLACE%20WITH%20THE%20URL%20WHERE%20YOU%20SAW%20THE%20ERROR%3E.\">\
+            report by opening an issue on GitHub</a> or send an email to \
+            <a href=\"mailto:contact@nhkeasier.com?subject=Server%20Error&body=I%20encountered%20a%20server%20error%20while%20visiting%20%3CREPLACE%20WITH%20THE%20URL%20WHERE%20YOU%20SAW%20THE%20ERROR%3E.\">\
+            contact@nhkeasier.com</a>.",
         ),
     )
         .into_response()
