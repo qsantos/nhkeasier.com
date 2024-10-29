@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block content %}
+{%- block content %}
 <p>
 Practice Japanese on real news from <a
 href="https://www3.nhk.or.jp/news/easy/">NHK News Web Easy</a> even more
@@ -17,20 +17,20 @@ For some more stories, visit <a href="https://slow-communication.jp/">Slow Commu
         Download all stories of {{ date.format("%B %Y") }} as EPUB
     </a>
 </p>
-{% include "widgets/nav_day.html" %}
-{% for story in stories %}
-{% include "widgets/story.html" %}
-{% endfor %}
-{% include "widgets/nav_day.html" %}
-{%- if let Some(edict) = edict -%}
+{%- include "widgets/nav_day.html" %}
+{%- for story in stories %}
+{%- include "widgets/story.html" %}
+{%- endfor %}
+{%- include "widgets/nav_day.html" %}
+{%- if let Some(edict) = edict %}
 <script type="edict">
 {{ edict|safe }}
 </script>
-{%- endif -%}
-{%- if let Some(enamdict) = enamdict -%}
+{%- endif %}
+{%- if let Some(enamdict) = enamdict %}
 <script type="enamdict">
 {{ enamdict|safe }}
 </script>
-{%- endif -%}
+{%- endif %}
 <script async src="/static/scripts.js?2024-02-01"></script>
-{% endblock %}
+{%- endblock %}

@@ -9,16 +9,16 @@
 <meta property="og:title" content="{{ title }}" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="TODO" />
-{%- if let Some(description) = description -%}
+{%- if let Some(description) = description %}
     <meta name="description" content="{{ description }}">
     <meta property="og:description" content="{{ description }}" />
-{%- endif -%}
-{%- if let Some(image) = image -%}
+{%- endif %}
+{%- if let Some(image) = image %}
     <meta property="og:image" content="{{ image|safe }}" />
     <meta property="og:image:width" content="640" />
     <meta property="og:image:height" content="360" />
     <meta name="twitter:card" content="summary_large_image" />
-{%- endif -%}
+{%- endif %}
 <link rel="icon" href="/static/favicon.png">
 <link rel="stylesheet" href="/static/bootstrap.min.css">
 <link rel="stylesheet" href="/static/style.css?2024-02-01">
@@ -77,11 +77,11 @@
 </header>
 <main>
 <h2>{{ heading }}</h2>
-{% block content %}
+{%- block content %}
 Something went terribly wrong, I guess.
-{% endblock %}
+{%- endblock %}
 </main>
-{%- if !DEBUG -%}
+{%- if !DEBUG %}
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7JRMQY3TCL"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -90,6 +90,6 @@ Something went terribly wrong, I guess.
 
   gtag('config', 'G-7JRMQY3TCL');
 </script>
-{%- endif -%}
+{%- endif %}
 </body>
 </html>

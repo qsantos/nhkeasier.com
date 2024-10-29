@@ -7,38 +7,38 @@
         <atom:link href="https://nhkeasier.com/feed/" rel="self"/>
         <language>en-us</language>
         <lastBuildDate>{{ Local::now().to_rfc2822() }}</lastBuildDate>
-        {% for story in stories %}
+        {%- for story in stories %}
         <item>
             <title>{{ story.title|safe }}</title>
             <link>https://nhkeasier.com/story/{{ story.id|safe }}/</link>
             <description>
-                {%- if let Some(video) = story.video_reencoded -%}
-                    {%- if let Some(image) = story.image -%}
+                {%- if let Some(video) = story.video_reencoded %}
+                    {%- if let Some(image) = story.image %}
                         &lt;video src="/media/{{ video }}" poster="/media/{{ image }}" controls preload="none"&gt;&lt;/video&gt;
-                    {%- else -%}
+                    {%- else %}
                         &lt;video src="/media/{{ video }}" controls preload="poster"&gt;&lt;/video&gt;
-                    {%- endif -%}
-                {%- else if let Some(image) = story.image -%}
+                    {%- endif %}
+                {%- else if let Some(image) = story.image %}
                     &lt;img src="/media/{{ image }}" alt="Story illustration"&gt;
-                {%- endif -%}
-                {%- if furiganas -%}
+                {%- endif %}
+                {%- if furiganas %}
                     {% if let Some(content) = story.content_with_ruby %}{{ content }}{% else %}Content is missing{% endif %}
-                {%- else -%}
+                {%- else %}
                     {% if let Some(content) = story.content %}{{ content }}{% else %}Content is missing{% endif %}
-                {%- endif -%}
-                {%- if let Some(voice) = story.voice -%}
+                {%- endif %}
+                {%- if let Some(voice) = story.voice %}
                     &lt;audio src="/media/{{ voice }}" controls preload="none"&gt;&lt;/audio&gt;'
-                {%- endif -%}
+                {%- endif %}
                 &lt;ul&gt;
                     {%- if story.published.date() >= NaiveDate::from_ymd_opt(2017, 12, 5).unwrap() %}
                         &lt;li&gt;&lt;a href="https://www3.nhk.or.jp/news/easy/{{ story.news_id }}/{{ story.news_id }}.html"&gt;Original&lt;/a&gt;&lt;/li&gt;
-                    {%- endif -%}
+                    {%- endif %}
                     &lt;li&gt;&lt;a href="/story/{{ story.id }}/" class="permalink"&gt;Permalink&lt;/a&gt;&lt;/li&gt;
                 &lt;/ul&gt;
             </description>
             <pubDate>{{ JST.from_utc_datetime(story.published).to_rfc2822() }}</pubDate>
             <guid>https://nhkeasier.com/story/{{ story.id|safe }}/</guid>
         </item>
-        {% endfor %}
+        {%- endfor %}
     </channel>
 </rss>

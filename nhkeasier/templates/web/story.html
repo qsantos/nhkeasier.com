@@ -1,15 +1,15 @@
 {% extends "base.html" %}
-{% block content %}
-{%- let date = story.published.date() -%}
+{%- block content %}
+{%- let date = story.published.date() %}
 <p>
     <strong>New:</strong>
     <a href="{{ date.format("/%Y/%m/epub") }}">
         Download all stories of {{ date.format("%B %Y") }} as EPUB
     </a>
 </p>
-{% include "widgets/nav_story.html" %}
-{% include "widgets/story.html" %}
-{% include "widgets/nav_story.html" %}
+{%- include "widgets/nav_story.html" %}
+{%- include "widgets/story.html" %}
+{%- include "widgets/nav_story.html" %}
 {%- if let Some(edict) = edict %}
 <script type="edict">
 {{ edict|safe }}
@@ -21,4 +21,4 @@
 </script>
 {%- endif %}
 <script async src="/static/scripts.js?2024-02-01"></script>
-{%- endblock -%}
+{%- endblock %}

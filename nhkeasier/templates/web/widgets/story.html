@@ -7,8 +7,8 @@
         </time>
     </a>
 </h4>
-{%- let video = story.video_reencoded.unwrap_or("") -%}
-{%- let image = story.image.unwrap_or("") -%}
+{%- let video = story.video_reencoded.unwrap_or("") %}
+{%- let image = story.image.unwrap_or("") %}
 {%- if !video.is_empty() %}
 <video src="/media/{{ video|safe }}"{% if let Some(image) = story.image %} poster="/media/{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
 {%- else if !image.is_empty() %}
@@ -24,7 +24,7 @@ Missing content
 {%- endif %}
 <table class="links">
     <td>
-        {# left empty  #}
+        {# left empty #}
     </td>
     <td>
     <a href="https://www3.nhk.or.jp/news/easy/{{ story.news_id|safe }}/{{ story.news_id|safe }}.html">Original</a>
