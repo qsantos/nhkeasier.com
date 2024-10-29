@@ -182,6 +182,56 @@ async fn epub_form(extract::State(state): extract::State<Arc<State>>) -> impl In
     )
 }
 
+async fn epub_year(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Path(year): extract::Path<u32>,
+    extract::Query(query): extract::Query<HashMap<String, String>>,
+) -> Response<Body> {
+    let rows =
+        sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE printf('%04d-%%-%%', $1) ORDER BY published ASC")
+            .bind(year)
+            .fetch_all(&state.pool)
+            .await
+            .expect("failed to query database for day stories");
+    if rows.is_empty() {
+        return handle_not_found().await.into_response();
+    }
+    let stories: Vec<Story> = rows
+        .iter()
+        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
+        .collect();
+
+    let mut buf = Vec::new();
+    let title = stories[0]
+        .published
+        .format("NHK Easier stories of %Y")
+        .to_string();
+    let output = std::io::Cursor::new(&mut buf);
+    let with_furigana = query.contains_key("furigana");
+    let with_images = query.contains_key("images");
+    let with_cjk_font = query.contains_key("cjk-font");
+    crate::make_epub(
+        &stories,
+        &title,
+        output,
+        with_furigana,
+        with_images,
+        with_cjk_font,
+    );
+
+    (
+        [
+            (header::CONTENT_TYPE, "application/epub+zip"),
+            (
+                header::CONTENT_DISPOSITION,
+                &format!("attachment; filename=nhkeasier-{year:04}.epub"),
+            ),
+        ],
+        buf,
+    )
+        .into_response()
+}
+
 async fn epub_month(
     extract::State(state): extract::State<Arc<State>>,
     extract::Path((year, month)): extract::Path<(i32, u32)>,
@@ -530,6 +580,7 @@ pub fn router(state: State) -> Router {
 
     Router::new()
         .route("/", get(archive))
+        .route("/:year/epub", get(epub_year))
         .route("/:year/:month/epub", get(epub_month))
         .route("/:year/:month/:day/", get(archive))
         .route("/epub/", get(epub_form))
