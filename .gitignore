@@ -3,3 +3,4 @@ media
 .env
 nhkeasier.com.log
 /target/
+/.cargo/
