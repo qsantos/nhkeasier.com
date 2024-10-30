@@ -17,7 +17,7 @@ use chrono::{Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
 use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
-use sqlx::FromRow;
+use sqlx::{sqlite::SqliteRow, FromRow};
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
@@ -182,14 +182,12 @@ async fn epub_form(extract::State(state): extract::State<Arc<State>>) -> impl In
     )
 }
 
-async fn epub_all(
-    extract::State(state): extract::State<Arc<State>>,
-    extract::Query(query): extract::Query<HashMap<String, String>>,
+async fn serve_epub(
+    query: HashMap<String, String>,
+    rows: Vec<SqliteRow>,
+    title: &str,
+    filename: &str,
 ) -> Response<Body> {
-    let rows = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published ASC")
-        .fetch_all(&state.pool)
-        .await
-        .expect("failed to query database for day stories");
     if rows.is_empty() {
         return handle_not_found().await.into_response();
     }
@@ -199,17 +197,13 @@ async fn epub_all(
         .collect();
 
     let mut buf = Vec::new();
-    let title = stories[0]
-        .published
-        .format("NHK Easier stories")
-        .to_string();
     let output = std::io::Cursor::new(&mut buf);
     let with_furigana = query.contains_key("furigana");
     let with_images = query.contains_key("images");
     let with_cjk_font = query.contains_key("cjk-font");
     crate::make_epub(
         &stories,
-        &title,
+        title,
         output,
         with_furigana,
         with_images,
@@ -221,12 +215,25 @@ async fn epub_all(
             (header::CONTENT_TYPE, "application/epub+zip"),
             (
                 header::CONTENT_DISPOSITION,
-                "attachment; filename=nhkeasier.epub",
+                &format!("attachment; filename={filename}"),
             ),
         ],
         buf,
     )
         .into_response()
+}
+
+async fn epub_all(
+    extract::State(state): extract::State<Arc<State>>,
+    extract::Query(query): extract::Query<HashMap<String, String>>,
+) -> Response<Body> {
+    let rows = sqlx::query("SELECT * FROM nhkeasier_story ORDER BY published ASC")
+        .fetch_all(&state.pool)
+        .await
+        .expect("failed to query database for day stories");
+    let title = "NHK Easier stories";
+    let filename = "nhkeasier.epub";
+    serve_epub(query, rows, title, filename).await
 }
 
 async fn epub_year(
@@ -240,43 +247,9 @@ async fn epub_year(
             .fetch_all(&state.pool)
             .await
             .expect("failed to query database for day stories");
-    if rows.is_empty() {
-        return handle_not_found().await.into_response();
-    }
-    let stories: Vec<Story> = rows
-        .iter()
-        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
-        .collect();
-
-    let mut buf = Vec::new();
-    let title = stories[0]
-        .published
-        .format("NHK Easier stories of %Y")
-        .to_string();
-    let output = std::io::Cursor::new(&mut buf);
-    let with_furigana = query.contains_key("furigana");
-    let with_images = query.contains_key("images");
-    let with_cjk_font = query.contains_key("cjk-font");
-    crate::make_epub(
-        &stories,
-        &title,
-        output,
-        with_furigana,
-        with_images,
-        with_cjk_font,
-    );
-
-    (
-        [
-            (header::CONTENT_TYPE, "application/epub+zip"),
-            (
-                header::CONTENT_DISPOSITION,
-                &format!("attachment; filename=nhkeasier-{year:04}.epub"),
-            ),
-        ],
-        buf,
-    )
-        .into_response()
+    let title = format!("NHK Easier stories of {year}");
+    let filename = format!("nhkeasier-{year:04}.epub");
+    serve_epub(query, rows, &title, &filename).await
 }
 
 async fn epub_month(
@@ -284,6 +257,9 @@ async fn epub_month(
     extract::Path((year, month)): extract::Path<(i32, u32)>,
     extract::Query(query): extract::Query<HashMap<String, String>>,
 ) -> Response<Body> {
+    let Ok(parsed_month) = chrono::Month::try_from(month as u8) else {
+        return handle_not_found().await.into_response();
+    };
     let rows =
         sqlx::query("SELECT * FROM nhkeasier_story WHERE published LIKE printf('%04d-%02d-%%', $1, $2) ORDER BY published ASC")
             .bind(year)
@@ -291,43 +267,9 @@ async fn epub_month(
             .fetch_all(&state.pool)
             .await
             .expect("failed to query database for day stories");
-    if rows.is_empty() {
-        return handle_not_found().await.into_response();
-    }
-    let stories: Vec<Story> = rows
-        .iter()
-        .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
-        .collect();
-
-    let mut buf = Vec::new();
-    let title = stories[0]
-        .published
-        .format("NHK Easier stories of %B %Y")
-        .to_string();
-    let output = std::io::Cursor::new(&mut buf);
-    let with_furigana = query.contains_key("furigana");
-    let with_images = query.contains_key("images");
-    let with_cjk_font = query.contains_key("cjk-font");
-    crate::make_epub(
-        &stories,
-        &title,
-        output,
-        with_furigana,
-        with_images,
-        with_cjk_font,
-    );
-
-    (
-        [
-            (header::CONTENT_TYPE, "application/epub+zip"),
-            (
-                header::CONTENT_DISPOSITION,
-                &format!("attachment; filename=nhkeasier-{year:04}-{month:02}.epub"),
-            ),
-        ],
-        buf,
-    )
-        .into_response()
+    let title = format!("NHK Easier stories of {} {year}", parsed_month.name());
+    let filename = format!("nhkeasier-{year:04}-{month:02}.epub");
+    serve_epub(query, rows, &title, &filename).await
 }
 
 async fn archive(
