@@ -5,7 +5,7 @@ edition = "2021"
 
 [lib]
 name = "edict2"
-# NOTE: adding cdylib as a crate-type degrades performance significatively;
+# NOTE: adding cdylib as a crate-type degrades performance significantly;
 # this might be related to https://github.com/rust-lang/cargo/issues/2301;
 # however, this produced binary is of the expected size
 crate-type = ["cdylib", "lib"]
