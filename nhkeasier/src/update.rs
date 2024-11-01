@@ -1,9 +1,9 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::process::Command;
+use std::sync::LazyLock;
 
 use chrono::NaiveDate;
-use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
 use sqlx::FromRow;
@@ -13,12 +13,11 @@ use crate::Story;
 
 const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
 
-lazy_static! {
-    static ref CONTENT_SELECTOR: scraper::Selector =
-        scraper::Selector::parse(".article-body").unwrap();
-    static ref CLEAN_UP_CONTENT_REGEX: Regex = Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>")
-        .expect("invalid CLEAN_UP_CONTENT_REGEX");
-}
+static CONTENT_SELECTOR: LazyLock<scraper::Selector> =
+    LazyLock::new(|| scraper::Selector::parse(".article-body").unwrap());
+static CLEAN_UP_CONTENT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>").expect("invalid CLEAN_UP_CONTENT_REGEX")
+});
 
 #[derive(Clone, Debug, Deserialize)]
 struct StoryInfo<'a> {

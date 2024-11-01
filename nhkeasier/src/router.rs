@@ -1,7 +1,7 @@
 use std::any::Any;
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use std::time::Instant;
 
 use askama_axum::Template;
@@ -14,7 +14,6 @@ use axum::{
     Router,
 };
 use chrono::{Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
-use lazy_static::lazy_static;
 use regex::Regex;
 use serde::Deserialize;
 use sqlx::{sqlite::SqliteRow, FromRow};
@@ -26,9 +25,8 @@ use edict2::{SubEdictCreator, SubEnamdictCreator};
 
 use crate::{Story, DEBUG, JST};
 
-lazy_static! {
-    static ref REMOVE_HTML_REGEX: Regex = Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX");
-}
+static REMOVE_HTML_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX"));
 
 #[derive(Template)]
 #[template(path = "web/message.html")]

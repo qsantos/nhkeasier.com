@@ -1,8 +1,9 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
+
 use regex::Regex;
 
-lazy_static! {
-    static ref FRAGMENT_PATTERN: Regex = Regex::new(concat!(
+static FRAGMENT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(concat!(
         "[",
         "々",                // IDEOGRAPHIC ITERATION MARK (U+3005)
         "\u{3040}-\u{30ff}", // Hiragana, Katakana
@@ -12,8 +13,8 @@ lazy_static! {
         "\u{ff66}-\u{ff9f}", // Halfwidth and Fullwidth Forms Block (hiragana and katakana)
         "]+",
     ))
-    .expect("invalid FRAGMENT_PATTERN regex");
-}
+    .expect("invalid FRAGMENT_PATTERN regex")
+});
 
 pub fn iter_fragments(data: &str) -> impl Iterator<Item = &str> {
     // iter fragments

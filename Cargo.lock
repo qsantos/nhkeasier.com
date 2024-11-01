@@ -590,7 +590,6 @@ dependencies = [
 name = "edict2"
 version = "0.1.0"
 dependencies = [
- "lazy_static",
  "ouroboros",
  "regex",
  "tracing",
@@ -1547,7 +1546,6 @@ dependencies = [
  "clap",
  "dotenvy",
  "edict2",
- "lazy_static",
  "lettre",
  "libxml",
  "regex",
