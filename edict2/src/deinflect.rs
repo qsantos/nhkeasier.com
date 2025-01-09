@@ -116,7 +116,7 @@ pub struct Iter<'a, 'b, 'c> {
     candidates: &'b mut Vec<Candidate<'c>>,
 }
 
-impl<'a, 'b, 'c: 'a> Iterator for Iter<'a, 'b, 'c> {
+impl<'a, 'c: 'a> Iterator for Iter<'a, '_, 'c> {
     type Item = Candidate<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let candidate = self.candidates.pop()?;
