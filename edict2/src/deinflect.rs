@@ -130,9 +130,9 @@ impl<'a, 'c: 'a> Iterator for Iter<'a, '_, 'c> {
                 if candidate.type_ & rule.type_ == 0 {
                     continue;
                 }
-                let prefix_len = candidate.word.bytes().len() - rule.from.bytes().len();
+                let prefix_len = candidate.word.len() - rule.from.len();
                 let prefix = &candidate.word[..prefix_len];
-                let mut word = String::with_capacity(prefix_len + rule.to.as_bytes().len());
+                let mut word = String::with_capacity(prefix_len + rule.to.len());
                 word.push_str(prefix);
                 word.push_str(rule.to);
                 self.candidates.push(Candidate {
