@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use tracing::{Event, Subscriber};
 use tracing_panic::panic_hook;
-use tracing_subscriber::layer::Context;
-use tracing_subscriber::prelude::__tracing_subscriber_SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::Layer;
+use tracing_subscriber::{filter::LevelFilter, fmt, layer::Context, prelude::*, registry, Layer};
 
 use crate::DEBUG;
 
@@ -55,24 +52,20 @@ pub fn init_logging() {
         .create(true)
         .open("nhkeasier.com.log")
         .unwrap();
-    let file_layer = tracing_subscriber::fmt::layer()
+    let file_layer = fmt::layer()
         .with_writer(Arc::new(file))
-        .with_filter(tracing_subscriber::filter::LevelFilter::DEBUG);
+        .with_filter(LevelFilter::DEBUG);
 
     // info to stdout
-    let stdout_layer =
-        tracing_subscriber::fmt::layer().with_filter(tracing_subscriber::filter::LevelFilter::INFO);
+    let stdout_layer = fmt::layer().with_filter(LevelFilter::INFO);
 
     if DEBUG {
-        tracing_subscriber::registry()
-            .with(stdout_layer)
-            .with(file_layer)
-            .init();
+        registry().with(stdout_layer).with(file_layer).init();
     } else {
         // warn to email
-        let email_layer = EmailLayer.with_filter(tracing_subscriber::filter::LevelFilter::WARN);
+        let email_layer = EmailLayer.with_filter(LevelFilter::WARN);
 
-        tracing_subscriber::registry()
+        registry()
             .with(stdout_layer)
             .with(file_layer)
             .with(email_layer)
