@@ -198,6 +198,64 @@ if (!String.prototype.endsWith) {
     }
 })();
 
+function getMode() {
+    const mode = localStorage.getItem('darkmode');
+    if (mode === 'on') {
+        return true;
+    } else if (mode === 'off') {
+        return false;
+    } else {
+        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;;
+    }
+}
+
+/* Toggle dark mode depending on <input type="checkbox"> */
+(function(){
+    const toggle = $('#darkmode-toggle input');
+    let last_mode = null;
+    toggle.addEventListener('click', update);
+    set_mode(getMode());
+
+    document.addEventListener('keyup', mousekey_toggler);
+    $('#darkmode-toggle-helper kbd').addEventListener('click', mousekey_toggler);
+
+    function mousekey_toggler(event) {
+        if (event.key !== undefined && event.key != 's' && event.key != 'S') {
+            return;
+        }
+        set_mode(!toggle.checked);
+        event.preventDefault();
+    }
+
+    // try to immediately detect touch devices
+    if ('ontouchstart' in window) {
+        set_touchdevice_helper_message();
+    }
+    let tap_start = null;
+    let triple_tap = false;
+    document.addEventListener('touchend', function(event) {
+        if (event.touches.length != 0) {
+            return;
+        }
+        set_mode(!toggle.checked);
+        event.preventDefault();
+    });
+    function set_touchdevice_helper_message() {
+        $('#darkmode-helper').innerHTML = 'Double-finger tap to toggle dictionary';
+    }
+
+    function set_mode(mode) {
+        toggle.checked = mode;
+        update();
+    }
+
+    function update(event) {
+        const mode = toggle.checked;
+        localStorage.setItem('darkmode', mode ? 'on' : 'off');
+        document.documentElement.setAttribute('data-bs-theme', mode ? 'dark' : 'light');
+    }
+})();
+
 /* The rest is rikai handling (loading EDICT and showing translations) */
 (function(){
 const edict = {};

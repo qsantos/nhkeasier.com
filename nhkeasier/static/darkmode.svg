@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<!-- Adapted from https://commons.wikimedia.org/wiki/File:Moon_phase_1.svg -->
+
+<svg
+   version="1.0"
+   width="400"
+   height="400"
+   id="svg2"
+   sodipodi:docname="darkmode.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview10"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.18"
+     inkscape:cx="250.42373"
+     inkscape:cy="167.37288"
+     inkscape:window-width="1920"
+     inkscape:window-height="1020"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4" />
+  <g
+     id="layer1"
+     transform="matrix(0.75,0,0,0.75,50,50.000001)" />
+  <g
+     id="layer2"
+     transform="matrix(0.75,0,0,0.75,50,50.000001)">
+    <path
+       d="m 749.07161,200.5305 a 168.70027,168.70027 0 1 1 -337.40054,0 168.70027,168.70027 0 1 1 337.40054,0 z"
+       transform="translate(-380.37134,-0.5305023)"
+       style="fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.54331;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path6166" />
+  </g>
+  <g
+     id="layer3"
+     transform="matrix(0.75,0,0,0.75,50,50.000001)">
+    <path
+       d="m 199.862,368.70045 c 93.17069,0 168.70042,-75.52972 168.70042,-168.70045 0,-93.1707 -75.52973,-168.700445 -168.70042,-168.700445 46.58591,0 84.35021,75.529745 84.35021,168.700445 0,93.17073 -37.7643,168.70045 -84.35021,168.70045 z"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       id="path7307" />
+  </g>
+</svg>

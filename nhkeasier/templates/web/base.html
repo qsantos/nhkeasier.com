@@ -65,6 +65,19 @@
             Press <kbd>D</kbd> to toggle dictionary
         </div>
     </div>
+    <div class="toggle" id="darkmode-toggle">
+        <ul>
+            <li>
+                <label>
+                    <input type="checkbox" name="darkmode-toggle" value="never">
+                    <img src="/static/darkmode.svg" alt="Toggle dark mode" title="Toggle dark mode">
+                </label>
+            </li>
+        </ul>
+        <div class="toggle-helper" id="darkmode-toggle-helper">
+            Press <kbd>S</kbd> to toggle dark mode
+        </div>
+    </div>
     <nav>
         <ul>
             <li><a href="/">Home</a></li>
@@ -84,11 +97,10 @@ Something went terribly wrong, I guess.
 {%- if !DEBUG %}
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7JRMQY3TCL"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-7JRMQY3TCL');
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-7JRMQY3TCL');
 </script>
 {%- endif %}
 </body>
