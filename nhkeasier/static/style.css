@@ -24,17 +24,17 @@ header h1 { margin:0; font:28px sans-serif; letter-spacing:2px; word-spacing:2px
 /* margin atop <a> (not padding in <h1>) for cross-browser consistency */
 header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; padding:0 14px 18px; }
 /* ruby toggle */
-.toggles { margin:0 auto 1em auto; }
-.toggles ul {
+.toggle { margin:0 auto 1em auto; }
+.toggle ul {
     list-style-type:none; margin:0; padding:0;
     display:flex; justify-content:space-between; width:15em;
 }
-.toggles li { margin:0 auto; }
-.toggles input { display:none; }
+.toggle li { margin:0 auto; }
+.toggle input { display:none; }
 header img { height:60px; width:60px; padding:5px; border-radius:3px; }
-.toggles :checked + img { padding:4px; border:1px solid white; }
-.toggles :hover + img { padding:4px; border:1px solid #a1b9e8; }
-.toggles-helper { text-align:center; margin:-.5em; }
+.toggle :checked + img { padding:4px; border:1px solid white; }
+.toggle :hover + img { padding:4px; border:1px solid #a1b9e8; }
+.toggle-helper { text-align:center; margin:-.5em; }
 /* navigation */
 header nav { font-size:20px; }
 header nav ul {

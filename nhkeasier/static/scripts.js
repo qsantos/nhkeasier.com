@@ -56,15 +56,15 @@ if (!String.prototype.endsWith) {
 
 /* Toggle <rt> in <ruby> elements depending on <input type="radio"> */
 (function(){
-    const toggles = $('#ruby-toggles');
+    const toggle = $('#ruby-toggle');
     let last_mode = null;
-    $$('input', toggles).forEach(function(element) {
+    $$('input', toggle).forEach(function(element) {
         element.addEventListener('click', update);
     });
     set_mode(localStorage.getItem('ruby-toggle') ?? 'hover');
 
     document.addEventListener('keyup', mousekey_toggler);
-    $('#ruby-toggles-helper kbd').addEventListener('click', mousekey_toggler);
+    $('#ruby-toggle-helper kbd').addEventListener('click', mousekey_toggler);
 
     function mousekey_toggler(event) {
         if (event.key !== undefined && event.key != 'f' && event.key != 'F') {
@@ -118,18 +118,18 @@ if (!String.prototype.endsWith) {
         event.preventDefault();
     });
     function set_touchdevice_helper_message() {
-        $('#ruby-toggles-helper').innerHTML = 'Double-finger tap to toggle furigana';
+        $('#ruby-toggle-helper').innerHTML = 'Double-finger tap to toggle furigana';
     }
 
     function set_mode(mode) {
         last_mode = get_mode();
-        const input_element = $('[value=' + mode + ']', toggles)
+        const input_element = $('[value=' + mode + ']', toggle)
         input_element.checked = true;
         update();
     }
 
     function get_mode() {
-        return $(':checked', toggles).value;
+        return $(':checked', toggle).value;
     }
 
     function update(event) {
@@ -177,7 +177,7 @@ if (!String.prototype.endsWith) {
         event.preventDefault();
     });
     function set_touchdevice_helper_message() {
-        $('#dict-toggles-helper').innerHTML = 'Double-finger tap to toggle dictionary';
+        $('#dict-toggle-helper').innerHTML = 'Double-finger tap to toggle dictionary';
     }
 
     function set_mode(mode) {
