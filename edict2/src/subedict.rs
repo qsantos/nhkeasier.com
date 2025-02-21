@@ -4,7 +4,7 @@ use std::time::Instant;
 
 use ouroboros::self_referencing;
 
-use crate::{iter_fragments, Deinflector, Edict, Error};
+use crate::{Deinflector, Edict, Error, iter_fragments};
 
 #[self_referencing]
 pub struct SubEdictCreator {

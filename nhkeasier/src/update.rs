@@ -41,7 +41,7 @@ struct StoryInfo<'a> {
 #[derive(Clone, Debug, Deserialize)]
 struct NewsList<'a>(#[serde(borrow)] [HashMap<NaiveDate, Vec<StoryInfo<'a>>>; 1]);
 
-use sqlx::{sqlite::SqliteRow, Pool, Sqlite};
+use sqlx::{Pool, Sqlite, sqlite::SqliteRow};
 
 async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, SqliteRow) {
     let mut rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE news_id = $1")
@@ -167,12 +167,14 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
     std::io::copy(&mut c, &mut f).expect("failed to save image");
     tracing::debug!("making image progressive");
-    assert!(Command::new("mogrify")
-        .args(["-interlace", "plane", &path])
-        .output()
-        .unwrap()
-        .status
-        .success());
+    assert!(
+        Command::new("mogrify")
+            .args(["-interlace", "plane", &path])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
     tracing::debug!("saving image to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
@@ -197,20 +199,22 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let url = format!("https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8");
     let filename = format!("mp3/{}.mp3", story.news_id);
     let path = format!("media/{filename}");
-    assert!(Command::new("vlc")
-        .args([
-            "-I",
-            "dummy",
-            &url,
-            &(String::from(":sout=#transcode{acodec=mp3,ab=192}:std{dst=")
-                + &path
-                + ",access=file}"),
-            "vlc://quit",
-        ])
-        .output()
-        .unwrap()
-        .status
-        .success());
+    assert!(
+        Command::new("vlc")
+            .args([
+                "-I",
+                "dummy",
+                &url,
+                &(String::from(":sout=#transcode{acodec=mp3,ab=192}:std{dst=")
+                    + &path
+                    + ",access=file}"),
+                "vlc://quit",
+            ])
+            .output()
+            .unwrap()
+            .status
+            .success()
+    );
     tracing::debug!("saving voice to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(

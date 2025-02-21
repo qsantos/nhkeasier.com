@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use tracing::{Event, Subscriber};
 use tracing_panic::panic_hook;
-use tracing_subscriber::{filter::LevelFilter, fmt, layer::Context, prelude::*, registry, Layer};
+use tracing_subscriber::{Layer, filter::LevelFilter, fmt, layer::Context, prelude::*, registry};
 
 use crate::DEBUG;
 

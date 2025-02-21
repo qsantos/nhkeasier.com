@@ -6,24 +6,24 @@ use std::time::Instant;
 
 use askama_axum::Template;
 use axum::{
+    Router,
     body::Body,
     extract,
-    http::{header, Response, StatusCode},
+    http::{Response, StatusCode, header},
     response::{Html, IntoResponse, Redirect},
     routing::get,
-    Router,
 };
 use chrono::{Datelike, Duration, Local, NaiveDate, NaiveDateTime, TimeZone};
 use regex::Regex;
 use serde::Deserialize;
-use sqlx::{sqlite::SqliteRow, FromRow};
+use sqlx::{FromRow, sqlite::SqliteRow};
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 
 use edict2::{SubEdictCreator, SubEnamdictCreator};
 
-use crate::{Story, DEBUG, JST};
+use crate::{DEBUG, JST, Story};
 
 static REMOVE_HTML_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX"));

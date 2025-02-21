@@ -8,11 +8,11 @@ mod update;
 
 use std::sync::LazyLock;
 
-pub use database::{connect_to_database, Story};
+pub use database::{Story, connect_to_database};
 pub use email::{send_email_async, send_email_sync};
 pub use epub::make_epub;
 pub use logging::init_logging;
-pub use router::{router, State};
+pub use router::{State, router};
 pub use ruby::remove_ruby;
 pub use update::{extract_story_content, update_stories};
 

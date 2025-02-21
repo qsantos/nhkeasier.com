@@ -2,9 +2,9 @@ use std::io::{Seek, Write};
 
 use askama::Template;
 use chrono::{DateTime, TimeZone, Utc};
-use zip::{write::FileOptions, CompressionMethod, ZipWriter};
+use zip::{CompressionMethod, ZipWriter, write::FileOptions};
 
-use crate::{Story, JST};
+use crate::{JST, Story};
 
 #[derive(Template)]
 #[template(path = "epub/EPUB/content.opf", escape = "xml")]
