@@ -5,27 +5,21 @@ use clap::Parser;
 use futures::future::FutureExt;
 use sqlx::{Pool, Sqlite};
 use std::panic::AssertUnwindSafe;
-use tokio::time::{Duration, Instant};
+use tokio::time::Duration;
 
 const UPDATE_PERIOD: Duration = Duration::from_secs(3600);
 
 async fn update_job(pool: Pool<Sqlite>) {
     nhkeasier::update_stories(&pool).await;
-    let mut last_run = Instant::now();
     loop {
-        let elapsed = last_run.elapsed();
-        if elapsed >= UPDATE_PERIOD {
-            // Catch panics to avoid the situation where the server keeps running but the update job is
-            // dead; the alternative would be to kill the whole process to make sure the panic is visible.
-            if let Err(err) = AssertUnwindSafe(nhkeasier::update_stories(&pool))
-                .catch_unwind()
-                .await
-            {
-                tracing::error!("update job panicked: {:?}", err);
-            }
-            last_run = Instant::now();
-        } else {
-            tokio::time::sleep_until(last_run + UPDATE_PERIOD).await;
+        tokio::time::sleep(UPDATE_PERIOD).await;
+        // Catch panics to avoid the situation where the server keeps running but the update job is
+        // dead; the alternative would be to kill the whole process to make sure the panic is visible.
+        if let Err(err) = AssertUnwindSafe(nhkeasier::update_stories(&pool))
+            .catch_unwind()
+            .await
+        {
+            tracing::error!("update job panicked: {:?}", err);
         }
     }
 }
