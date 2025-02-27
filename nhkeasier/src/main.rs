@@ -10,9 +10,7 @@ use tokio::time::Duration;
 const UPDATE_PERIOD: Duration = Duration::from_secs(3600);
 
 async fn update_job(pool: Pool<Sqlite>) {
-    nhkeasier::update_stories(&pool).await;
     loop {
-        tokio::time::sleep(UPDATE_PERIOD).await;
         // Catch panics to avoid the situation where the server keeps running but the update job is
         // dead; the alternative would be to kill the whole process to make sure the panic is visible.
         if let Err(err) = AssertUnwindSafe(nhkeasier::update_stories(&pool))
@@ -21,6 +19,7 @@ async fn update_job(pool: Pool<Sqlite>) {
         {
             tracing::error!("update job panicked: {:?}", err);
         }
+        tokio::time::sleep(UPDATE_PERIOD).await;
     }
 }
 
