@@ -13,11 +13,12 @@ async fn update_job(pool: Pool<Sqlite>) {
     loop {
         // Catch panics to avoid the situation where the server keeps running but the update job is
         // dead; the alternative would be to kill the whole process to make sure the panic is visible.
-        if let Err(err) = AssertUnwindSafe(nhkeasier::update_stories(&pool))
+        if AssertUnwindSafe(nhkeasier::update_stories(&pool))
             .catch_unwind()
             .await
+            .is_err()
         {
-            tracing::error!("update job panicked: {:?}", err);
+            tracing::error!("panic caught when running update_stories()");
         }
         tokio::time::sleep(UPDATE_PERIOD).await;
     }
