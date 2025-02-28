@@ -43,9 +43,6 @@ impl<S: Subscriber> Layer<S> for EmailLayer {
 }
 
 pub fn init_logging() {
-    // also log panics (especially for email notifications)
-    std::panic::set_hook(Box::new(panic_hook));
-
     // debug to file
     let file = std::fs::File::options()
         .append(true)
@@ -71,4 +68,8 @@ pub fn init_logging() {
             .with(email_layer)
             .init();
     }
+
+    // also log panics (especially for email notifications)
+    // NOTE: only set the hook after the subscriber, to avoid silently swallowing panics
+    std::panic::set_hook(Box::new(panic_hook));
 }
