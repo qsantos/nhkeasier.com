@@ -165,7 +165,7 @@ async fn epub_form(extract::State(state): extract::State<Arc<State>>) -> impl In
     )
     .fetch_one(&state.pool)
     .await
-    .unwrap();
+    .expect("failed to query database for min and max dates");
     Html(
         EpubFormTemplate {
             title: &format!("Generate an EPUB {min:?} {max:?}"),

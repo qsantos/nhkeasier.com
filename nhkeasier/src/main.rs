@@ -69,6 +69,8 @@ async fn main() -> Result<(), edict2::Error> {
             exit(1);
         });
     tracing::info!("Listening on http://{:?}", args.listen_addr);
-    axum::serve(listener, app).await.unwrap();
+    axum::serve(listener, app)
+        .await
+        .expect("failed to start server");
     Ok(())
 }

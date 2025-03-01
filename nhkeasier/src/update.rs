@@ -73,13 +73,13 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         // TODO: use Tokio fs
         std::fs::read_to_string(format!("media/{webpage}")).expect("failed to read existing HTML")
     } else {
-        tracing::debug!("downloading HTML");
         let url = format!(
             "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
             story.news_id
         );
-        let res = reqwest::get(url).await.unwrap();
-        let html = res.bytes().await.unwrap();
+        tracing::debug!("downloading HTML from {url}");
+        let res = reqwest::get(url).await.expect("failed to download HTML");
+        let html = res.bytes().await.expect("failed to get HTML contents");
         tracing::debug!("saving HTML to file");
         let mut c = std::io::Cursor::new(&html);
         let filename = format!("html/{}.html", story.news_id);
@@ -98,7 +98,7 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
         .await
         .expect("failed to update webpage (story was removed from database while updating it)");
         tracing::debug!("decoding UTF-8 HTML");
-        String::from_utf8(html.into()).unwrap()
+        String::from_utf8(html.into()).expect("failed to decode HTML")
     }
 }
 
@@ -147,18 +147,19 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         tracing::debug!("image already present");
         return;
     }
-    tracing::debug!("downloading image");
     let req = if info.news_web_image_uri.is_empty() {
         let url = format!(
             "http://www3.nhk.or.jp/news/easy/{}/{}",
             story.news_id, info.news_easy_image_uri
         );
+        tracing::debug!("downloading image from {url}");
         reqwest::get(url).await
     } else {
+        tracing::debug!("downloading image from {}", info.news_web_image_uri);
         reqwest::get(&info.news_web_image_uri).await
     };
-    let res = req.unwrap();
-    let content = res.bytes().await.unwrap();
+    let res = req.expect("failed to download image");
+    let content = res.bytes().await.expect("failed to get image contents");
     tracing::debug!("saving image to file");
     let mut c = std::io::Cursor::new(&content);
     let filename = format!("jpg/{}.jpg", story.news_id);
@@ -166,12 +167,12 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     // TODO: use Tokio fs
     let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
     std::io::copy(&mut c, &mut f).expect("failed to save image");
-    tracing::debug!("making image progressive");
+    tracing::debug!("making image progressive: mogrify -interlace plane {path}");
     assert!(
         Command::new("mogrify")
             .args(["-interlace", "plane", &path])
             .output()
-            .unwrap()
+            .expect("failed to call mogrify -interlace plane …")
             .status
             .success()
     );
@@ -194,11 +195,17 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         tracing::debug!("voice already present");
         return;
     }
-    tracing::debug!("downloading voice to file");
-    let voiceid = info.news_easy_voice_uri.strip_suffix(".m4a").unwrap();
+    tracing::debug!("downloading voice to file {}", info.news_easy_voice_uri);
+    let voiceid = info
+        .news_easy_voice_uri
+        .strip_suffix(".m4a")
+        .expect("failed to strip suffix .m4u");
     let url = format!("https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8");
     let filename = format!("mp3/{}.mp3", story.news_id);
     let path = format!("media/{filename}");
+    tracing::debug!(
+        "running: vlc -I dummy {url} :sout=#transcode{{acodec=mp3,ab=192}}:std{{dst={path},access=file}} vlc://quit"
+    );
     assert!(
         Command::new("vlc")
             .args([
@@ -211,7 +218,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
                 "vlc://quit",
             ])
             .output()
-            .unwrap()
+            .expect("failed to call vlc -I dummy …")
             .status
             .success()
     );
@@ -232,10 +239,15 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
 pub async fn update_stories(pool: &Pool<Sqlite>) {
     tracing::info!("Updating stories");
     tracing::debug!("downloading list of stories");
-    let res = reqwest::get(STORY_LIST_URL).await.unwrap();
-    let data = res.text().await.unwrap();
+    let res = reqwest::get(STORY_LIST_URL)
+        .await
+        .expect("failed to download list of stories");
+    let data = res
+        .text()
+        .await
+        .expect("failed to get contents of list of stories");
     tracing::debug!("downloaded list of stories");
-    let j: NewsList = serde_json::from_str(&data).unwrap();
+    let j: NewsList = serde_json::from_str(&data).expect("failed to parse list of stories");
     for stories in j.0[0].values() {
         for info in stories {
             let span = tracing::debug_span!("story", news_id = info.news_id);
@@ -249,7 +261,9 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 } else {
                     tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
-                extract_story_content(pool, &story).await.unwrap();
+                extract_story_content(pool, &story)
+                    .await
+                    .expect("failed to extract content");
                 fetch_image_of_story(pool, info, &story).await;
                 fetch_voice_of_story(pool, info, &story).await;
             }

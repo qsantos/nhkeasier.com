@@ -48,7 +48,7 @@ pub fn init_logging() {
         .append(true)
         .create(true)
         .open("nhkeasier.com.log")
-        .unwrap();
+        .expect("Failed to open nhkeasier.com.log");
     let file_layer = fmt::layer()
         .with_writer(Arc::new(file))
         .with_filter(LevelFilter::DEBUG);
