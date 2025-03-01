@@ -54,28 +54,34 @@ struct StoryTemplate<'a> {
 mod filters {
     pub fn xhtml_sanitize(content: &str) -> ::askama::Result<String> {
         let parser = libxml::parser::Parser::default_html();
-        let document = parser.parse_string(content.as_bytes()).unwrap();
-        let html = document.get_root_element().unwrap();
-        let mut body = html.get_first_child().unwrap();
-        body.set_name("div").unwrap();
+        let document = parser
+            .parse_string(content.as_bytes())
+            .expect("failed to parse HTML");
+        let html = document.get_root_element().expect("no root element");
+        let mut body = html.get_first_child().expect("no body");
+        body.set_name("div").expect("failed to rename body to div");
         Ok(document.node_to_string(&body))
     }
 }
 
 fn zip_bytes<W: Write + Seek>(zip: &mut ZipWriter<W>, filename: &str, bytes: &[u8]) {
     let options = FileOptions::default().compression_method(CompressionMethod::DEFLATE);
-    zip.start_file(filename, options).unwrap();
-    zip.write_all(bytes).unwrap();
+    zip.start_file(filename, options)
+        .expect("failed to start ZIP file (DEFLATE)");
+    zip.write_all(bytes)
+        .expect("failed to write ZIP file (DEFLATE)");
 }
 
 fn zip_bytes_store<W: Write + Seek>(zip: &mut ZipWriter<W>, filename: &str, bytes: &[u8]) {
     let options = FileOptions::default().compression_method(CompressionMethod::STORE);
-    zip.start_file(filename, options).unwrap();
-    zip.write_all(bytes).unwrap();
+    zip.start_file(filename, options)
+        .expect("failed to start ZIP file (STORE)");
+    zip.write_all(bytes)
+        .expect("failed to write ZIP file (STORE)");
 }
 
 fn zip_template<W: Write + Seek, T: Template>(zip: &mut ZipWriter<W>, filename: &str, template: T) {
-    let content = template.render().unwrap();
+    let content = template.render().expect("failed to render template");
     zip_bytes(zip, filename, content.as_bytes());
 }
 
@@ -153,13 +159,13 @@ pub fn make_epub<W: Write + Seek>(
             if image.is_empty() {
                 continue;
             }
-            let data = std::fs::read(format!("media/{}", image)).unwrap();
+            let data = std::fs::read(format!("media/{}", image)).expect("failed to read image");
             let filename = format!("EPUB/images/{}.jpg", story.news_id);
             zip_bytes_store(&mut zip, &filename, &data);
         }
     }
 
-    zip.finish().unwrap();
+    zip.finish().expect("failed to finish ZIP file");
 }
 
 #[tokio::test]

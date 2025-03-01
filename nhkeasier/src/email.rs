@@ -31,17 +31,20 @@ fn send_email_common(subject: &str, body: String) -> (Message, String, Credentia
 pub fn send_email_sync(subject: &str, body: String) {
     let (message, host, creds) = send_email_common(subject, body);
     let mailer = SmtpTransport::relay(&host)
-        .unwrap()
+        .expect("failed to create email transport (sync)")
         .credentials(creds)
         .build();
-    mailer.send(&message).unwrap();
+    mailer.send(&message).expect("failed to send email (sync)");
 }
 
 pub async fn send_email_async(subject: &str, body: String) {
     let (message, host, creds) = send_email_common(subject, body);
     let mailer = AsyncSmtpTransport::<Tokio1Executor>::relay(&host)
-        .unwrap()
+        .expect("failed to create email transport (async)")
         .credentials(creds)
         .build();
-    mailer.send(message).await.unwrap();
+    mailer
+        .send(message)
+        .await
+        .expect("failed to send email (async)");
 }

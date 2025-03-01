@@ -14,7 +14,7 @@ use crate::Story;
 const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
 
 static CONTENT_SELECTOR: LazyLock<scraper::Selector> =
-    LazyLock::new(|| scraper::Selector::parse(".article-body").unwrap());
+    LazyLock::new(|| scraper::Selector::parse(".article-body").expect("invalid selector"));
 static CLEAN_UP_CONTENT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>").expect("invalid CLEAN_UP_CONTENT_REGEX")
 });

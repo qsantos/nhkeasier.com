@@ -26,7 +26,8 @@ pub const DEBUG: bool = false;
 pub static JST: LazyLock<FixedOffset> = LazyLock::new(|| FixedOffset::east_opt(3600 * 9).unwrap());
 
 pub fn parse_datetime_nhk(s: &str) -> DateTime<FixedOffset> {
-    let dt = NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S").unwrap();
+    let dt =
+        NaiveDateTime::parse_from_str(s, "%Y-%m-%d %H:%M:%S").expect("failed to parse datetime");
     JST.from_local_datetime(&dt).unwrap()
 }
 

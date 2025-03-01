@@ -4,7 +4,7 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 static REMOVE_RUBY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new("<rp>.*?</rp>|<rt>.*?</rt>|<rtc>.*?</rtc>|<ruby>|</ruby>").unwrap()
+    Regex::new("<rp>.*?</rp>|<rt>.*?</rt>|<rtc>.*?</rtc>|<ruby>|</ruby>").expect("invalid regex")
 });
 
 pub fn remove_ruby(s: &str) -> Cow<'_, str> {
