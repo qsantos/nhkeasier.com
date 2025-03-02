@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+if ! docker --version >/dev/null; then
+    echo "docker not found; to install on Debian, run 'sudo apt-get install docker.io'" >&2
+    exit 1
+fi
+COMMAND=(
+    docker run
+    # Make Ctrl+C work
+    --init --tty
+    # Make sure to use same user and group ids for mapped files
+    --user "$(id -u)":"$(id -g)"
+    # Remove container after running
+    --rm
+    # Share cargo registry with host
+    --volume="$HOME"/.cargo/registry:/usr/local/cargo/registry
+    # Avoid clobbering host's target directory
+    --env=CARGO_TARGET_DIR=target/release-bookworm
+    # Map current directory to /app in container
+    --volume="$PWD":/app
+    # Set working directory
+    --workdir=/app
+    # Same as target VPS; slim-bookworm lacks some dependencies
+    rust:bookworm
+    # Build command
+    cargo build --release
+)
+"${COMMAND[@]}"
