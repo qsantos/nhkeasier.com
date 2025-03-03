@@ -35,7 +35,7 @@ async fn main() -> Result<(), edict2::Error> {
     let args = Args::parse();
 
     if dotenvy::dotenv().is_err() {
-        tracing::error!(".env file is missing");
+        eprintln!(".env file is missing");
         exit(1);
     }
 
