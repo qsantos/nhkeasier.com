@@ -168,14 +168,13 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
     std::io::copy(&mut c, &mut f).expect("failed to save image");
     tracing::debug!("making image progressive: mogrify -interlace plane {path}");
-    assert!(
-        Command::new("mogrify")
-            .args(["-interlace", "plane", &path])
-            .output()
-            .expect("failed to call mogrify -interlace plane …")
-            .status
-            .success()
-    );
+    let output = Command::new("mogrify")
+        .args(["-interlace", "plane", &path])
+        .output()
+        .expect("failed to call mogrify -interlace plane …");
+    if !output.status.success() {
+        panic!("failed to make image progressive: {:?}", output);
+    }
     tracing::debug!("saving image to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
@@ -206,22 +205,21 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     tracing::debug!(
         "running: vlc -I dummy {url} :sout=#transcode{{acodec=mp3,ab=192}}:std{{dst={path},access=file}} vlc://quit"
     );
-    assert!(
-        Command::new("vlc")
-            .args([
-                "-I",
-                "dummy",
-                &url,
-                &(String::from(":sout=#transcode{acodec=mp3,ab=192}:std{dst=")
-                    + &path
-                    + ",access=file}"),
-                "vlc://quit",
-            ])
-            .output()
-            .expect("failed to call vlc -I dummy …")
-            .status
-            .success()
-    );
+    let output = Command::new("vlc")
+        .args([
+            "-I",
+            "dummy",
+            &url,
+            &(String::from(":sout=#transcode{acodec=mp3,ab=192}:std{dst=")
+                + &path
+                + ",access=file}"),
+            "vlc://quit",
+        ])
+        .output()
+        .expect("failed to call vlc -I dummy …");
+    if !output.status.success() {
+        panic!("failed to download voice: {:?}", output);
+    }
     tracing::debug!("saving voice to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
