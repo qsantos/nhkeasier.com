@@ -241,7 +241,7 @@ function getMode() {
         event.preventDefault();
     });
     function set_touchdevice_helper_message() {
-        $('#darkmode-helper').innerHTML = 'Double-finger tap to toggle dictionary';
+        $('#darkmode-toggle-helper').innerHTML = 'Double-finger tap to toggle dictionary';
     }
 
     function set_mode(mode) {
