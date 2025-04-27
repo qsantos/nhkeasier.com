@@ -575,53 +575,54 @@ function main() {
         const html = rikai_html(text);
         if (html.length == 0) {
             rikai.style.display = 'none';
-        } else {
-            const lineheight = 39;
-            const vertical_margin = 5;
-
-            rikai.innerHTML = html;
-            rikai.style.display = 'block';
-            let rect;
-            if (range.getClientRect !== undefined) {  // Mozilla
-                rect = range.getClientRect();
-            } else {  // Webkit
-                rect = range.getClientRects()[0];
-            }
-            let x = rect.left;
-            let y = rect.bottom + vertical_margin;
-
-            // fix edge case where caret is at the end of previous line
-            // we detect this by comparing to the cursor position
-            const dx = x - cursorX;
-            const dy = y - cursorY;
-            const d2 = dx*dx + dy*dy;
-            if (d2 > 10000) {  // more than 100px away
-                x = target.parentNode.getBoundingClientRect().left;
-                y += lineheight;
-            }
-
-            // avoid overflow
-            rect = rikai.getBoundingClientRect();
-            // avoid right overflow
-            x = Math.max(0, Math.min(x, document.documentElement.clientWidth - rect.width));
-            // avoid bottom overflow
-            if (y + rect.height > document.documentElement.clientHeight) {
-                const offset = 2*vertical_margin + lineheight + rect.height;
-                if (y - offset > 0) {  // no point in clipping the top
-                    y -= offset;
-                }
-            }
-
-            if (window.scrollX === undefined) {  // MSIE
-                x += document.documentElement.scrollLeft;
-                y += document.documentElement.scrollTop;
-            } else {  // necessary for Microsoft Edge
-                x += scrollX;
-                y += scrollY;
-            }
-            rikai.style.left = x + 'px';
-            rikai.style.top = y + 'px';
+            return;
         }
+
+        const lineheight = 39;
+        const vertical_margin = 5;
+
+        rikai.innerHTML = html;
+        rikai.style.display = 'block';
+        let rect;
+        if (range.getClientRect !== undefined) {  // Mozilla
+            rect = range.getClientRect();
+        } else {  // Webkit
+            rect = range.getClientRects()[0];
+        }
+        let x = rect.left;
+        let y = rect.bottom + vertical_margin;
+
+        // fix edge case where caret is at the end of previous line
+        // we detect this by comparing to the cursor position
+        const dx = x - cursorX;
+        const dy = y - cursorY;
+        const d2 = dx*dx + dy*dy;
+        if (d2 > 10000) {  // more than 100px away
+            x = target.parentNode.getBoundingClientRect().left;
+            y += lineheight;
+        }
+
+        // avoid overflow
+        rect = rikai.getBoundingClientRect();
+        // avoid right overflow
+        x = Math.max(0, Math.min(x, document.documentElement.clientWidth - rect.width));
+        // avoid bottom overflow
+        if (y + rect.height > document.documentElement.clientHeight) {
+            const offset = 2*vertical_margin + lineheight + rect.height;
+            if (y - offset > 0) {  // no point in clipping the top
+                y -= offset;
+            }
+        }
+
+        if (window.scrollX === undefined) {  // MSIE
+            x += document.documentElement.scrollLeft;
+            y += document.documentElement.scrollTop;
+        } else {  // necessary for Microsoft Edge
+            x += scrollX;
+            y += scrollY;
+        }
+        rikai.style.left = x + 'px';
+        rikai.style.top = y + 'px';
     }
 
     function on_mousemove(event) {
