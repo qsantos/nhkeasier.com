@@ -530,6 +530,10 @@ function rikai_html(text) {
         ret += '<h3>Names</h3><dl>' + names_html.join('') + '</dl>';
     }
 
+    if (ret.length) {
+        ret = '<a id="rikai-close-button" onclick="$(\'#rikai\').style.display = \'none\'">&#10006;</a>' + ret;
+    }
+
     return ret;
 }
 
