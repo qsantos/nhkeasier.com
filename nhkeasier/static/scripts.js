@@ -148,7 +148,6 @@ if (!String.prototype.endsWith) {
 /* Toggle on-hover dictionary depending on <input type="checkbox"> */
 (function(){
     const toggle = $('#dict-toggle input');
-    let last_mode = null;
     toggle.addEventListener('click', update);
     set_mode(localStorage.getItem('dict-toggle') == 'on');
 
@@ -167,17 +166,8 @@ if (!String.prototype.endsWith) {
     if ('ontouchstart' in window) {
         set_touchdevice_helper_message();
     }
-    let tap_start = null;
-    let triple_tap = false;
-    document.addEventListener('touchend', function(event) {
-        if (event.touches.length != 0) {
-            return;
-        }
-        set_mode(!toggle.checked);
-        event.preventDefault();
-    });
     function set_touchdevice_helper_message() {
-        $('#dict-toggle-helper').innerHTML = 'Double-finger tap to toggle dictionary';
+        $('#dict-toggle-helper').innerHTML = 'Toggle dictionary';
     }
 
     function set_mode(mode) {
