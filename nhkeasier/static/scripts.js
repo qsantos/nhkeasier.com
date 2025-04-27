@@ -559,7 +559,7 @@ function main() {
             return;
         }
         const now = new Date().getTime();
-        if (now - last_click < 1000) {  // 1 second
+        if (now - last_click < 100) {  // 100 ms
             return;
         }
 
