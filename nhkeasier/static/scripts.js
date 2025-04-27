@@ -557,7 +557,12 @@ function main() {
     rikai.id = 'rikai';
     document.body.appendChild(rikai);
 
+    function close_rikai() {
+        rikai.style.display = 'none';
+    }
+
     let last_click = 0;
+    let rikai_close_timeout = 0;
     function update_rikai(cursorX, cursorY) {
         if (!rikai_enabled) {
             return;
@@ -574,9 +579,12 @@ function main() {
 
         const html = rikai_html(text);
         if (html.length == 0) {
-            rikai.style.display = 'none';
+            clearTimeout(rikai_close_timeout);
+            rikai_close_timeout = setTimeout(close_rikai, 300);
             return;
         }
+        clearTimeout(rikai_close_timeout);
+        rikai_close_timeout = 0;
 
         const lineheight = 39;
         const vertical_margin = 5;
@@ -635,6 +643,8 @@ function main() {
     }
 
     function ignore_event(event) {
+        clearTimeout(rikai_close_timeout);
+        rikai_close_timeout = 0;
         event.stopPropagation();
     }
 
