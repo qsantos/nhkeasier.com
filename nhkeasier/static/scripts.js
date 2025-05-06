@@ -633,6 +633,15 @@ function main() {
         rikai.style.top = y + 'px';
     }
 
+    function on_keyup(event) {
+        // close rikai when hitting Escape
+        if (event.key === 'Escape') {
+            console.log(event.key);
+            close_rikai();
+            event.preventDefault();
+        }
+    }
+
     function on_mousemove(event) {
         update_rikai(event.clientX, event.clientY);
     }
@@ -649,6 +658,7 @@ function main() {
     }
 
     /* Event binding */
+    window.addEventListener('keyup', on_keyup);
     window.addEventListener('mousemove', on_mousemove);
     window.addEventListener('click', on_click);
     rikai.addEventListener('mousemove', ignore_event);
