@@ -94,6 +94,13 @@
 Something went terribly wrong, I guess.
 {%- endblock %}
 </main>
+<script>
+document.addEventListener('keyup', function(event) {
+    if (event.key === 'r') {
+        document.location = '/random/';
+    }
+});
+</script>
 {%- if !DEBUG %}
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7JRMQY3TCL"></script>
 <script>
