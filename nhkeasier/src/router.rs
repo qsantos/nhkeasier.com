@@ -480,6 +480,19 @@ async fn story(
     (StatusCode::OK, Html(html))
 }
 
+async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
+    let maybe_id: Option<u64> =
+        sqlx::query_scalar("SELECT * FROM nhkeasier_story ORDER BY RANDOM() LIMIT 1")
+            .fetch_optional(&state.pool)
+            .await
+            .expect("failed to query database for specific story");
+    if let Some(id) = maybe_id {
+        Redirect::to(&format!("/story/{}/", id))
+    } else {
+        Redirect::to("/")
+    }
+}
+
 async fn about() -> impl IntoResponse {
     Html(
         AboutTemplate {
@@ -573,6 +586,7 @@ pub fn router(state: State) -> Router {
         .route("/:year/:month/:day/", get(archive))
         .route("/epub/", get(epub_form))
         .route("/story/:id/", get(story))
+        .route("/random/", get(random))
         .route("/about/", get(about))
         .route("/contact/", get(contact).post(contact_send))
         .route("/contact/sent/", get(contact_sent))
