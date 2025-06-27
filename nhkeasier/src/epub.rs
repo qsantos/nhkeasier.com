@@ -159,7 +159,7 @@ pub fn make_epub<W: Write + Seek>(
             if image.is_empty() {
                 continue;
             }
-            let data = std::fs::read(format!("media/{}", image)).expect("failed to read image");
+            let data = std::fs::read(format!("media/{image}")).expect("failed to read image");
             let filename = format!("EPUB/images/{}.jpg", story.news_id);
             zip_bytes_store(&mut zip, &filename, &data);
         }

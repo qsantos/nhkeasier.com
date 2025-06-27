@@ -487,7 +487,7 @@ async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoR
             .await
             .expect("failed to query database for specific story");
     if let Some(id) = maybe_id {
-        Redirect::to(&format!("/story/{}/", id))
+        Redirect::to(&format!("/story/{id}/"))
     } else {
         Redirect::to("/")
     }

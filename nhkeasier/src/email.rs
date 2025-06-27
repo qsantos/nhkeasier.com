@@ -19,7 +19,7 @@ fn send_email_common(subject: &str, body: String) -> (Message, String, Credentia
         .to("NHK Easier <contact@nhkeasier.com>"
             .parse()
             .expect("failed to parse to address"))
-        .subject(format!("[NHK Easier] {}", subject))
+        .subject(format!("[NHK Easier] {subject}"))
         .header(ContentType::TEXT_PLAIN)
         .body(body)
         .expect("failed to create email message");

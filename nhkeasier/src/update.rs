@@ -173,7 +173,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         .output()
         .expect("failed to call mogrify -interlace plane …");
     if !output.status.success() {
-        panic!("failed to make image progressive: {:?}", output);
+        panic!("failed to make image progressive: {output:?}");
     }
     tracing::debug!("saving image to database");
     // TODO: no need to wait for query to finish
@@ -218,7 +218,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         .output()
         .expect("failed to call vlc -I dummy …");
     if !output.status.success() {
-        panic!("failed to download voice: {:?}", output);
+        panic!("failed to download voice: {output:?}");
     }
     tracing::debug!("saving voice to database");
     // TODO: no need to wait for query to finish

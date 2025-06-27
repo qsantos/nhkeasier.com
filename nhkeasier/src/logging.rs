@@ -22,7 +22,7 @@ impl VecCollectVisitor {
 impl tracing::field::Visit for VecCollectVisitor {
     fn record_debug(&mut self, field: &tracing::field::Field, value: &dyn std::fmt::Debug) {
         self.fields
-            .push((field.name().to_string(), format!("{:?}", value)));
+            .push((field.name().to_string(), format!("{value:?}")));
     }
 }
 
