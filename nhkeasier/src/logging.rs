@@ -36,7 +36,7 @@ impl<S: Subscriber> Layer<S> for EmailLayer {
         event.record(&mut visitor);
         let (_, message) = &visitor.fields[0];
         crate::send_email_sync(
-            &format!("[NHK Easier] {level} {message}"),
+            &format!("{level} {message}"),
             format!("{file}:{line}\n{:#?}", visitor.fields),
         )
     }
