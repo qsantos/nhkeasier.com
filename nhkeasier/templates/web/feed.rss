@@ -9,7 +9,7 @@
         <lastBuildDate>{{ Local::now().to_rfc2822() }}</lastBuildDate>
         {%- for story in stories %}
         <item>
-            <title>{{ story.title|safe }}</title>
+            <title>{{ story.title }}</title>
             <link>https://nhkeasier.com/story/{{ story.id|safe }}/</link>
             <description>
                 {%- if let Some(video) = story.video_reencoded %}
