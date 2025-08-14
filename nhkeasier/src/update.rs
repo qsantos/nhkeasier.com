@@ -160,7 +160,7 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     };
     let res = req.expect("failed to download image");
     if res.status() == 404 {
-        tracing::warn!("got 404 when downloading image");
+        tracing::info!("got 404 when downloading image");
         return;
     }
     let content = res.bytes().await.expect("failed to get image contents");
