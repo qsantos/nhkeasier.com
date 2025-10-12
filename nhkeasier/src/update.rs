@@ -5,13 +5,15 @@ use std::sync::LazyLock;
 
 use chrono::NaiveDate;
 use regex::Regex;
+use reqwest::Client;
 use serde::Deserialize;
 use sqlx::FromRow;
 use tracing::Instrument;
 
 use crate::Story;
 
-const STORY_LIST_URL: &str = "http://www3.nhk.or.jp/news/easy/news-list.json";
+const BUILD_AUTHORIZE_URL: &str = "https://news.web.nhk/tix/build_authorize?idp=a-alaz&profileType=abroad&redirect_uri=https%3A%2F%2Fnews.web.nhk%2Fnews%2Feasy%2F&entity=none&area=130&pref=13&jisx0402=13101&postal=1000001";
+const STORY_LIST_URL: &str = "https://news.web.nhk/news/easy/news-list.json";
 
 static CONTENT_SELECTOR: LazyLock<scraper::Selector> =
     LazyLock::new(|| scraper::Selector::parse(".article-body").expect("invalid selector"));
@@ -28,9 +30,8 @@ struct StoryInfo<'a> {
     // for some reason, they escape the slashes, so URLs can never be zero-copy parsed
     // TODO: https://github.com/dtolnay/request-for-implementation/issues/7
     pub news_web_image_uri: String,
-    // these are actually not full URLs but just filenames, so no need to unescape
-    pub news_easy_image_uri: &'a str,
-    pub news_easy_voice_uri: &'a str,
+    pub news_easy_image_uri: String,
+    pub news_easy_voice_uri: String,
     // there might be escapes in the titles, but we might get away with zero-copy in some cases
     #[serde(borrow)]
     pub title: Cow<'a, str>,
@@ -67,7 +68,7 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
     }
 }
 
-async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
+async fn html_of_story(pool: &Pool<Sqlite>, client: &Client, story: &Story<'_>) -> String {
     if let Some(webpage) = story.webpage {
         tracing::debug!("getting HTML from database");
         // TODO: use Tokio fs
@@ -78,7 +79,11 @@ async fn html_of_story(pool: &Pool<Sqlite>, story: &Story<'_>) -> String {
             story.news_id
         );
         tracing::debug!("downloading HTML from {url}");
-        let res = reqwest::get(url).await.expect("failed to download HTML");
+        let res = client
+            .get(url)
+            .send()
+            .await
+            .expect("failed to download HTML");
         let html = res.bytes().await.expect("failed to get HTML contents");
         tracing::debug!("saving HTML to file");
         let mut c = std::io::Cursor::new(&html);
@@ -115,12 +120,16 @@ fn clean_up_html(content: &str) -> Cow<'_, str> {
     CLEAN_UP_CONTENT_REGEX.replace_all(content, "")
 }
 
-pub async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) -> Result<(), ()> {
+pub async fn extract_story_content(
+    pool: &Pool<Sqlite>,
+    client: &Client,
+    story: &Story<'_>,
+) -> Result<(), ()> {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
         return Ok(());
     }
-    let html = html_of_story(pool, story).await;
+    let html = html_of_story(pool, client, story).await;
     tracing::debug!("extracting content");
     let raw_content = raw_content_of_html(&html)?;
     let content_with_ruby = clean_up_html(&raw_content);
@@ -142,7 +151,12 @@ pub async fn extract_story_content(pool: &Pool<Sqlite>, story: &Story<'_>) -> Re
     Ok(())
 }
 
-async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
+async fn fetch_image_of_story(
+    pool: &Pool<Sqlite>,
+    client: &Client,
+    info: &StoryInfo<'_>,
+    story: &Story<'_>,
+) {
     if story.image.is_some() {
         tracing::debug!("image already present");
         return;
@@ -153,10 +167,10 @@ async fn fetch_image_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
             story.news_id, info.news_easy_image_uri
         );
         tracing::debug!("downloading image from {url}");
-        reqwest::get(url).await
+        client.get(url).send().await
     } else {
         tracing::debug!("downloading image from {}", info.news_web_image_uri);
-        reqwest::get(&info.news_web_image_uri).await
+        client.get(&info.news_web_image_uri).send().await
     };
     let res = req.expect("failed to download image");
     if res.status() == 404 {
@@ -238,12 +252,34 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
     tracing::info!("found voice for story");
 }
 
+async fn authenticate(client: &Client) {
+    tracing::debug!("requesting build-authorize URL: {BUILD_AUTHORIZE_URL}");
+    // NOTE: reqwest automatically follows redirections
+    client
+        .get(BUILD_AUTHORIZE_URL)
+        .send()
+        .await
+        .expect("failed to request build-authorize URL");
+}
+
 pub async fn update_stories(pool: &Pool<Sqlite>) {
     tracing::info!("Updating stories");
     tracing::debug!("downloading list of stories");
-    let res = reqwest::get(STORY_LIST_URL)
+    let client = Client::builder()
+        .cookie_store(true)
+        .build()
+        .expect("failed to build HTTP client");
+    authenticate(&client).await;
+    let res = client
+        .get(STORY_LIST_URL)
+        .send()
         .await
         .expect("failed to download list of stories");
+    if res.status() != 200 {
+        tracing::error!("received error when downloading list of stories: {res:?}");
+        tracing::error!("{}", res.text().await.unwrap());
+        return;
+    }
     let data = res
         .text()
         .await
@@ -253,6 +289,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
     for stories in j.0[0].values() {
         for info in stories {
             let span = tracing::debug_span!("story", news_id = info.news_id);
+            let client = &client;
             async move {
                 tracing::debug!("info={:?}", info);
                 tracing::debug!("searching story for news_id={}", info.news_id);
@@ -263,10 +300,10 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                 } else {
                     tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
-                extract_story_content(pool, &story)
+                extract_story_content(pool, client, &story)
                     .await
                     .expect("failed to extract content");
-                fetch_image_of_story(pool, info, &story).await;
+                fetch_image_of_story(pool, client, info, &story).await;
                 fetch_voice_of_story(pool, info, &story).await;
             }
             .instrument(span)
