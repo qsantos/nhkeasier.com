@@ -96,6 +96,10 @@ Something went terribly wrong, I guess.
 </main>
 <script>
 document.addEventListener('keydown', function(event) {
+    const targetTagName = event.target.tagName;
+    if (targetTagName == 'INPUT' || targetTagName == 'TEXTAREA') {
+        return;
+    }
     if (event.key === 'r' && !(event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)) {
         document.location = '/random/';
     }
