@@ -2,7 +2,14 @@ use std::sync::Arc;
 
 use tracing::{Event, Subscriber};
 use tracing_panic::panic_hook;
-use tracing_subscriber::{Layer, filter::LevelFilter, fmt, layer::Context, prelude::*, registry};
+use tracing_subscriber::{
+    Layer,
+    filter::{LevelFilter, Targets},
+    fmt,
+    layer::Context,
+    prelude::*,
+    registry,
+};
 
 use crate::DEBUG;
 
@@ -49,9 +56,12 @@ pub fn init_logging() {
         .create(true)
         .open("nhkeasier.com.log")
         .expect("Failed to open nhkeasier.com.log");
+    let file_filter = Targets::new()
+        .with_target("nhkeasier", LevelFilter::DEBUG)
+        .with_default(LevelFilter::WARN);
     let file_layer = fmt::layer()
         .with_writer(Arc::new(file))
-        .with_filter(LevelFilter::DEBUG);
+        .with_filter(file_filter);
 
     // info to stdout
     let stdout_layer = fmt::layer().with_filter(LevelFilter::INFO);
