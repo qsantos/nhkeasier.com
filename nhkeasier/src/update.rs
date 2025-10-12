@@ -42,6 +42,11 @@ struct StoryInfo<'a> {
 #[derive(Clone, Debug, Deserialize)]
 struct NewsList<'a>(#[serde(borrow)] [HashMap<NaiveDate, Vec<StoryInfo<'a>>>; 1]);
 
+#[derive(Clone, Debug, Deserialize)]
+struct VoiceToken {
+    token: String,
+}
+
 use sqlx::{Pool, Sqlite, sqlite::SqliteRow};
 
 async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, SqliteRow) {
@@ -208,7 +213,25 @@ async fn fetch_image_of_story(
     tracing::info!("found image for story");
 }
 
-async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: &Story<'_>) {
+async fn get_voice_token(client: &Client) -> String {
+    let res = client
+        .get("https://mediatoken.web.nhk/v1/token")
+        .send()
+        .await
+        .expect("failed to get voice token");
+    let voice_token: VoiceToken = res
+        .json()
+        .await
+        .expect("failed to parse voice token response");
+    voice_token.token
+}
+
+async fn fetch_voice_of_story(
+    pool: &Pool<Sqlite>,
+    token: &str,
+    info: &StoryInfo<'_>,
+    story: &Story<'_>,
+) {
     if story.voice.is_some() {
         tracing::debug!("voice already present");
         return;
@@ -218,7 +241,7 @@ async fn fetch_voice_of_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>, story: 
         .news_easy_voice_uri
         .strip_suffix(".m4a")
         .expect("failed to strip suffix .m4u");
-    let url = format!("https://vod-stream.nhk.jp/news/easy_audio/{voiceid}/index.m3u8");
+    let url = format!("https://media.vd.st.nhk/news/easy_audio/{voiceid}/index.m3u8?hdnts={token}");
     let filename = format!("mp3/{}.mp3", story.news_id);
     let path = format!("media/{filename}");
     tracing::debug!(
@@ -287,10 +310,12 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
         .expect("failed to get contents of list of stories");
     tracing::debug!("downloaded list of stories");
     let j: NewsList = serde_json::from_str(&data).expect("failed to parse list of stories");
+    let voice_token = get_voice_token(&client).await;
     for stories in j.0[0].values() {
         for info in stories {
             let span = tracing::debug_span!("story", news_id = info.news_id);
             let client = &client;
+            let voice_token = &voice_token;
             async move {
                 tracing::debug!("info={:?}", info);
                 tracing::debug!("searching story for news_id={}", info.news_id);
@@ -305,7 +330,7 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
                     .await
                     .expect("failed to extract content");
                 fetch_image_of_story(pool, client, info, &story).await;
-                fetch_voice_of_story(pool, info, &story).await;
+                fetch_voice_of_story(pool, voice_token, info, &story).await;
             }
             .instrument(span)
             .await

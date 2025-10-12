@@ -16,7 +16,7 @@ futures = "0.3.31"
 lettre = { version = "0.11.2", default-features = false, features = ["smtp-transport", "tokio1-native-tls", "builder", "tracing"] }
 libxml = "0.3.3"
 regex = { version = "1.10.2", default-features = false, features = ["perf", "std"] }
-reqwest = { version = "0.11.23", features = ["cookies"] }
+reqwest = { version = "0.11.23", features = ["cookies", "json"] }
 scraper = "0.19.0"
 serde = "1.0.193"
 serde_json = "1.0.108"
