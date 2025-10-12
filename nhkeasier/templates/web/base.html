@@ -95,8 +95,8 @@ Something went terribly wrong, I guess.
 {%- endblock %}
 </main>
 <script>
-document.addEventListener('keyup', function(event) {
-    if (event.key === 'r') {
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'r' && !(event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)) {
         document.location = '/random/';
     }
 });
