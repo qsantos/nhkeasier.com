@@ -161,17 +161,18 @@ async fn fetch_image_of_story(
         tracing::debug!("image already present");
         return;
     }
-    let req = if info.news_web_image_uri.is_empty() {
-        let url = format!(
+    let url = if !info.news_web_image_uri.is_empty() {
+        info.news_web_image_uri.to_string()
+    } else if !info.news_easy_image_uri.is_empty() {
+        info.news_easy_image_uri.to_string()
+    } else {
+        format!(
             "http://www3.nhk.or.jp/news/easy/{}/{}",
             story.news_id, info.news_easy_image_uri
-        );
-        tracing::debug!("downloading image from {url}");
-        client.get(url).send().await
-    } else {
-        tracing::debug!("downloading image from {}", info.news_web_image_uri);
-        client.get(&info.news_web_image_uri).send().await
+        )
     };
+    tracing::debug!("downloading image from {url}");
+    let req = client.get(url).send().await;
     let res = req.expect("failed to download image");
     if res.status() == 404 {
         tracing::info!("got 404 when downloading image");
