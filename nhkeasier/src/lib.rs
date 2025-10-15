@@ -14,7 +14,7 @@ pub use epub::make_epub;
 pub use logging::init_logging;
 pub use router::{State, router};
 pub use ruby::remove_ruby;
-pub use update::{extract_story_content, update_stories};
+pub use update::{extract_story_content, update_loop};
 
 use chrono::{DateTime, FixedOffset, NaiveDateTime, TimeZone};
 

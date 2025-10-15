@@ -7,20 +7,20 @@ use sqlx::{Pool, Sqlite};
 use std::panic::AssertUnwindSafe;
 use tokio::time::Duration;
 
-const UPDATE_PERIOD: Duration = Duration::from_secs(3600);
+const RETRY_DELAY: Duration = Duration::from_secs(3600);
 
 async fn update_job(pool: Pool<Sqlite>) {
     loop {
         // Catch panics to avoid the situation where the server keeps running but the update job is
         // dead; the alternative would be to kill the whole process to make sure the panic is visible.
-        if AssertUnwindSafe(nhkeasier::update_stories(&pool))
+        if AssertUnwindSafe(nhkeasier::update_loop(&pool))
             .catch_unwind()
             .await
             .is_err()
         {
             tracing::error!("panic caught when running update_stories()");
         }
-        tokio::time::sleep(UPDATE_PERIOD).await;
+        tokio::time::sleep(RETRY_DELAY).await;
     }
 }
 

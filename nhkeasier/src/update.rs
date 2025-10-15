@@ -5,13 +5,15 @@ use std::sync::LazyLock;
 
 use chrono::NaiveDate;
 use regex::Regex;
-use reqwest::Client;
+use reqwest::{Client, StatusCode};
 use serde::Deserialize;
-use sqlx::FromRow;
+use sqlx::{FromRow, Pool, Sqlite, sqlite::SqliteRow};
+use tokio::time::Duration;
 use tracing::Instrument;
 
 use crate::Story;
 
+const UPDATE_PERIOD: Duration = Duration::from_secs(3600);
 const BUILD_AUTHORIZE_URL: &str = "https://news.web.nhk/tix/build_authorize?idp=a-alaz&profileType=abroad&redirect_uri=https%3A%2F%2Fnews.web.nhk%2Fnews%2Feasy%2F&entity=none&area=130&pref=13&jisx0402=13101&postal=1000001";
 const STORY_LIST_URL: &str = "https://news.web.nhk/news/easy/news-list.json";
 
@@ -42,12 +44,15 @@ struct StoryInfo<'a> {
 #[derive(Clone, Debug, Deserialize)]
 struct NewsList<'a>(#[serde(borrow)] [HashMap<NaiveDate, Vec<StoryInfo<'a>>>; 1]);
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Error {
+    AuthenticationFailure,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 struct VoiceToken {
     token: String,
 }
-
-use sqlx::{Pool, Sqlite, sqlite::SqliteRow};
 
 async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, SqliteRow) {
     let mut rows = sqlx::query("SELECT * FROM nhkeasier_story WHERE news_id = $1")
@@ -290,28 +295,34 @@ async fn authenticate(client: &Client) {
         .await
         .expect("failed to request build-authorize URL");
     if res.status() != 200 {
-        tracing::error!("received error when getting JWT: {res:?}");
-        tracing::error!("{}", res.text().await.unwrap());
+        let res_fmt = format!("{res:?}");
+        panic!(
+            "received error when getting JWT: {res_fmt}\n{}",
+            res.text().await.unwrap()
+        );
     }
 }
 
-pub async fn update_stories(pool: &Pool<Sqlite>) {
+async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Error> {
     tracing::info!("Updating stories");
     tracing::debug!("downloading list of stories");
-    let client = Client::builder()
-        .cookie_store(true)
-        .build()
-        .expect("failed to build HTTP client");
-    authenticate(&client).await;
     let res = client
         .get(STORY_LIST_URL)
         .send()
         .await
         .expect("failed to download list of stories");
-    if res.status() != 200 {
-        tracing::error!("received error when downloading list of stories: {res:?}");
-        tracing::error!("{}", res.text().await.unwrap());
-        return;
+    match res.status() {
+        StatusCode::OK => (),
+        StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
+            return Err(Error::AuthenticationFailure);
+        }
+        status => {
+            let res_fmt = format!("{res:?}");
+            panic!(
+                "received {status} error when downloading list of stories: {res_fmt}\n{}",
+                res.text().await.unwrap()
+            );
+        }
     }
     let data = res
         .text()
@@ -319,11 +330,10 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
         .expect("failed to get contents of list of stories");
     tracing::debug!("downloaded list of stories");
     let j: NewsList = serde_json::from_str(&data).expect("failed to parse list of stories");
-    let voice_token = get_voice_token(&client).await;
+    let voice_token = get_voice_token(client).await;
     for stories in j.0[0].values() {
         for info in stories {
             let span = tracing::debug_span!("story", news_id = info.news_id);
-            let client = &client;
             let voice_token = &voice_token;
             async move {
                 tracing::debug!("info={:?}", info);
@@ -344,5 +354,25 @@ pub async fn update_stories(pool: &Pool<Sqlite>) {
             .instrument(span)
             .await
         }
+    }
+    Ok(())
+}
+
+pub async fn update_loop(pool: &Pool<Sqlite>) {
+    let client = Client::builder()
+        .cookie_store(true)
+        .build()
+        .expect("failed to build HTTP client");
+    loop {
+        // Catch panics to avoid the situation where the server keeps running but the update job is
+        // dead; the alternative would be to kill the whole process to make sure the panic is visible.
+        if let Err(Error::AuthenticationFailure) = update_stories(pool, &client).await {
+            authenticate(&client).await;
+            // try again just once
+            update_stories(pool, &client)
+                .await
+                .expect("failed to fetch stories after authenticating");
+        }
+        tokio::time::sleep(UPDATE_PERIOD).await;
     }
 }
