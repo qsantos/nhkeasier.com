@@ -279,11 +279,15 @@ async fn fetch_voice_of_story(
 async fn authenticate(client: &Client) {
     tracing::debug!("requesting build-authorize URL: {BUILD_AUTHORIZE_URL}");
     // NOTE: reqwest automatically follows redirections
-    client
+    let res = client
         .get(BUILD_AUTHORIZE_URL)
         .send()
         .await
         .expect("failed to request build-authorize URL");
+    if res.status() != 200 {
+        tracing::error!("received error when getting JWT: {res:?}");
+        tracing::error!("{}", res.text().await.unwrap());
+    }
 }
 
 pub async fn update_stories(pool: &Pool<Sqlite>) {
