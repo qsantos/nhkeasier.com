@@ -278,6 +278,11 @@ async fn fetch_voice_of_story(
 
 async fn authenticate(client: &Client) {
     tracing::debug!("requesting build-authorize URL: {BUILD_AUTHORIZE_URL}");
+    client
+        .get("https://news.web.nhk/news/easy/")
+        .send()
+        .await
+        .expect("failed to request NHK News Web Easy home page");
     // NOTE: reqwest automatically follows redirections
     let res = client
         .get(BUILD_AUTHORIZE_URL)
