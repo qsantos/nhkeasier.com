@@ -4,10 +4,10 @@
     <div class="form-group">
         <label for="year">Year</label>
         <select id="year" class="form-control">
-            <option selected>All</option>
-{%- for year in min_date.year()..max_date.year() %}
+{%- for year in (min_date.year()..max_date.year()).rev() %}
             <option>{{ year }}</option>
 {%- endfor %}
+            <option>All</option>
         </select>
         <small class="form-text text-muted">
             Please select the year before the month.
@@ -15,7 +15,7 @@
     </div>
     <div class="form-group">
         <label for="month">Month</label>
-        <select id="month" class="form-control" disabled>
+        <select id="month" class="form-control">
             <option selected>All</option>
             <option value="0">January</option>
             <option value="1">February</option>
