@@ -194,6 +194,7 @@ async fn serve_epub(
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
 
+    // NOTE: cannot stream because ZipWriter requires Seek
     let mut buf = Vec::new();
     let output = std::io::Cursor::new(&mut buf);
     let with_furigana = query.contains_key("furigana");
