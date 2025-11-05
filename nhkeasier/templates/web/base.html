@@ -25,6 +25,22 @@
 <link rel="alternate" href="/feed/" title="NHK Easier Stories" type="application/rss+xml">
 </head>
 <body>
+
+<script>
+// handle dark mode before rendering content or fetching resources to avoid flashing when loading page
+function isDarkModeOn() {
+    const mode = localStorage.getItem('darkmode');
+    if (mode === 'on') {
+        return true;
+    } else if (mode === 'off') {
+        return false;
+    } else {
+        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+    }
+}
+document.documentElement.setAttribute('data-bs-theme', isDarkModeOn() ? 'dark' : 'light');
+</script>
+
 <header>
     <h1><a href="/">NHK <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
     <div class="toggle" id="ruby-toggle">

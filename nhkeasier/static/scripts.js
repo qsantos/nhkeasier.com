@@ -188,22 +188,11 @@ if (!String.prototype.endsWith) {
     }
 })();
 
-function getMode() {
-    const mode = localStorage.getItem('darkmode');
-    if (mode === 'on') {
-        return true;
-    } else if (mode === 'off') {
-        return false;
-    } else {
-        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
-    }
-}
-
 /* Toggle dark mode depending on <input type="checkbox"> */
 (function(){
     const toggle = $('#darkmode-toggle input');
     toggle.addEventListener('click', update);
-    set_mode(getMode());
+    set_mode(isDarkModeOn());
 
     document.addEventListener('keyup', mousekey_toggler);
     $('#darkmode-toggle-helper kbd').addEventListener('click', mousekey_toggler);
