@@ -195,7 +195,7 @@ function getMode() {
     } else if (mode === 'off') {
         return false;
     } else {
-        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;;
+        return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
     }
 }
 
