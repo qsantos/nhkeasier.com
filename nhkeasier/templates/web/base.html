@@ -23,6 +23,7 @@
 <link rel="stylesheet" href="/static/bootstrap-5.3.3.min.css">
 <link rel="stylesheet" href="/static/style.css?2025-04-27">
 <link rel="alternate" href="/feed/" title="NHK Easier Stories" type="application/rss+xml">
+<script async src="/static/bootstrap-5.3.3.min.js"></script>
 </head>
 <body>
 
@@ -41,69 +42,77 @@ function isDarkModeOn() {
 document.documentElement.setAttribute('data-bs-theme', isDarkModeOn() ? 'dark' : 'light');
 </script>
 
-<header>
-    <h1><a href="/">NHK <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
-    <div class="toggle" id="ruby-toggle">
-        <ul>
-            <li>
-                <label>
-                    <input type="radio" name="ruby-toggle" value="always">
-                    <img src="/static/always.svg" alt="Always show furigana" title="Always show furigana">
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="radio" name="ruby-toggle" value="hover" checked>
-                    <img src="/static/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
-                </label>
-            </li>
-            <li>
-                <label>
-                    <input type="radio" name="ruby-toggle" value="never">
-                    <img src="/static/never.svg" alt="Never show furigana" title="Never show furigana">
-                </label>
-            </li>
-        </ul>
-        <div class="toggle-helper" id="ruby-toggle-helper">
-            Press <kbd>F</kbd> to toggle furigana
+<header class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+        <h1 class="nvarbar-brand"><a href="/">NHK <ruby>Easier<rt>イーシア</rt></ruby></a></h1>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#header-collapse" aria-controls="header-collapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="header-collapse">
+            <div class="toggle" id="ruby-toggle">
+                <ul>
+                    <li>
+                        <label>
+                            <input type="radio" name="ruby-toggle" value="always">
+                            <img src="/static/always.svg" alt="Always show furigana" title="Always show furigana">
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" name="ruby-toggle" value="hover" checked>
+                            <img src="/static/hover.svg" alt="Show furigana on hover" title="Show on hover furigana">
+                        </label>
+                    </li>
+                    <li>
+                        <label>
+                            <input type="radio" name="ruby-toggle" value="never">
+                            <img src="/static/never.svg" alt="Never show furigana" title="Never show furigana">
+                        </label>
+                    </li>
+                </ul>
+                <div class="toggle-helper" id="ruby-toggle-helper">
+                    Press <kbd>F</kbd> to toggle furigana
+                </div>
+            </div>
+            <div class="toggle" id="dict-toggle">
+                <ul>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="dict-toggle" checked>
+                            <img src="/static/dict.png" alt="Toggle the dictionary" title="Toggle the dictionary">
+                        </label>
+                    </li>
+                </ul>
+                <div class="toggle-helper" id="dict-toggle-helper">
+                    Press <kbd>D</kbd> to toggle dictionary
+                </div>
+            </div>
+            <div class="toggle" id="darkmode-toggle">
+                <ul>
+                    <li>
+                        <label>
+                            <input type="checkbox" name="darkmode-toggle" value="never">
+                            <img src="/static/darkmode.svg" alt="Toggle dark mode" title="Toggle dark mode">
+                        </label>
+                    </li>
+                </ul>
+                <div class="toggle-helper" id="darkmode-toggle-helper">
+                    Press <kbd>S</kbd> to toggle dark mode
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/epub/">EPUB</a></li>
+                    <li><a href="/story/1/">First</a></li>
+                    <li><a href="/random/"><span style="text-decoration: underline">R</span>andom</a></li>
+                    <li><a href="/contact/">Contact</a></li>
+                    <li><a href="/about/">About</a></li>
+                </ul>
+            </nav>
         </div>
     </div>
-    <div class="toggle" id="dict-toggle">
-        <ul>
-            <li>
-                <label>
-                    <input type="checkbox" name="dict-toggle" checked>
-                    <img src="/static/dict.png" alt="Toggle the dictionary" title="Toggle the dictionary">
-                </label>
-            </li>
-        </ul>
-        <div class="toggle-helper" id="dict-toggle-helper">
-            Press <kbd>D</kbd> to toggle dictionary
-        </div>
-    </div>
-    <div class="toggle" id="darkmode-toggle">
-        <ul>
-            <li>
-                <label>
-                    <input type="checkbox" name="darkmode-toggle" value="never">
-                    <img src="/static/darkmode.svg" alt="Toggle dark mode" title="Toggle dark mode">
-                </label>
-            </li>
-        </ul>
-        <div class="toggle-helper" id="darkmode-toggle-helper">
-            Press <kbd>S</kbd> to toggle dark mode
-        </div>
-    </div>
-    <nav>
-        <ul>
-            <li><a href="/epub/">EPUB</a></li>
-            <li><a href="/story/1/">First</a></li>
-            <li><a href="/random/"><span style="text-decoration: underline">R</span>andom</a></li>
-            <li><a href="/contact/">Contact</a></li>
-            <li><a href="/about/">About</a></li>
-        </ul>
-    </nav>
 </header>
+
 <main>
 <h2>{{ heading }}</h2>
 {%- block content %}

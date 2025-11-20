@@ -26,7 +26,7 @@ header h1 a, header h1 a:hover { display:inline-block; margin:10px 0 10px; paddi
 /* ruby toggle */
 .toggle { margin:0 auto 1em auto; }
 .toggle ul {
-    list-style-type:none; margin:0; padding:0;
+    list-style-type:none; margin:0 auto 1em auto; padding:0;
     display:flex; justify-content:space-between; width:15em;
 }
 .toggle li { margin:0 auto; }
