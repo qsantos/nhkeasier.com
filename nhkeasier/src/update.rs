@@ -362,6 +362,7 @@ async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Erro
 pub async fn update_loop(pool: &Pool<Sqlite>) {
     let client = Client::builder()
         .cookie_store(true)
+        .user_agent("curl/8.14.1") // avoid 500 error when authenticating
         .build()
         .expect("failed to build HTTP client");
     loop {
