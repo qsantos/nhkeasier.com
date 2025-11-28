@@ -483,7 +483,7 @@ async fn story(
 
 async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
     let maybe_id: Option<u64> =
-        sqlx::query_scalar("SELECT * FROM nhkeasier_story ORDER BY RANDOM() LIMIT 1")
+        sqlx::query_scalar("SELECT id FROM nhkeasier_story WHERE id >= (ABS(RANDOM()) % (SELECT MAX(id) FROM nhkeasier_story)) + 1 LIMIT 1")
             .fetch_optional(&state.pool)
             .await
             .expect("failed to query database for specific story");
