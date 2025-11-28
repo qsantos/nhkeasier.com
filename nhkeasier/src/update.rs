@@ -241,7 +241,11 @@ async fn fetch_voice_of_story(
         tracing::debug!("voice already present");
         return;
     }
-    tracing::debug!("downloading voice to file {}", info.news_easy_voice_uri);
+    tracing::debug!("downloading voice to file '{}'", info.news_easy_voice_uri);
+    if info.news_easy_voice_uri.is_empty() {
+        tracing::debug!("news_easy_voice_uri is empty");
+        return;
+    }
     let voiceid = info
         .news_easy_voice_uri
         .strip_suffix(".m4a")
