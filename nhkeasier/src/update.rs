@@ -312,8 +312,9 @@ async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Erro
         .await
         .expect("failed to download list of stories");
     match res.status() {
-        StatusCode::OK => (),
-        StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN => {
+        StatusCode::OK => tracing::info!("Successfully got the list of stories"),
+        status @ (StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN) => {
+            tracing::warn!("Authentication failure: {status}");
             return Err(Error::AuthenticationFailure);
         }
         status => {
