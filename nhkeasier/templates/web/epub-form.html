@@ -4,7 +4,7 @@
     <div class="form-group">
         <label for="year">Year</label>
         <select id="year" class="form-control">
-{%- for year in (min_date.year()..max_date.year()).rev() %}
+{%- for year in (min_date.year()..=max_date.year()).rev() %}
             <option>{{ year }}</option>
 {%- endfor %}
             <option>All</option>
