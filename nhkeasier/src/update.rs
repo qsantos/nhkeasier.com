@@ -318,7 +318,7 @@ async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Erro
     match res.status() {
         StatusCode::OK => tracing::info!("Successfully got the list of stories"),
         status @ (StatusCode::UNAUTHORIZED | StatusCode::FORBIDDEN) => {
-            tracing::warn!("Authentication failure: {status}");
+            tracing::info!("Authentication failure: {status}");
             return Err(Error::AuthenticationFailure);
         }
         status => {
