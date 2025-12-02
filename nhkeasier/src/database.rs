@@ -1,6 +1,9 @@
+use std::str::FromStr;
+use std::time::Duration;
+
 use chrono::NaiveDateTime;
-use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::{FromRow, Pool, Sqlite};
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
+use sqlx::{ConnectOptions, FromRow, Pool, Sqlite};
 
 #[derive(Clone, Debug, FromRow)]
 #[allow(dead_code)]
@@ -20,11 +23,13 @@ pub struct Story<'a> {
 }
 
 pub async fn connect_to_database() -> Pool<Sqlite> {
-    let database_url =
-        std::env::var("DATABASE_URL").expect("missing environment variable DATABASE_URL");
+    let url = std::env::var("DATABASE_URL").expect("missing environment variable DATABASE_URL");
+    let opts = SqliteConnectOptions::from_str(&url)
+        .expect("invalid DATABASE_URL")
+        .log_slow_statements(tracing::log::LevelFilter::Warn, Duration::from_millis(100));
     SqlitePoolOptions::new()
         .max_connections(5)
-        .connect(&database_url)
+        .connect_with(opts)
         .await
         .expect("failed to connect to database")
 }
