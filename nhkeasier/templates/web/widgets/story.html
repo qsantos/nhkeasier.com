@@ -7,11 +7,7 @@
         </time>
     </a>
 </h4>
-{%- let video = story.video_reencoded.unwrap_or("") %}
-{%- let image = story.image.unwrap_or("") %}
-{%- if !video.is_empty() %}
-<video src="/media/{{ video|safe }}"{% if let Some(image) = story.image %} poster="/media/{{ image|safe }}" preload="none"{% else %} preload="poster"{% endif %} controls></video>
-{%- else if !image.is_empty() %}
+{%- if let Some(image) = story.image %}
 <img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
 {%- endif %}
 {%- if let Some(content) = story.content_with_ruby %}

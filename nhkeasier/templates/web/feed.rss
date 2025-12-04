@@ -12,13 +12,7 @@
             <title>{{ story.title }}</title>
             <link>https://nhkeasier.com/story/{{ story.id|safe }}/</link>
             <description>
-                {%- if let Some(video) = story.video_reencoded %}
-                    {%- if let Some(image) = story.image %}
-                        &lt;video src="/media/{{ video }}" poster="/media/{{ image }}" controls preload="none"&gt;&lt;/video&gt;
-                    {%- else %}
-                        &lt;video src="/media/{{ video }}" controls preload="poster"&gt;&lt;/video&gt;
-                    {%- endif %}
-                {%- else if let Some(image) = story.image %}
+                {%- if let Some(image) = story.image %}
                     &lt;img src="/media/{{ image }}" alt="Story illustration"&gt;
                 {%- endif %}
                 {%- if furiganas %}

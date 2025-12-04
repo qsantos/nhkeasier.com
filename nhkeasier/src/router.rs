@@ -348,8 +348,7 @@ async fn archive(
 
     let story = stories
         .iter()
-        .find(|story| story.video_reencoded.is_some())
-        .or_else(|| stories.iter().find(|story| story.image.is_some()))
+        .find(|story| story.image.is_some())
         .unwrap_or_else(|| stories.first().expect("day stories should not be empty"));
 
     let titles = stories

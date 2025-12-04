@@ -17,8 +17,6 @@ pub struct Story<'a> {
     pub content: Option<&'a str>,
     pub image: Option<&'a str>,
     pub voice: Option<&'a str>,
-    pub video_original: Option<&'a str>,
-    pub video_reencoded: Option<&'a str>,
     pub webpage: Option<&'a str>,
 }
 
@@ -26,7 +24,7 @@ pub async fn connect_to_database() -> Pool<Sqlite> {
     let url = std::env::var("DATABASE_URL").expect("missing environment variable DATABASE_URL");
     let opts = SqliteConnectOptions::from_str(&url)
         .expect("invalid DATABASE_URL")
-        .log_slow_statements(tracing::log::LevelFilter::Warn, Duration::from_millis(100));
+        .log_slow_statements(tracing::log::LevelFilter::Warn, Duration::from_millis(10));
     SqlitePoolOptions::new()
         .max_connections(5)
         .connect_with(opts)
