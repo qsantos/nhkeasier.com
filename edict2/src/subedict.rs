@@ -1,7 +1,7 @@
-use std::collections::HashSet;
 use std::include_str;
 use std::time::Instant;
 
+use gxhash::HashSet;
 use ouroboros::self_referencing;
 
 use crate::{Deinflector, Edict, Error, iter_fragments};
@@ -39,7 +39,7 @@ impl SubEdictCreator {
                 candidates.extend(fields.deinflector.deinflect(fragment, &mut buffer));
             }
 
-            let mut lines = HashSet::new();
+            let mut lines = HashSet::default();
             for candidate in candidates {
                 if let Some(entries) = fields.edict2.lookup(&candidate.word as &str) {
                     for entry in entries {
@@ -79,7 +79,7 @@ impl SubEnamdictCreator {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
 
-            let mut lines = HashSet::new();
+            let mut lines = HashSet::default();
             for fragment in fragments {
                 if let Some(entries) = fields.enamdict.lookup(fragment as &str) {
                     for entry in entries.iter() {

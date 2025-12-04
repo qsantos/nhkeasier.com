@@ -1,5 +1,6 @@
 use std::borrow::Cow;
-use std::collections::HashMap;
+
+use gxhash::HashMap;
 
 use crate::Error;
 
@@ -58,7 +59,7 @@ impl<'a> Deinflector<'a> {
                     aux(chars, rule, suffix_to_rules, Some(rules));
                 } else {
                     let mut rules = Vec::new();
-                    let mut suffix_to_rules = SuffixToRules(HashMap::new());
+                    let mut suffix_to_rules = SuffixToRules(HashMap::default());
                     aux(chars, rule, &mut suffix_to_rules, Some(&mut rules));
                     cur_suffix_to_rules.0.insert(c, (rules, suffix_to_rules));
                 }
@@ -68,7 +69,7 @@ impl<'a> Deinflector<'a> {
         }
 
         // NOTE: skip(1) for header on first line
-        let mut suffix_to_rules = SuffixToRules(HashMap::new());
+        let mut suffix_to_rules = SuffixToRules(HashMap::default());
         let mut reasons = Vec::new();
         for (lineno, line) in data.lines().enumerate().skip(1) {
             let lineno = lineno + 1;

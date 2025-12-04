@@ -11,6 +11,7 @@ name = "edict2"
 crate-type = ["cdylib", "lib"]
 
 [dependencies]
+gxhash = "3.5.0"
 ouroboros = "0.18.1"
 regex = { version = "1.10.2", default-features = false, features = ["std", "perf"] }
 tracing = "0.1.40"

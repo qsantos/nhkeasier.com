@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::collections::hash_map::Entry;
+
+use gxhash::HashMap;
 
 use crate::Error;
 
@@ -16,7 +17,7 @@ pub struct Edict<'a> {
 
 impl<'a> Edict<'a> {
     pub fn parse(data: &'a str) -> Result<Self, Error> {
-        let mut entries = HashMap::new();
+        let mut entries = HashMap::default();
         // NOTE: skip(1) for header on first line
         for (lineno, line) in data.lines().enumerate().skip(1) {
             let lineno = lineno + 1;
