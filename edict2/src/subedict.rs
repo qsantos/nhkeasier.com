@@ -42,7 +42,7 @@ impl SubEdictCreator {
             let mut lines = HashSet::new();
             for candidate in candidates {
                 if let Some(entries) = fields.edict2.lookup(&candidate.word as &str) {
-                    for entry in entries.iter() {
+                    for entry in entries {
                         if entry.type_ & candidate.type_ != 0 {
                             lines.insert(entry.line);
                         }
