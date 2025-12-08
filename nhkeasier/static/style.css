@@ -123,3 +123,9 @@ kbd {
 [data-bs-theme=dark] {
     main h2, article h3 { color:#8fbfff; }
 }
+
+/* Fix image aspect-ratio on narrower screens */
+article>img {
+  max-width: 100%;
+  height: auto;
+}
