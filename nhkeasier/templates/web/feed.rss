@@ -21,7 +21,7 @@
                     {% if let Some(content) = story.content %}{{ content }}{% else %}Content is missing{% endif %}
                 {%- endif %}
                 {%- if let Some(voice) = story.voice %}
-                    &lt;audio src="/media/{{ voice }}" controls preload="none"&gt;&lt;/audio&gt;'
+                    &lt;audio src="/media/{{ voice }}" controls preload="none"&gt;&lt;/audio&gt;
                 {%- endif %}
                 &lt;ul&gt;
                     {%- if story.published.date() >= NaiveDate::from_ymd_opt(2017, 12, 5).unwrap() %}
