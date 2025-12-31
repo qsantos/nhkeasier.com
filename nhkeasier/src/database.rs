@@ -24,7 +24,7 @@ pub async fn connect_to_database() -> Pool<Sqlite> {
     let url = std::env::var("DATABASE_URL").expect("missing environment variable DATABASE_URL");
     let opts = SqliteConnectOptions::from_str(&url)
         .expect("invalid DATABASE_URL")
-        .log_slow_statements(tracing::log::LevelFilter::Warn, Duration::from_millis(10));
+        .log_slow_statements(tracing::log::LevelFilter::Warn, Duration::from_millis(100));
     SqlitePoolOptions::new()
         .max_connections(5)
         .connect_with(opts)
