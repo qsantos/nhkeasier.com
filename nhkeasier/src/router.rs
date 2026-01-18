@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, LazyLock};
 use std::time::Instant;
 
-use askama_axum::Template;
+use askama::Template;
 use axum::{
     Router,
     body::Body,

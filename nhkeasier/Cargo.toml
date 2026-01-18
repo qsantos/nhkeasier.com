@@ -5,8 +5,7 @@ edition = "2024"
 default-run = "nhkeasier"
 
 [dependencies]
-askama = { version = "0.12.1", default-features = false, features = ["with-axum"] }
-askama_axum = "0.4.0"
+askama = { version = "0.12.1", default-features = false }
 axum = { version = "0.7.2", default-features = false, features = ["http1", "tokio", "query", "form", "tracing"] }
 chrono = { version = "0.4.31", default-features = false, features = ["serde"] }
 clap = { version = "4.4.12", features = ["derive"] }
