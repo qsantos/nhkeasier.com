@@ -111,7 +111,6 @@ async fn save_content(
         .await
         .expect("failed to save HTML");
     tracing::debug!("saving content to database");
-    // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET webpage = $1, content_with_ruby = $2, content = $3 WHERE id = $4",
         filename,
@@ -206,7 +205,6 @@ async fn fetch_image_of_story(
         panic!("failed to make image progressive: {output:?}");
     }
     tracing::debug!("saving image to database");
-    // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET image = $1 WHERE id = $2",
         filename,
@@ -273,7 +271,6 @@ async fn fetch_voice_of_story(
         panic!("failed to download voice: {output:?}");
     }
     tracing::debug!("saving voice to database");
-    // TODO: no need to wait for query to finish
     sqlx::query!(
         "UPDATE nhkeasier_story SET voice = $1 WHERE id = $2",
         filename,
