@@ -93,6 +93,26 @@ async fn download_html(client: &Client, story: &Story<'_>) -> Bytes {
     res.bytes().await.expect("failed to get HTML contents")
 }
 
+async fn save_html(pool: &Pool<Sqlite>, story: &Story<'_>, html: &Bytes) {
+    tracing::debug!("saving HTML to file");
+    let mut c = std::io::Cursor::new(&html);
+    let filename = format!("html/{}.html", story.news_id);
+    // TODO: use Tokio fs
+    let mut f = std::fs::File::create(format!("media/{filename}"))
+        .expect("failed to create file to save HTML");
+    std::io::copy(&mut c, &mut f).expect("failed to save HTML");
+    tracing::debug!("saving HTML to database");
+    // TODO: no need to wait for query to finish
+    sqlx::query!(
+        "UPDATE nhkeasier_story SET webpage = $1 WHERE id = $2",
+        filename,
+        story.id
+    )
+    .execute(pool)
+    .await
+    .expect("failed to update webpage (story was removed from database while updating it)");
+}
+
 async fn html_of_story(pool: &Pool<Sqlite>, client: &Client, story: &Story<'_>) -> String {
     if let Some(webpage) = story.webpage {
         tracing::debug!("getting HTML from database");
@@ -100,24 +120,7 @@ async fn html_of_story(pool: &Pool<Sqlite>, client: &Client, story: &Story<'_>) 
         std::fs::read_to_string(format!("media/{webpage}")).expect("failed to read existing HTML")
     } else {
         let html = download_html(client, story).await;
-
-        tracing::debug!("saving HTML to file");
-        let mut c = std::io::Cursor::new(&html);
-        let filename = format!("html/{}.html", story.news_id);
-        // TODO: use Tokio fs
-        let mut f = std::fs::File::create(format!("media/{filename}"))
-            .expect("failed to create file to save HTML");
-        std::io::copy(&mut c, &mut f).expect("failed to save HTML");
-        tracing::debug!("saving HTML to database");
-        // TODO: no need to wait for query to finish
-        sqlx::query!(
-            "UPDATE nhkeasier_story SET webpage = $1 WHERE id = $2",
-            filename,
-            story.id
-        )
-        .execute(pool)
-        .await
-        .expect("failed to update webpage (story was removed from database while updating it)");
+        save_html(pool, story, &html).await;
         tracing::debug!("decoding UTF-8 HTML");
         String::from_utf8(html.into()).expect("failed to decode HTML")
     }
