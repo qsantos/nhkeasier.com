@@ -105,7 +105,7 @@ macro_rules! zip_copy_store {
     };
 }
 
-pub fn make_epub<W: Write + Seek>(
+pub async fn make_epub<W: Write + Seek>(
     stories: &[Story<'_>],
     title: &str,
     output: W,
@@ -159,7 +159,9 @@ pub fn make_epub<W: Write + Seek>(
             if image.is_empty() {
                 continue;
             }
-            let data = std::fs::read(format!("media/{image}")).expect("failed to read image");
+            let data = tokio::fs::read(format!("media/{image}"))
+                .await
+                .expect("failed to read image");
             let filename = format!("EPUB/images/{}.jpg", story.news_id);
             zip_bytes_store(&mut zip, &filename, &data);
         }
@@ -186,5 +188,5 @@ async fn test() {
     //let mut buf = Vec::new();
     //let f = std::io::Cursor::new(&mut buf);
     let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
-    make_epub(&stories, "NHK Easier latest stories", f, false, true, true);
+    make_epub(&stories, "NHK Easier latest stories", f, false, true, true).await;
 }

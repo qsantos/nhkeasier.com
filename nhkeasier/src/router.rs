@@ -207,7 +207,8 @@ async fn serve_epub(
         with_furigana,
         with_images,
         with_cjk_font,
-    );
+    )
+    .await;
 
     (
         [

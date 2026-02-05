@@ -8,6 +8,7 @@ use regex::Regex;
 use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 use sqlx::{FromRow, Pool, Sqlite, sqlite::SqliteRow};
+use tokio::io::AsyncWriteExt;
 use tokio::time::Duration;
 use tracing::Instrument;
 
@@ -102,12 +103,13 @@ async fn save_content(
     content: &str,
 ) {
     tracing::debug!("saving HTML to file");
-    let mut c = std::io::Cursor::new(&html);
     let filename = format!("html/{}.html", story.news_id);
-    // TODO: use Tokio fs
-    let mut f = std::fs::File::create(format!("media/{filename}"))
+    let mut f = tokio::fs::File::create(format!("media/{filename}"))
+        .await
         .expect("failed to create file to save HTML");
-    std::io::copy(&mut c, &mut f).expect("failed to save HTML");
+    f.write_all(html.as_bytes())
+        .await
+        .expect("failed to save HTML");
     tracing::debug!("saving content to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
@@ -189,12 +191,12 @@ async fn fetch_image_of_story(
     }
     let content = res.bytes().await.expect("failed to get image contents");
     tracing::debug!("saving image to file");
-    let mut c = std::io::Cursor::new(&content);
     let filename = format!("jpg/{}.jpg", story.news_id);
     let path = format!("media/{filename}");
-    // TODO: use Tokio fs
-    let mut f = std::fs::File::create(&path).expect("failed to create file to save image");
-    std::io::copy(&mut c, &mut f).expect("failed to save image");
+    let mut f = tokio::fs::File::create(&path)
+        .await
+        .expect("failed to create file to save image");
+    f.write_all(&content).await.expect("failed to save image");
     tracing::debug!("making image progressive: mogrify -interlace plane {path}");
     let output = Command::new("mogrify")
         .args(["-interlace", "plane", &path])
