@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::process::Command;
 use std::sync::LazyLock;
 
+use axum::body::Bytes;
 use chrono::NaiveDate;
 use regex::Regex;
 use reqwest::{Client, StatusCode};
@@ -78,23 +79,28 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
     }
 }
 
+async fn download_html(client: &Client, story: &Story<'_>) -> Bytes {
+    let url = format!(
+        "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
+        story.news_id
+    );
+    tracing::debug!("downloading HTML from {url}");
+    let res = client
+        .get(url)
+        .send()
+        .await
+        .expect("failed to download HTML");
+    res.bytes().await.expect("failed to get HTML contents")
+}
+
 async fn html_of_story(pool: &Pool<Sqlite>, client: &Client, story: &Story<'_>) -> String {
     if let Some(webpage) = story.webpage {
         tracing::debug!("getting HTML from database");
         // TODO: use Tokio fs
         std::fs::read_to_string(format!("media/{webpage}")).expect("failed to read existing HTML")
     } else {
-        let url = format!(
-            "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
-            story.news_id
-        );
-        tracing::debug!("downloading HTML from {url}");
-        let res = client
-            .get(url)
-            .send()
-            .await
-            .expect("failed to download HTML");
-        let html = res.bytes().await.expect("failed to get HTML contents");
+        let html = download_html(client, story).await;
+
         tracing::debug!("saving HTML to file");
         let mut c = std::io::Cursor::new(&html);
         let filename = format!("html/{}.html", story.news_id);
