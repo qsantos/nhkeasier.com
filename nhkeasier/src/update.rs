@@ -349,9 +349,9 @@ async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Erro
                 } else {
                     tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
-                extract_story_content(pool, client, &story)
-                    .await
-                    .expect("failed to extract content");
+                if extract_story_content(pool, client, &story).await.is_err() {
+                    tracing::warn!("failed to extract content for story id={}", story.id);
+                }
                 fetch_image_of_story(pool, client, info, &story).await;
                 fetch_voice_of_story(pool, voice_token, info, &story).await;
             }
