@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use std::process::Command;
 use std::sync::LazyLock;
 
-use axum::body::Bytes;
 use chrono::NaiveDate;
 use regex::Regex;
 use reqwest::{Client, StatusCode};
@@ -79,7 +78,7 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
     }
 }
 
-async fn download_html(client: &Client, story: &Story<'_>) -> Bytes {
+async fn download_html(client: &Client, story: &Story<'_>) -> String {
     let url = format!(
         "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
         story.news_id
@@ -90,10 +89,18 @@ async fn download_html(client: &Client, story: &Story<'_>) -> Bytes {
         .send()
         .await
         .expect("failed to download HTML");
-    res.bytes().await.expect("failed to get HTML contents")
+    let bytes = res.bytes().await.expect("failed to get HTML contents");
+    tracing::debug!("decoding UTF-8 HTML");
+    String::from_utf8(bytes.into()).expect("failed to decode HTML")
 }
 
-async fn save_html(pool: &Pool<Sqlite>, story: &Story<'_>, html: &Bytes) {
+async fn save_content(
+    pool: &Pool<Sqlite>,
+    story: &Story<'_>,
+    html: &str,
+    content_with_ruby: &str,
+    content: &str,
+) {
     tracing::debug!("saving HTML to file");
     let mut c = std::io::Cursor::new(&html);
     let filename = format!("html/{}.html", story.news_id);
@@ -101,29 +108,19 @@ async fn save_html(pool: &Pool<Sqlite>, story: &Story<'_>, html: &Bytes) {
     let mut f = std::fs::File::create(format!("media/{filename}"))
         .expect("failed to create file to save HTML");
     std::io::copy(&mut c, &mut f).expect("failed to save HTML");
-    tracing::debug!("saving HTML to database");
+    tracing::debug!("saving content to database");
     // TODO: no need to wait for query to finish
     sqlx::query!(
-        "UPDATE nhkeasier_story SET webpage = $1 WHERE id = $2",
+        "UPDATE nhkeasier_story SET webpage = $1, content_with_ruby = $2, content = $3 WHERE id = $4",
         filename,
+        content_with_ruby,
+        content,
         story.id
     )
     .execute(pool)
     .await
-    .expect("failed to update webpage (story was removed from database while updating it)");
-}
-
-async fn html_of_story(pool: &Pool<Sqlite>, client: &Client, story: &Story<'_>) -> String {
-    if let Some(webpage) = story.webpage {
-        tracing::debug!("getting HTML from database");
-        // TODO: use Tokio fs
-        std::fs::read_to_string(format!("media/{webpage}")).expect("failed to read existing HTML")
-    } else {
-        let html = download_html(client, story).await;
-        save_html(pool, story, &html).await;
-        tracing::debug!("decoding UTF-8 HTML");
-        String::from_utf8(html.into()).expect("failed to decode HTML")
-    }
+    .expect("failed to update content (story was removed from database while updating it)");
+    tracing::debug!("saved content to database");
 }
 
 fn raw_content_of_html(html: &str) -> Result<String, ()> {
@@ -148,24 +145,17 @@ pub async fn extract_story_content(
         tracing::debug!("content already present");
         return Ok(());
     }
-    let html = html_of_story(pool, client, story).await;
+    if let Some(webpage) = story.webpage {
+        tracing::warn!("no content, but webpage is {webpage}, skipping");
+        return Ok(());
+    }
+    let html = download_html(client, story).await;
     tracing::debug!("extracting content");
     let raw_content = raw_content_of_html(&html)?;
     let content_with_ruby = clean_up_html(&raw_content);
     let content_with_ruby = content_with_ruby.trim();
     let content = crate::remove_ruby(content_with_ruby);
-    tracing::debug!("saving content to database");
-    // TODO: no need to wait for query to finish
-    sqlx::query!(
-        "UPDATE nhkeasier_story SET content_with_ruby = $1, content = $2 WHERE id = $3",
-        content_with_ruby,
-        content,
-        story.id
-    )
-    .execute(pool)
-    .await
-    .expect("failed to update content (story was removed from database while updating it)");
-    tracing::debug!("saved content to database");
+    save_content(pool, story, &html, content_with_ruby, content.as_ref()).await;
     tracing::info!("found content for story");
     Ok(())
 }
