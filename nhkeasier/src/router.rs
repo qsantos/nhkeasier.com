@@ -530,7 +530,8 @@ struct ContactForm {
 async fn contact_send(form: extract::Form<ContactForm>) -> impl IntoResponse {
     crate::send_email_async(
         &form.subject,
-        format!("From: {}\n\n{}", form.from_email, form.message),
+        form.message.to_string(),
+        Some(&form.from_email),
     )
     .await;
     Redirect::to("/contact/sent/")

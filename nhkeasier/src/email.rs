@@ -4,13 +4,17 @@ use lettre::{
     AsyncSmtpTransport, AsyncTransport, Message, SmtpTransport, Tokio1Executor, Transport,
 };
 
-fn send_email_common(subject: &str, body: String) -> (Message, String, Credentials) {
+fn send_email_common(
+    subject: &str,
+    body: String,
+    reply_to: Option<&str>,
+) -> (Message, String, Credentials) {
     let host = std::env::var("EMAIL_HOST").expect("missing environment variable EMAIL_HOST");
     let user = std::env::var("EMAIL_USER").expect("missing environment variable EMAIL_USER");
     let password =
         std::env::var("EMAIL_PASSWORD").expect("missing environment variable EMAIL_PASSWORD");
 
-    let message = Message::builder()
+    let mut message = Message::builder()
         .from(
             "NHK Easier <bugs@nhkeasier.com>"
                 .parse()
@@ -20,16 +24,20 @@ fn send_email_common(subject: &str, body: String) -> (Message, String, Credentia
             .parse()
             .expect("failed to parse to address"))
         .subject(format!("[NHK Easier] {subject}"))
-        .header(ContentType::TEXT_PLAIN)
-        .body(body)
-        .expect("failed to create email message");
+        .header(ContentType::TEXT_PLAIN);
+    if let Some(reply_to) = reply_to
+        && let Ok(reply_to) = reply_to.parse()
+    {
+        message = message.reply_to(reply_to);
+    }
+    let message = message.body(body).expect("failed to create email message");
 
     let creds = Credentials::new(user, password);
     (message, host, creds)
 }
 
-pub fn send_email_sync(subject: &str, body: String) {
-    let (message, host, creds) = send_email_common(subject, body);
+pub fn send_email_sync(subject: &str, body: String, reply_to: Option<&str>) {
+    let (message, host, creds) = send_email_common(subject, body, reply_to);
     let mailer = SmtpTransport::relay(&host)
         .expect("failed to create email transport (sync)")
         .credentials(creds)
@@ -37,8 +45,8 @@ pub fn send_email_sync(subject: &str, body: String) {
     mailer.send(&message).expect("failed to send email (sync)");
 }
 
-pub async fn send_email_async(subject: &str, body: String) {
-    let (message, host, creds) = send_email_common(subject, body);
+pub async fn send_email_async(subject: &str, body: String, reply_to: Option<&str>) {
+    let (message, host, creds) = send_email_common(subject, body, reply_to);
     let mailer = AsyncSmtpTransport::<Tokio1Executor>::relay(&host)
         .expect("failed to create email transport (async)")
         .credentials(creds)

@@ -45,6 +45,7 @@ impl<S: Subscriber> Layer<S> for EmailLayer {
         crate::send_email_sync(
             &format!("{level} {message}"),
             format!("{file}:{line}\n{:#?}", visitor.fields),
+            None,
         )
     }
 }
