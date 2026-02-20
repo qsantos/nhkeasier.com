@@ -41,7 +41,11 @@ impl<S: Subscriber> Layer<S> for EmailLayer {
         let line = meta.line().unwrap_or(0);
         let mut visitor = VecCollectVisitor::new();
         event.record(&mut visitor);
-        let (_, message) = &visitor.fields[0];
+        let message = if let Some(field) = visitor.fields.first() {
+            field.1.as_ref()
+        } else {
+            "<empty>"
+        };
         crate::send_email_sync(
             &format!("{level} {message}"),
             format!("{file}:{line}\n{:#?}", visitor.fields),
