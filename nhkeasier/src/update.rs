@@ -79,7 +79,7 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
     }
 }
 
-async fn download_html(client: &Client, story: &Story<'_>) -> String {
+async fn download_html(client: &Client, story: &Story<'_>) -> Result<String, ()> {
     let url = format!(
         "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
         story.news_id
@@ -90,9 +90,18 @@ async fn download_html(client: &Client, story: &Story<'_>) -> String {
         .send()
         .await
         .expect("failed to download HTML");
+    let status = res.status();
+    if status != StatusCode::OK {
+        tracing::warn!("received {status} from server");
+        return Err(());
+    }
     let bytes = res.bytes().await.expect("failed to get HTML contents");
     tracing::debug!("decoding UTF-8 HTML");
-    String::from_utf8(bytes.into()).expect("failed to decode HTML")
+    let Ok(html) = String::from_utf8(bytes.into()) else {
+        tracing::warn!("failed to decode HTML");
+        return Err(());
+    };
+    Ok(html)
 }
 
 async fn save_content(
@@ -150,7 +159,7 @@ pub async fn extract_story_content(
         tracing::warn!("no content, but webpage is {webpage}, skipping");
         return Ok(());
     }
-    let html = download_html(client, story).await;
+    let html = download_html(client, story).await?;
     tracing::debug!("extracting content");
     let raw_content = raw_content_of_html(&html)?;
     let content_with_ruby = clean_up_html(&raw_content);
