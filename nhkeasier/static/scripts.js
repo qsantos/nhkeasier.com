@@ -412,7 +412,7 @@ function iter_deinflections(word, callback) {
             const rreason = rule[3];
 
             // check types match
-            if (wtype & rtype === 0) {
+            if ((wtype & rtype) === 0) {
                 continue;
             }
             // check suffix matches
