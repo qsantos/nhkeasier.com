@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package version="3.0" unique-identifier="epub-id-1" prefix="ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/" xmlns="http://www.idpf.org/2007/opf">
-  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-    <dc:identifier>urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7</dc:identifier>
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <dc:identifier id="epub-id-1">urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7</dc:identifier>
     <dc:title>{{ title }}</dc:title>
     <dc:date>{{ now.to_rfc3339()|safe }}</dc:date>
     <dc:language>ja</dc:language>
-    <dc:creator opf:role="aut">Japan Broadcasting Corporation</dc:creator>
-    <dc:contributor opf:role="edc">{{ title }}</dc:contributor>
+    <dc:creator id="creator">Japan Broadcasting Corporation</dc:creator>
+    <meta refines="#creator" property="role" scheme="marc:relators">aut</meta>
+    <dc:contributor id="contributor">{{ title }}</dc:contributor>
+    <meta refines="#contributor" property="role" scheme="marc:relators">edt</meta>
+    <meta property="dcterms:modified">{{ now.format("%Y-%m-%dT%H:%M:%SZ")|safe }}</meta>
     <meta name="cover" content="images/logo.png" />
   </metadata>
   <manifest>

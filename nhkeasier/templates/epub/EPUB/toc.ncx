@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/" xml:lang="ja">
   <head>
-    <title>{{ title }}</title>
+    <meta name="dtb:uid" content="urn:uuid:078805dd-05b4-471b-8f04-532df82b1aa7"/>
   </head>
   <docTitle>
     <text>{{ title }}</text>
   </docTitle>
   <navMap>
 {%- for story in stories %}
-    <navPoint>
+    <navPoint id="navPoint-{{ loop.index }}">
       <navLabel>
           <text>{{ story.published.date().to_string()|safe }}: {{ story.title }}</text>
       </navLabel>

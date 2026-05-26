@@ -58,9 +58,18 @@ mod filters {
             .parse_string(content.as_bytes())
             .expect("failed to parse HTML");
         let html = document.get_root_element().expect("no root element");
-        let mut body = html.get_first_child().expect("no body");
-        body.set_name("div").expect("failed to rename body to div");
-        Ok(document.node_to_string(&body))
+        let body = html
+            .get_child_elements()
+            .into_iter()
+            .find(|n| n.get_name() == "body")
+            .expect("no body element");
+        let mut result = String::new();
+        let mut child_opt = body.get_first_child();
+        while let Some(child) = child_opt {
+            result.push_str(&document.node_to_string(&child));
+            child_opt = child.get_next_sibling();
+        }
+        Ok(result)
     }
 }
 
