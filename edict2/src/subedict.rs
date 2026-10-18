@@ -1,4 +1,3 @@
-use std::borrow::Cow;
 use std::include_str;
 use std::sync::LazyLock;
 use std::time::Instant;
@@ -37,7 +36,7 @@ impl SubEdictCreator {
         )
     }
 
-    pub fn from(&self, content: &str) -> Vec<Cow<'_, str>> {
+    pub fn from(&self, content: &str) -> Vec<String> {
         self.with(|fields| {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
@@ -54,14 +53,13 @@ impl SubEdictCreator {
                 if let Some((key, entries)) = fields.edict2.lookup(&candidate.word as &str) {
                     for entry in entries {
                         if entry.type_ & candidate.type_ != 0 {
-                            matches.push((entry.line, key));
+                            matches.push((entry.line, key, entry.type_));
                         }
                     }
                 }
             }
 
-            let lines =
-                keep_displayed_lines(matches, is_lone_kana_of_kanji_word, strip_hidden_glosses);
+            let lines = format_lines(matches, is_lone_kana_of_kanji_word);
             tracing::debug!(
                 "sub-edict with {} entries generated in {:?}",
                 lines.len(),
@@ -110,69 +108,62 @@ fn is_lone_kana_of_kanji_word(line: &str, key: &str) -> bool {
     is_kana && line.contains(" [") && !line.contains("(uk)")
 }
 
-/// Remove the trailing glosses that are never displayed; for example:
-/// 日本 [にほん(P);にっぽん] /(n) Japan/(P)/EntL1582710X/ → 日本 [にほん(P);にっぽん] /(n) Japan/
-fn strip_hidden_glosses(mut line: &str) -> &str {
-    if let Some(i) = line.rfind("/EntL") {
-        line = &line[..=i];
-    }
-    if line.ends_with("/(P)/") {
-        line = &line[..line.len() - "(P)/".len()];
-    }
-    line
-}
-
-/// Group the (line, key) matches by line, and only keep the headwords that can be displayed
+/// Group the (line, key, type) matches by line, and format the lines for the client (see
+/// format_line)
 ///
 /// Lines whose matches are all unlikely are dropped.
-fn keep_displayed_lines<'a>(
-    mut matches: Vec<(&'a str, &'a str)>,
+fn format_lines<'a>(
+    mut matches: Vec<(&'a str, &'a str, u32)>,
     is_unlikely: impl Fn(&str, &str) -> bool,
-    transform: impl Fn(&'a str) -> &'a str,
-) -> Vec<Cow<'a, str>> {
+) -> Vec<String> {
     matches.sort_unstable();
     matches.dedup();
     let mut keys = Vec::new();
     matches
-        .chunk_by(|(line1, _), (line2, _)| line1 == line2)
-        .filter(|chunk| !chunk.iter().all(|(line, key)| is_unlikely(line, key)))
+        .chunk_by(|(line1, _, _), (line2, _, _)| line1 == line2)
+        .filter(|chunk| !chunk.iter().all(|(line, key, _)| is_unlikely(line, key)))
         .map(|chunk| {
+            let (line, _, type_) = chunk[0];
             keys.clear();
-            keys.extend(chunk.iter().map(|(_, key)| *key));
-            keep_displayed_headwords(transform(chunk[0].0), &keys)
+            keys.extend(chunk.iter().map(|(_, key, _)| *key));
+            format_line(line, &keys, type_)
         })
         .collect()
 }
 
-/// Keep only the headwords that the client can display, without their markers
+/// Format a line of EDICT for the client, as four fields separated by tabs: the writings, the
+/// readings, the type (without bit 7, empty if zero), and the meanings, as displayed; for example:
+/// 行く(P);往く(rK) [いく(P);ゆく(P)] /(v5k-s,vi) (1) to go/to move/(v5k-s,vi) (2) to leave/…
+/// → 行く\tいく;ゆく\t66\tto go; to move/to leave/…
 ///
-/// When hovering a writing, the client displays it with all the readings; when hovering a reading,
-/// it displays all the writings with it; so other headwords are never displayed. For example, when
-/// the text only contains 行く:
-/// 行く(P);往く(rK) [いく(P);ゆく(P)] /… → 行く [いく;ゆく] /…
-fn keep_displayed_headwords<'a>(line: &'a str, keys: &[&str]) -> Cow<'a, str> {
+/// Only the headwords that the client can display are kept: when hovering a writing, the client
+/// displays it with all the readings; when hovering a reading, it displays all the writings with
+/// it; so other headwords are never displayed.
+fn format_line(line: &str, keys: &[&str], type_: u32) -> String {
     let (headwords, glosses) = line
         .split_once(" /")
         .expect("Edict::parse should have checked for \" /\"");
-    if !headwords.contains([';', '(']) {
-        // single writing (and single reading), without markers: nothing to remove
-        return Cow::Borrowed(line);
-    }
     let mut ret = String::with_capacity(line.len());
     if let Some((writings, readings)) = headwords.split_once(" [") {
         let readings = readings.trim_end_matches(']');
         let writing_matched = iter_forms(writings).any(|form| keys.contains(&form));
         let reading_matched = iter_forms(readings).any(|form| keys.contains(&form));
         push_forms(&mut ret, writings, keys, reading_matched);
-        ret.push_str(" [");
+        ret.push('\t');
         push_forms(&mut ret, readings, keys, writing_matched);
-        ret.push(']');
     } else {
+        // only readings
+        ret.push('\t');
         push_forms(&mut ret, headwords, keys, false);
     }
-    ret.push_str(" /");
-    ret.push_str(glosses);
-    Cow::Owned(ret)
+    ret.push('\t');
+    let type_ = type_ & !(1 << 7);
+    if type_ != 0 {
+        ret.push_str(&type_.to_string());
+    }
+    ret.push('\t');
+    push_meanings(&mut ret, glosses.strip_suffix('/').unwrap_or(glosses));
+    ret
 }
 
 /// Iterate over the forms of a list of headwords, without their markers (like Edict::parse)
@@ -192,6 +183,94 @@ fn push_forms(ret: &mut String, headwords: &str, keys: &[&str], keep_all: bool) 
     }
 }
 
+/// Group glosses into meanings separated by '/', skipping markers and the tags of each gloss; for
+/// example: (n) (1) dot/spot/(n) (2) mark/(P)/EntL1234X → dot; spot/mark
+fn push_meanings(ret: &mut String, glosses: &str) {
+    let mut meaning_is_empty = true;
+    // NOTE: the client used to replace '/' with "; ", then split on "; "; this gives the same result
+    for gloss in glosses.split('/').flat_map(split_semicolon_space) {
+        if gloss == "(P)" || gloss.starts_with("EntL") {
+            continue;
+        }
+        let (starts_meaning, gloss) = split_gloss_tags(gloss);
+        if !meaning_is_empty {
+            ret.push_str(if starts_meaning { "/" } else { "; " });
+        }
+        ret.push_str(gloss);
+        meaning_is_empty = false;
+    }
+}
+
+/// Same as s.split("; "), but faster for short strings
+fn split_semicolon_space(s: &str) -> impl Iterator<Item = &str> {
+    let mut rest = Some(s);
+    std::iter::from_fn(move || {
+        let s = rest?;
+        let mut start = 0;
+        while let Some(i) = s[start..].find(';') {
+            let i = start + i;
+            if s[i + 1..].starts_with(' ') {
+                rest = Some(&s[i + 2..]);
+                return Some(&s[..i]);
+            }
+            start = i + 1;
+        }
+        rest = None;
+        Some(s)
+    })
+}
+
+/// Split the tags at the start of a gloss: an optional part-of-speech (one or two characters), an
+/// optional meaning number, and any other tags; return whether there was a meaning number (which
+/// starts a new meaning) and the rest of the gloss
+///
+/// This is equivalent to /^(?:\([^0-9]\S?\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/, which the
+/// client used, but much faster.
+fn split_gloss_tags(gloss: &str) -> (bool, &str) {
+    let mut rest = gloss;
+
+    // optional part-of-speech
+    if let Some(after) = rest.strip_prefix('(') {
+        let mut chars = after.chars();
+        if let Some(c1) = chars.next()
+            && !c1.is_ascii_digit()
+        {
+            let after_c1 = chars.as_str();
+            let mut chars = after_c1.chars();
+            if let Some(c2) = chars.next()
+                && !c2.is_whitespace()
+                && let Some(after_tag) = chars.as_str().strip_prefix(") ")
+            {
+                rest = after_tag;
+            } else if let Some(after_tag) = after_c1.strip_prefix(") ") {
+                rest = after_tag;
+            }
+        }
+    }
+
+    // optional meaning number
+    let mut has_number = false;
+    if let Some(after) = rest.strip_prefix('(') {
+        let digits = after.bytes().take_while(u8::is_ascii_digit).count();
+        if digits != 0
+            && let Some(after_tag) = after[digits..].strip_prefix(") ")
+        {
+            rest = after_tag;
+            has_number = true;
+        }
+    }
+
+    // other tags
+    while rest.starts_with('(') {
+        let Some(i) = rest[1..].find(") ") else {
+            break;
+        };
+        rest = &rest[1 + i + ") ".len()..];
+    }
+
+    (has_number, rest)
+}
+
 #[self_referencing]
 pub struct SubEnamdictCreator {
     enamdict_data: &'static str,
@@ -208,7 +287,7 @@ impl SubEnamdictCreator {
     /// Names are only looked up for strings that are not also words in EDICT, since those are
     /// much more likely to be meant as words (e.g. 森 is “forest” more often than the surname),
     /// and that look like names (see is_plausible_name)
-    pub fn from(&self, content: &str, edict: &SubEdictCreator) -> Vec<Cow<'_, str>> {
+    pub fn from(&self, content: &str, edict: &SubEdictCreator) -> Vec<String> {
         self.with(|fields| {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
@@ -225,12 +304,12 @@ impl SubEnamdictCreator {
                 }
                 if let Some((key, entries)) = fields.enamdict.lookup(fragment as &str) {
                     for entry in entries.iter() {
-                        matches.push((entry.line, key));
+                        matches.push((entry.line, key, 0));
                     }
                 }
             }
 
-            let lines = keep_displayed_lines(matches, |_, _| false, |line| line);
+            let lines = format_lines(matches, |_, _| false);
             tracing::debug!(
                 "sub-enamdict with {} entries generated in {:?}",
                 lines.len(),

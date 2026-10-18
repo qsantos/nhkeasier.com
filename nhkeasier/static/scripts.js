@@ -236,55 +236,37 @@ function dict_set_or_append(dict, key, value) {
     dict[key].push(value);
 }
 
+// each line has four fields separated by tabs: the writings, the readings, the type (without bit 7)
+// and the meanings; for example: 行く\tいく;ゆく\t66\tto go; to move/to leave
 function parse_edict(dst, data) {
-    const edict_line_pattern = /^(\S*)\s+(?:\[(.*?)\])?\s*\/(.*)\//gm;
-    let match;
-    while ((match = edict_line_pattern.exec(data))) {
-        const glosses = match[3].replace(/\//g, '; ');
-
-        let type = 1<<7;
-        if (glosses.search('v1') >= 0)    { type |= 1<<0; }
-        if (glosses.search('v5') >= 0)    { type |= 1<<1; }
-        if (glosses.search('v5k-s') >= 0) { type |= 1<<6; }
-        if (glosses.search('adj-i') >= 0) { type |= 1<<2; }
-        if (glosses.search('vk') >= 0)    { type |= 1<<3; }
-        if (glosses.search('vs') >= 0)    { type |= 1<<4; }
-
-        const common_marker = /\([^)]*\)/gm;
-
-        if (match[2]) {  // kanjis and kanas are given
-            const kanjis = match[1].replace(common_marker, '').split(';');
-            const kanas = match[2].replace(common_marker, '').split(';');
-
-            kanjis.forEach(function(kanji) {
-                dict_set_or_append(dst, kanji, {
-                    'kanjis': [kanji],
-                    'kanas': kanas,
-                    'glosses': glosses,
-                    'type': type,
-                });
-            });
-
-            kanas.forEach(function(kana) {
-                dict_set_or_append(dst, kana, {
-                    'kanjis': kanjis,
-                    'kanas': [kana],
-                    'glosses': glosses,
-                    'type': type,
-                });
-            });
-        } else {  // only kanas
-            const kanas = match[1].replace(common_marker, '').split(';');
-            kanas.forEach(function(kana) {
-                dict_set_or_append(dst, kana, {
-                    'kanjis': [],
-                    'kanas': [kana],
-                    'glosses': glosses,
-                    'type': type,
-                });
-            });
+    data.split('\n').forEach(function(line) {
+        const fields = line.split('\t');
+        if (fields.length !== 4) {
+            return;
         }
-    }
+        const kanjis = fields[0] ? fields[0].split(';') : [];
+        const kanas = fields[1].split(';');
+        const type = (parseInt(fields[2]) || 0) | 1<<7;
+        const meanings = fields[3].split('/');
+
+        kanjis.forEach(function(kanji) {
+            dict_set_or_append(dst, kanji, {
+                'kanjis': [kanji],
+                'kanas': kanas,
+                'meanings': meanings,
+                'type': type,
+            });
+        });
+
+        kanas.forEach(function(kana) {
+            dict_set_or_append(dst, kana, {
+                'kanjis': kanjis,
+                'kanas': [kana],
+                'meanings': meanings,
+                'type': type,
+            });
+        });
+    });
 }
 
 function load_edict(data) {
@@ -456,29 +438,9 @@ function append_meaning(html, sense, reason) {
     }
     html.push('<dd>');
 
-    // extract meanings
-    const meanings = [];
-    let last_meaning = [];
-    sense.glosses.split('; ').forEach(function(gloss) {
-        if (gloss == '(P)' || gloss.startsWith('EntL')) {
-            return;
-        }
-
-        const match = /^(?:\(([^0-9]\S?)\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/.exec(gloss);
-        const nature = match[1];
-        const meaning_id = match[2];
-        const meaning = match[3];
-        if (meaning_id !== undefined && last_meaning.length !== 0) {
-            meanings.push(last_meaning.join('; '));
-            last_meaning = [];
-        }
-        last_meaning.push(meaning)
-    });
-    meanings.push(last_meaning.join('; '));
-
     // list meanings
     html.push('<ol>');
-    meanings.forEach(function(meaning) {
+    sense.meanings.forEach(function(meaning) {
         html.push('<li>');
         html.push(meaning);
         html.push('</li>');
