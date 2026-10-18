@@ -494,6 +494,14 @@ async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoR
     }
 }
 
+async fn deinflect() -> impl IntoResponse {
+    // NOTE: the URL in scripts.js is versioned, update it when the rules change
+    (
+        [(header::CACHE_CONTROL, "public, max-age=31536000, immutable")],
+        DEINFLECT_DATA,
+    )
+}
+
 async fn about() -> impl IntoResponse {
     Html(
         AboutTemplate {
@@ -598,7 +606,7 @@ pub fn router(state: State) -> Router {
             "/favicon.ico",
             ServeFile::new("nhkeasier/static/favicon.ico"),
         )
-        .route("/static/deinflect.dat", get(async || DEINFLECT_DATA))
+        .route("/static/deinflect.dat", get(deinflect))
         .nest_service("/media", ServeDir::new("media"))
         .nest_service("/static", ServeDir::new("nhkeasier/static"))
         .fallback(handle_not_found)
