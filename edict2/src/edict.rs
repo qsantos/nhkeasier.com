@@ -25,15 +25,18 @@ impl<'a> Edict<'a> {
                 lineno,
                 expected: " /",
             })?;
-            let type_ = if let Some(rest) = meanings.strip_prefix('(') {
-                let (glosses, _) = rest.split_once(')').ok_or(Error::ParseError {
-                    lineno,
-                    expected: ")",
-                })?;
-                type_from_glosses(glosses)
-            } else {
-                1 << 7
-            };
+            // each sense may start with its own part-of-speech tags; for example:
+            // たい /(aux-adj) (1) want to ... do something/…/(suf,adj-i) (3) very .../(P)/EntL2017560X/
+            let mut type_ = 1 << 7;
+            for sense in meanings.split('/') {
+                if let Some(rest) = sense.strip_prefix('(') {
+                    let (glosses, _) = rest.split_once(')').ok_or(Error::ParseError {
+                        lineno,
+                        expected: ")",
+                    })?;
+                    type_ |= type_from_glosses(glosses);
+                }
+            }
 
             if let Some((writings, rest)) = line.split_once(" [") {
                 // both writings, and readings (within brackets); for example:
