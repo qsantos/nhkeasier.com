@@ -64,8 +64,11 @@ impl<'a> Edict<'a> {
         Ok(Edict { entries })
     }
 
-    pub fn lookup(&self, word: &str) -> Option<&[EdictEntry<'_>]> {
-        self.entries.get(word).map(|b| b.as_ref())
+    /// Return the entries for the given word, along with the matching key in the dictionary
+    pub fn lookup(&self, word: &str) -> Option<(&'a str, &[EdictEntry<'a>])> {
+        self.entries
+            .get_key_value(word)
+            .map(|(key, entries)| (*key, entries.as_ref()))
     }
 }
 
