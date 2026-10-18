@@ -1,11 +1,16 @@
 use std::borrow::Cow;
 use std::include_str;
+use std::sync::LazyLock;
 use std::time::Instant;
 
 use gxhash::HashSet;
 use ouroboros::self_referencing;
+use regex::Regex;
 
 use crate::{Deinflector, Edict, Error, iter_fragments};
+
+static KATAKANA_RUN_PATTERN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("[ァ-ヺー]+").expect("invalid KATAKANA_RUN_PATTERN regex"));
 
 #[self_referencing]
 pub struct SubEdictCreator {
@@ -72,6 +77,26 @@ impl SubEdictCreator {
     pub fn is_word(&self, word: &str) -> bool {
         self.with_edict2(|edict2| edict2.lookup(word).is_some())
     }
+}
+
+/// Whether a string from the text looks like a name, as opposed to a fragment of a word
+///
+/// Single characters and strings with hiragana mostly match given names by their readings (e.g.
+/// のあ for 乃亜, 乃愛, etc.), and katakana names must not be part of a longer katakana word
+/// (e.g. ツカ in カムチャツカ).
+fn is_plausible_name(fragment: &str, katakana_runs: &HashSet<&str>) -> bool {
+    let mut chars = fragment.chars();
+    if chars.next().is_none() || chars.next().is_none() {
+        return false;
+    }
+    if fragment
+        .chars()
+        .any(|c| matches!(c, '\u{3040}'..='\u{309f}'))
+    {
+        return false;
+    }
+    let is_katakana = fragment.chars().all(|c| matches!(c, 'ァ'..='ヺ' | 'ー'));
+    !is_katakana || katakana_runs.contains(fragment)
 }
 
 /// Whether a single kana matched the reading of a word usually written in kanji; for example, し
@@ -181,16 +206,21 @@ impl SubEnamdictCreator {
     }
 
     /// Names are only looked up for strings that are not also words in EDICT, since those are
-    /// much more likely to be meant as words (e.g. 森 is “forest” more often than the surname)
+    /// much more likely to be meant as words (e.g. 森 is “forest” more often than the surname),
+    /// and that look like names (see is_plausible_name)
     pub fn from(&self, content: &str, edict: &SubEdictCreator) -> Vec<Cow<'_, str>> {
         self.with(|fields| {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
+            let katakana_runs: HashSet<&str> = KATAKANA_RUN_PATTERN
+                .find_iter(content)
+                .map(|m| m.as_str())
+                .collect();
 
             // (line, key) pairs, to know through which keys each line was matched
             let mut matches = Vec::new();
             for fragment in fragments {
-                if edict.is_word(fragment) {
+                if !is_plausible_name(fragment, &katakana_runs) || edict.is_word(fragment) {
                     continue;
                 }
                 if let Some((key, entries)) = fields.enamdict.lookup(fragment as &str) {
