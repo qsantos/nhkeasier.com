@@ -55,7 +55,8 @@ impl SubEdictCreator {
                 }
             }
 
-            let lines = keep_displayed_lines(matches, strip_hidden_glosses);
+            let lines =
+                keep_displayed_lines(matches, is_lone_kana_of_kanji_word, strip_hidden_glosses);
             tracing::debug!(
                 "sub-edict with {} entries generated in {:?}",
                 lines.len(),
@@ -64,6 +65,17 @@ impl SubEdictCreator {
             lines
         })
     }
+}
+
+/// Whether a single kana matched the reading of a word usually written in kanji; for example, し
+/// for 氏 [し]; in the text, such a kana is almost always part of a longer word, or grammar
+fn is_lone_kana_of_kanji_word(line: &str, key: &str) -> bool {
+    let mut chars = key.chars();
+    let (Some(c), None) = (chars.next(), chars.next()) else {
+        return false;
+    };
+    let is_kana = matches!(c, '\u{3040}'..='\u{30ff}');
+    is_kana && line.contains(" [") && !line.contains("(uk)")
 }
 
 /// Remove the trailing glosses that are never displayed; for example:
@@ -79,8 +91,11 @@ fn strip_hidden_glosses(mut line: &str) -> &str {
 }
 
 /// Group the (line, key) matches by line, and only keep the headwords that can be displayed
+///
+/// Lines whose matches are all unlikely are dropped.
 fn keep_displayed_lines<'a>(
     mut matches: Vec<(&'a str, &'a str)>,
+    is_unlikely: impl Fn(&str, &str) -> bool,
     transform: impl Fn(&'a str) -> &'a str,
 ) -> Vec<Cow<'a, str>> {
     matches.sort_unstable();
@@ -88,6 +103,7 @@ fn keep_displayed_lines<'a>(
     let mut keys = Vec::new();
     matches
         .chunk_by(|(line1, _), (line2, _)| line1 == line2)
+        .filter(|chunk| !chunk.iter().all(|(line, key)| is_unlikely(line, key)))
         .map(|chunk| {
             keys.clear();
             keys.extend(chunk.iter().map(|(_, key)| *key));
@@ -172,7 +188,7 @@ impl SubEnamdictCreator {
                 }
             }
 
-            let lines = keep_displayed_lines(matches, |line| line);
+            let lines = keep_displayed_lines(matches, |_, _| false, |line| line);
             tracing::debug!(
                 "sub-enamdict with {} entries generated in {:?}",
                 lines.len(),
