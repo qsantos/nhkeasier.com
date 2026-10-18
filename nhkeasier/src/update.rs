@@ -1,6 +1,5 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
-use std::process::Command;
 use std::sync::LazyLock;
 
 use chrono::NaiveDate;
@@ -9,6 +8,7 @@ use reqwest::{Client, StatusCode};
 use serde::Deserialize;
 use sqlx::{FromRow, Pool, Sqlite, sqlite::SqliteRow};
 use tokio::io::AsyncWriteExt;
+use tokio::process::Command;
 use tokio::time::Duration;
 use tracing::Instrument;
 
@@ -214,11 +214,12 @@ async fn fetch_image_of_story(
     let output = Command::new("mogrify")
         .args(["-interlace", "plane", &path])
         .output()
+        .await
         .expect("failed to call mogrify -interlace plane …");
     if !output.status.success() {
         panic!("failed to make image progressive: {output:?}");
     }
-    make_image_variants(story.news_id);
+    make_image_variants(story.news_id).await;
     tracing::debug!("saving image to database");
     sqlx::query!(
         "UPDATE nhkeasier_story SET image = $1 WHERE id = $2",
@@ -239,11 +240,12 @@ const IMAGE_VARIANT_WIDTHS: [u32; 2] = [640, 1280];
 ///
 /// Images are never upscaled: when the original is not wider than a variant, the variant is a hard
 /// link to the previous one.
-pub fn make_image_variants(news_id: &str) {
+pub async fn make_image_variants(news_id: &str) {
     let original = format!("media/jpg/{news_id}.jpg");
     let output = Command::new("identify")
         .args(["-format", "%w", &original])
         .output()
+        .await
         .expect("failed to call identify");
     let Some(original_width) = String::from_utf8_lossy(&output.stdout)
         .parse::<u32>()
@@ -253,14 +255,20 @@ pub fn make_image_variants(news_id: &str) {
         tracing::warn!("failed to get width of {original}: {output:?}");
         return;
     };
-    std::fs::create_dir_all("media/webp").expect("failed to create media/webp");
+    tokio::fs::create_dir_all("media/webp")
+        .await
+        .expect("failed to create media/webp");
     let mut full_resolution_variant = None;
     for width in IMAGE_VARIANT_WIDTHS {
         let variant = format!("media/webp/{news_id}-{width}.webp");
-        if !std::path::Path::new(&variant).exists() {
+        let exists = tokio::fs::try_exists(&variant)
+            .await
+            .expect("failed to check image variant");
+        if !exists {
             if let Some(full_resolution_variant) = &full_resolution_variant {
                 tracing::debug!("linking {variant} to {full_resolution_variant}");
-                std::fs::hard_link(full_resolution_variant, &variant)
+                tokio::fs::hard_link(full_resolution_variant, &variant)
+                    .await
                     .expect("failed to link image variant");
             } else {
                 tracing::debug!("making image variant {variant}");
@@ -270,6 +278,7 @@ pub fn make_image_variants(news_id: &str) {
                         &original, "-resize", &resize, "-strip", "-quality", "75", &variant,
                     ])
                     .output()
+                    .await
                     .expect("failed to call convert");
                 if !output.status.success() {
                     tracing::warn!("failed to make image variant {variant}: {output:?}");
@@ -284,7 +293,7 @@ pub fn make_image_variants(news_id: &str) {
 }
 
 /// Make the missing WebP variants of all the images in media/jpg
-pub fn make_missing_image_variants() {
+pub async fn make_missing_image_variants() {
     let mut news_ids: Vec<String> = std::fs::read_dir("media/jpg")
         .expect("failed to list media/jpg")
         .map(|entry| entry.expect("failed to list media/jpg").path())
@@ -296,7 +305,7 @@ pub fn make_missing_image_variants() {
         if i % 100 == 0 {
             tracing::info!("making image variants: {i}/{}", news_ids.len());
         }
-        make_image_variants(news_id);
+        make_image_variants(news_id).await;
     }
     tracing::info!("made image variants of {} images", news_ids.len());
 }
@@ -350,6 +359,7 @@ async fn fetch_voice_of_story(
             "vlc://quit",
         ])
         .output()
+        .await
         .expect("failed to call vlc -I dummy …");
     if !output.status.success() {
         panic!("failed to download voice: {output:?}");

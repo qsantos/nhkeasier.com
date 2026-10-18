@@ -45,7 +45,7 @@ async fn main() -> Result<(), edict2::Error> {
     nhkeasier::init_logging();
 
     if args.make_image_variants {
-        nhkeasier::make_missing_image_variants();
+        nhkeasier::make_missing_image_variants().await;
         return Ok(());
     }
 
