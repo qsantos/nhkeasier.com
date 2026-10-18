@@ -24,6 +24,13 @@ static CLEAN_UP_CONTENT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new("<a.*?>|<span.*?>|</a>|</span>|<p></p>").expect("invalid CLEAN_UP_CONTENT_REGEX")
 });
 
+#[derive(Debug)]
+pub enum ExtractContentError {
+    HttpStatus(StatusCode),
+    InvalidUtf8,
+    ContentNotFound,
+}
+
 #[derive(Clone, Debug, Deserialize)]
 struct StoryInfo<'a> {
     // news_id and news_prearranged_time have a predefined format which should never contain
@@ -79,7 +86,7 @@ async fn upsert_story(pool: &Pool<Sqlite>, info: &StoryInfo<'_>) -> (bool, Sqlit
     }
 }
 
-async fn download_html(client: &Client, story: &Story<'_>) -> Result<String, ()> {
+async fn download_html(client: &Client, story: &Story<'_>) -> Result<String, ExtractContentError> {
     let url = format!(
         "http://www3.nhk.or.jp/news/easy/{0}/{0}.html",
         story.news_id
@@ -92,14 +99,12 @@ async fn download_html(client: &Client, story: &Story<'_>) -> Result<String, ()>
         .expect("failed to download HTML");
     let status = res.status();
     if status != StatusCode::OK {
-        tracing::warn!("received {status} from server");
-        return Err(());
+        return Err(ExtractContentError::HttpStatus(status));
     }
     let bytes = res.bytes().await.expect("failed to get HTML contents");
     tracing::debug!("decoding UTF-8 HTML");
     let Ok(html) = String::from_utf8(bytes.into()) else {
-        tracing::warn!("failed to decode HTML");
-        return Err(());
+        return Err(ExtractContentError::InvalidUtf8);
     };
     Ok(html)
 }
@@ -133,12 +138,12 @@ async fn save_content(
     tracing::debug!("saved content to database");
 }
 
-fn raw_content_of_html(html: &str) -> Result<String, ()> {
+fn raw_content_of_html(html: &str) -> Result<String, ExtractContentError> {
     let document = scraper::Html::parse_document(html);
     if let Some(fragment) = document.select(&CONTENT_SELECTOR).next() {
         Ok(fragment.inner_html())
     } else {
-        Err(())
+        Err(ExtractContentError::ContentNotFound)
     }
 }
 
@@ -150,7 +155,7 @@ pub async fn extract_story_content(
     pool: &Pool<Sqlite>,
     client: &Client,
     story: &Story<'_>,
-) -> Result<(), ()> {
+) -> Result<(), ExtractContentError> {
     if story.content_with_ruby.is_some() {
         tracing::debug!("content already present");
         return Ok(());
@@ -357,8 +362,8 @@ async fn update_stories(pool: &Pool<Sqlite>, client: &Client) -> Result<(), Erro
                 } else {
                     tracing::debug!("selected id={} for news_id={}", story.id, story.news_id);
                 }
-                if extract_story_content(pool, client, &story).await.is_err() {
-                    tracing::warn!("failed to extract content for story id={}", story.id);
+                if let Err(e) = extract_story_content(pool, client, &story).await {
+                    tracing::warn!("failed to extract content for story id={}: {e:?}", story.id);
                 }
                 fetch_image_of_story(pool, client, info, &story).await;
                 fetch_voice_of_story(pool, voice_token, info, &story).await;
