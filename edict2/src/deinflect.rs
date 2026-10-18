@@ -36,6 +36,7 @@ struct SuffixToRules<'a>(HashMap<char, (Vec<Rule<'a>>, SuffixToRules<'a>)>);
 //   * bit 2 hints at a い-adjective (marker 'adj-i')
 //   * bit 3 hints at a くる verb (marker 'vk')
 //   * bit 4 hints at a す or する verb (markers starting with 'vs-')
+//   * bit 6 hints at an irregular 五段 verb such as 行く (marker 'v5k-s')
 //   * bit 7 should always be set for words (so that 0xff & wtype != 0 always)
 // for a word, type gives a hint of the expected grammatical class of the word
 // for a rule, type[0:8] gives the required grammatical class of original word

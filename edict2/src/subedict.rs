@@ -18,11 +18,14 @@ pub struct SubEdictCreator {
     deinflector: Deinflector<'this>,
 }
 
+/// Deinflection rules used by SubEdictCreator, to be served to the client so that both agree
+pub const DEINFLECT_DATA: &str = include_str!("../data/deinflect");
+
 impl SubEdictCreator {
     pub fn from_files() -> Result<Self, Error> {
         SubEdictCreator::try_new(
             include_str!("../data/edict2"),
-            include_str!("../data/deinflect"),
+            DEINFLECT_DATA,
             |data| Edict::parse(data),
             |data| Deinflector::parse(data),
         )

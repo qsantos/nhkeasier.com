@@ -8,4 +8,4 @@ pub use deinflect::Deinflector;
 pub use edict::Edict;
 pub use error::Error;
 pub use fragments::iter_fragments;
-pub use subedict::{SubEdictCreator, SubEnamdictCreator};
+pub use subedict::{DEINFLECT_DATA, SubEdictCreator, SubEnamdictCreator};

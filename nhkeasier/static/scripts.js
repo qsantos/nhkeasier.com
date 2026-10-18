@@ -245,6 +245,7 @@ function parse_edict(dst, data) {
         let type = 1<<7;
         if (glosses.search('v1') >= 0)    { type |= 1<<0; }
         if (glosses.search('v5') >= 0)    { type |= 1<<1; }
+        if (glosses.search('v5k-s') >= 0) { type |= 1<<6; }
         if (glosses.search('adj-i') >= 0) { type |= 1<<2; }
         if (glosses.search('vk') >= 0)    { type |= 1<<3; }
         if (glosses.search('vs') >= 0)    { type |= 1<<4; }

@@ -21,7 +21,7 @@ use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
 use tower_http::trace::TraceLayer;
 
-use edict2::{SubEdictCreator, SubEnamdictCreator};
+use edict2::{DEINFLECT_DATA, SubEdictCreator, SubEnamdictCreator};
 
 use crate::{DEBUG, JST, Story};
 
@@ -598,6 +598,7 @@ pub fn router(state: State) -> Router {
             "/favicon.ico",
             ServeFile::new("nhkeasier/static/favicon.ico"),
         )
+        .route("/static/deinflect.dat", get(async || DEINFLECT_DATA))
         .nest_service("/media", ServeDir::new("media"))
         .nest_service("/static", ServeDir::new("nhkeasier/static"))
         .fallback(handle_not_found)
