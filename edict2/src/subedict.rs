@@ -67,6 +67,13 @@ impl SubEdictCreator {
     }
 }
 
+impl SubEdictCreator {
+    /// Whether the word is a key of EDICT (without deinflection)
+    pub fn is_word(&self, word: &str) -> bool {
+        self.with_edict2(|edict2| edict2.lookup(word).is_some())
+    }
+}
+
 /// Whether a single kana matched the reading of a word usually written in kanji; for example, し
 /// for 氏 [し]; in the text, such a kana is almost always part of a longer word, or grammar
 fn is_lone_kana_of_kanji_word(line: &str, key: &str) -> bool {
@@ -173,7 +180,9 @@ impl SubEnamdictCreator {
         SubEnamdictCreator::try_new(include_str!("../data/enamdict"), |data| Edict::parse(data))
     }
 
-    pub fn from(&self, content: &str) -> Vec<Cow<'_, str>> {
+    /// Names are only looked up for strings that are not also words in EDICT, since those are
+    /// much more likely to be meant as words (e.g. 森 is “forest” more often than the surname)
+    pub fn from(&self, content: &str, edict: &SubEdictCreator) -> Vec<Cow<'_, str>> {
         self.with(|fields| {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
@@ -181,6 +190,9 @@ impl SubEnamdictCreator {
             // (line, key) pairs, to know through which keys each line was matched
             let mut matches = Vec::new();
             for fragment in fragments {
+                if edict.is_word(fragment) {
+                    continue;
+                }
                 if let Some((key, entries)) = fields.enamdict.lookup(fragment as &str) {
                     for entry in entries.iter() {
                         matches.push((entry.line, key));

@@ -369,7 +369,9 @@ async fn archive(
     let edict = edict.join("\n");
     tracing::debug!("edict joined in {:?}", start.elapsed());
 
-    let enamdict = state.sub_enamdict_creator.from(&content);
+    let enamdict = state
+        .sub_enamdict_creator
+        .from(&content, &state.sub_edict_creator);
     let start = Instant::now();
     let enamdict = enamdict.join("\n");
     tracing::debug!("enamdict joined in {:?}", start.elapsed());
@@ -454,7 +456,9 @@ async fn story(
     let edict = edict.join("\n");
     tracing::debug!("edict joined in {:?}", start.elapsed());
 
-    let enamdict = state.sub_enamdict_creator.from(&content);
+    let enamdict = state
+        .sub_enamdict_creator
+        .from(&content, &state.sub_edict_creator);
     let start = Instant::now();
     let enamdict = enamdict.join("\n");
     tracing::debug!("enamdict joined in {:?}", start.elapsed());
