@@ -362,7 +362,7 @@ async fn archive(
         .flat_map(|story| story.content)
         .collect::<Vec<_>>()
         .join("\n");
-    let content = titles + &contents;
+    let content = titles + "\n" + &contents;
 
     let edict = state.sub_edict_creator.from(&content);
     let start = Instant::now();
@@ -443,21 +443,21 @@ async fn story(
     .await
     .expect("failed to query database for next story");
 
-    let edict = story.content.map(|content| {
-        let edict = state.sub_edict_creator.from(content);
-        let start = Instant::now();
-        let edict = edict.join("\n");
-        tracing::debug!("edict joined in {:?}", start.elapsed());
-        edict
-    });
+    // the title is displayed and hoverable too
+    let content = match story.content {
+        Some(content) => format!("{}\n{}", story.title, content),
+        None => story.title.to_string(),
+    };
 
-    let enamdict = story.content.map(|content| {
-        let enamdict = state.sub_enamdict_creator.from(content);
-        let start = Instant::now();
-        let enamdict = enamdict.join("\n");
-        tracing::debug!("enamdict joined in {:?}", start.elapsed());
-        enamdict
-    });
+    let edict = state.sub_edict_creator.from(&content);
+    let start = Instant::now();
+    let edict = edict.join("\n");
+    tracing::debug!("edict joined in {:?}", start.elapsed());
+
+    let enamdict = state.sub_enamdict_creator.from(&content);
+    let start = Instant::now();
+    let enamdict = enamdict.join("\n");
+    tracing::debug!("enamdict joined in {:?}", start.elapsed());
 
     let start = Instant::now();
     let html = StoryTemplate {
@@ -470,8 +470,8 @@ async fn story(
         heading: "Single Story",
         previous_news_id,
         next_news_id,
-        edict: edict.as_deref(),
-        enamdict: enamdict.as_deref(),
+        edict: Some(&edict),
+        enamdict: Some(&enamdict),
         story: &story,
     }
     .render()
