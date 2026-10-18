@@ -1,6 +1,7 @@
 use std::any::Any;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::hash::Hasher;
 use std::sync::{Arc, LazyLock};
 use std::time::Instant;
 
@@ -24,6 +25,33 @@ use tower_http::trace::TraceLayer;
 use edict2::{DEINFLECT_DATA, SubEdictCreator, SubEnamdictCreator};
 
 use crate::{DEBUG, JST, Story};
+
+/// Versions of the static files, used in their URLs so that browsers fetch them again when they
+/// change
+pub struct StaticVersions {
+    /// also covers the deinflection rules, since scripts.js uses its version to fetch them
+    pub scripts: String,
+    pub style: String,
+}
+
+pub static STATIC_VERSIONS: LazyLock<StaticVersions> = LazyLock::new(|| {
+    let read = |path| std::fs::read(path).expect("failed to read static file");
+    StaticVersions {
+        scripts: hash_contents(&[
+            &read("nhkeasier/static/scripts.js"),
+            DEINFLECT_DATA.as_bytes(),
+        ]),
+        style: hash_contents(&[&read("nhkeasier/static/style.css")]),
+    }
+});
+
+fn hash_contents(contents: &[&[u8]]) -> String {
+    let mut hasher = std::hash::DefaultHasher::new();
+    for content in contents {
+        hasher.write(content);
+    }
+    format!("{:016x}", hasher.finish())
+}
 
 static REMOVE_HTML_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("<.*?>").expect("invalid REMOVE_HTML_REGEX"));
@@ -499,7 +527,7 @@ async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoR
 }
 
 async fn deinflect() -> impl IntoResponse {
-    // NOTE: the URL in scripts.js is versioned, update it when the rules change
+    // the URL is versioned (see STATIC_VERSIONS)
     (
         [(header::CACHE_CONTROL, "public, max-age=31536000, immutable")],
         DEINFLECT_DATA,

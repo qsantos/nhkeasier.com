@@ -1,5 +1,8 @@
 "use strict";
 
+// the version of this script, which also covers deinflect.dat
+const script_version = new URL(document.currentScript.src).search;
+
 let rikai_enabled = true;
 
 /* Define $, $$ and ensure forEach exists */
@@ -491,7 +494,7 @@ function rikai_html(text) {
 
 function main() {
     /* Start downloading data */
-    fetch('/static/deinflect.dat?20130521').then(response => response.text().then(load_deinflect));
+    fetch('/static/deinflect.dat' + script_version).then(response => response.text().then(load_deinflect));
 
     /* Parse EDICT2 data */
     const edict_data = document.querySelector('script[type=edict]');
