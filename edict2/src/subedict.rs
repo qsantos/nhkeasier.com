@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::include_str;
 use std::time::Instant;
 
@@ -31,7 +32,7 @@ impl SubEdictCreator {
         )
     }
 
-    pub fn from(&self, content: &str) -> Vec<&str> {
+    pub fn from(&self, content: &str) -> Vec<Cow<'_, str>> {
         self.with(|fields| {
             let start = Instant::now();
             let fragments: HashSet<&str> = iter_fragments(content).collect();
@@ -47,13 +48,16 @@ impl SubEdictCreator {
                 if let Some(entries) = fields.edict2.lookup(&candidate.word as &str) {
                     for entry in entries {
                         if entry.type_ & candidate.type_ != 0 {
-                            lines.insert(strip_hidden_glosses(entry.line));
+                            lines.insert(entry.line);
                         }
                     }
                 }
             }
 
-            let lines: Vec<&str> = lines.into_iter().collect();
+            let lines: Vec<Cow<str>> = lines
+                .into_iter()
+                .map(|line| strip_headword_markers(strip_hidden_glosses(line)))
+                .collect();
             tracing::debug!(
                 "sub-edict with {} entries generated in {:?}",
                 lines.len(),
@@ -74,6 +78,30 @@ fn strip_hidden_glosses(mut line: &str) -> &str {
         line = &line[..line.len() - "(P)/".len()];
     }
     line
+}
+
+/// Remove the markers of headwords, which the client strips anyway; for example:
+/// 行く(P);往く(rK) [いく(P);ゆく(P)] /… → 行く;往く [いく;ゆく] /…
+fn strip_headword_markers(line: &str) -> Cow<'_, str> {
+    let Some((headwords, glosses)) = line.split_once(" /") else {
+        return Cow::Borrowed(line);
+    };
+    if !headwords.contains('(') {
+        return Cow::Borrowed(line);
+    }
+    let mut ret = String::with_capacity(line.len());
+    let mut in_marker = false;
+    for c in headwords.chars() {
+        match c {
+            '(' => in_marker = true,
+            ')' => in_marker = false,
+            _ if !in_marker => ret.push(c),
+            _ => {}
+        }
+    }
+    ret.push_str(" /");
+    ret.push_str(glosses);
+    Cow::Owned(ret)
 }
 
 #[self_referencing]
