@@ -47,7 +47,7 @@ impl SubEdictCreator {
                 if let Some(entries) = fields.edict2.lookup(&candidate.word as &str) {
                     for entry in entries {
                         if entry.type_ & candidate.type_ != 0 {
-                            lines.insert(entry.line);
+                            lines.insert(strip_hidden_glosses(entry.line));
                         }
                     }
                 }
@@ -62,6 +62,18 @@ impl SubEdictCreator {
             lines
         })
     }
+}
+
+/// Remove the trailing glosses that are never displayed; for example:
+/// 日本 [にほん(P);にっぽん] /(n) Japan/(P)/EntL1582710X/ → 日本 [にほん(P);にっぽん] /(n) Japan/
+fn strip_hidden_glosses(mut line: &str) -> &str {
+    if let Some(i) = line.rfind("/EntL") {
+        line = &line[..=i];
+    }
+    if line.ends_with("/(P)/") {
+        line = &line[..line.len() - "(P)/".len()];
+    }
+    line
 }
 
 #[self_referencing]
