@@ -15,13 +15,13 @@ COMMAND=(
     # Share cargo registry with host
     --volume="$HOME"/.cargo/registry:/usr/local/cargo/registry
     # Avoid clobbering host's target directory
-    --env=CARGO_TARGET_DIR=target/release-bookworm
+    --env=CARGO_TARGET_DIR=target/release-trixie
     # Map current directory to /app in container
     --volume="$PWD":/app
     # Set working directory
     --workdir=/app
-    # Same as target VPS; slim-bookworm lacks some dependencies
-    rust:bookworm
+    # Same as target VPS; slim-trixie lacks some dependencies
+    rust:trixie
     # Build command
     cargo build --release
 )
