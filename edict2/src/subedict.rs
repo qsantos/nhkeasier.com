@@ -285,3 +285,92 @@ impl SubEnamdictCreator {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_split_gloss_tags() {
+        assert_eq!(split_gloss_tags("dot"), (false, "dot"));
+        assert_eq!(split_gloss_tags("(n) dot"), (false, "dot"));
+        assert_eq!(split_gloss_tags("(n) (1) (uk) tooth"), (true, "tooth"));
+        assert_eq!(
+            split_gloss_tags("(v5k-s,vi) (2) to leave"),
+            (true, "to leave")
+        );
+        assert_eq!(split_gloss_tags("(See 来る・1) to go"), (false, "to go"));
+        assert_eq!(split_gloss_tags("(unclosed tag"), (false, "(unclosed tag"));
+        assert_eq!(
+            split_gloss_tags("phosphorus (P)"),
+            (false, "phosphorus (P)")
+        );
+    }
+
+    #[test]
+    fn test_split_semicolon_space() {
+        for s in ["", "a", "a; b", "a;b; c", "a; ", "; a", ";", "a;;  b"] {
+            let expected: Vec<&str> = s.split("; ").collect();
+            assert_eq!(
+                split_semicolon_space(s).collect::<Vec<_>>(),
+                expected,
+                "{s:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_format_line() {
+        let line = "行く(P);往く(rK) [いく(P);ゆく(P)] /(v5k-s,vi) (1) to go/to move/(v5k-s,vi) (2) to leave/(P)/EntL1578850X/";
+        let type_ = 1 << 7 | 1 << 6 | 1 << 1;
+        // matched writing: all the readings
+        assert_eq!(
+            format_line(line, &["行く"], type_),
+            "行く\tいく;ゆく\t66\tto go; to move/to leave"
+        );
+        // matched reading: all the writings
+        assert_eq!(
+            format_line(line, &["ゆく"], type_),
+            "行く;往く\tゆく\t66\tto go; to move/to leave"
+        );
+        // only readings
+        assert_eq!(
+            format_line("あの /(adj-pn) that/EntL1/", &["あの"], 1 << 7),
+            "\tあの\t\tthat"
+        );
+        // (P) in a gloss is not a marker
+        assert_eq!(
+            format_line(
+                "燐 [りん;リン] /(n) (uk) phosphorus (P)/EntL1555530X/",
+                &["燐"],
+                1 << 7
+            ),
+            "燐\tりん;リン\t\tphosphorus (P)"
+        );
+    }
+
+    #[test]
+    fn test_is_lone_kana_of_kanji_word() {
+        assert!(is_lone_kana_of_kanji_word("氏 [し] /(n) Mr/", "し"));
+        assert!(!is_lone_kana_of_kanji_word("氏 [し] /(n) Mr/", "氏"));
+        assert!(!is_lone_kana_of_kanji_word(
+            "為る [する] /(vs-i) (uk) to do/",
+            "す"
+        ));
+        assert!(!is_lone_kana_of_kanji_word("し /(prt) and/", "し"));
+        assert!(!is_lone_kana_of_kanji_word(
+            "島 [しま] /(n) island/",
+            "しま"
+        ));
+    }
+
+    #[test]
+    fn test_is_plausible_name() {
+        let katakana_runs = HashSet::from_iter(["カムチャツカ"]);
+        assert!(is_plausible_name("カムチャツカ", &katakana_runs));
+        assert!(!is_plausible_name("ツカ", &katakana_runs));
+        assert!(is_plausible_name("穴水町", &katakana_runs));
+        assert!(!is_plausible_name("森", &katakana_runs));
+        assert!(!is_plausible_name("のあ", &katakana_runs));
+    }
+}
