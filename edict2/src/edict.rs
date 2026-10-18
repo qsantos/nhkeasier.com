@@ -74,6 +74,10 @@ fn type_from_glosses(glosses: &str) -> u32 {
             type_ |= 1 << 0;
         } else if gloss.starts_with("v5") {
             type_ |= 1 << 1;
+            // the deinflection rules for 行く (った→く, etc.) only target this type
+            if gloss == "v5k-s" {
+                type_ |= 1 << 6;
+            }
         } else if gloss == "adj-i" {
             type_ |= 1 << 2;
         } else if gloss == "vk" {
