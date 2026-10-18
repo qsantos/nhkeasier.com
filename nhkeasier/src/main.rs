@@ -28,6 +28,9 @@ async fn update_job(pool: Pool<Sqlite>) {
 struct Args {
     #[arg(short, long, default_value = "127.0.0.1:3000")]
     listen_addr: SocketAddr,
+    /// Make the missing WebP variants of story images, then exit
+    #[arg(long)]
+    make_image_variants: bool,
 }
 
 #[tokio::main]
@@ -40,6 +43,11 @@ async fn main() -> Result<(), edict2::Error> {
     }
 
     nhkeasier::init_logging();
+
+    if args.make_image_variants {
+        nhkeasier::make_missing_image_variants();
+        return Ok(());
+    }
 
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;

@@ -8,7 +8,15 @@
     </a>
 </h4>
 {%- if let Some(image) = story.image %}
+{%- if !image.is_empty() %}
+<a href="/media/{{ image|safe }}">
+<picture>
+<source type="image/webp" sizes="(max-width: 660px) calc(100vw - 20px), 640px"
+        srcset="/media/webp/{{ story.news_id|safe }}-640.webp 640w, /media/webp/{{ story.news_id|safe }}-1280.webp 1280w">
 <img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
+</picture>
+</a>
+{%- endif %}
 {%- endif %}
 {%- if let Some(content) = story.content_with_ruby %}
 {{ content|safe }}
