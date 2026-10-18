@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::str::FromStr;
 use std::time::Duration;
 
@@ -18,6 +19,16 @@ pub struct Story<'a> {
     pub image: Option<&'a str>,
     pub voice: Option<&'a str>,
     pub webpage: Option<&'a str>,
+}
+
+impl Story<'_> {
+    /// Whether the WebP variants of the image exist; otherwise, browsers would not fall back to
+    /// the original image
+    pub fn has_image_variants(&self) -> bool {
+        crate::update::IMAGE_VARIANT_WIDTHS.iter().all(|&width| {
+            Path::new(&crate::update::image_variant_path(self.news_id, width)).exists()
+        })
+    }
 }
 
 pub async fn connect_to_database() -> Pool<Sqlite> {

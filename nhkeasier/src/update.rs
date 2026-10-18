@@ -234,12 +234,17 @@ async fn fetch_image_of_story(
 }
 
 /// Widths of the WebP variants of story images, as referenced in widgets/story.html
-const IMAGE_VARIANT_WIDTHS: [u32; 2] = [640, 1280];
+pub(crate) const IMAGE_VARIANT_WIDTHS: [u32; 2] = [640, 1280];
+
+pub(crate) fn image_variant_path(news_id: &str, width: u32) -> String {
+    format!("media/webp/{news_id}-{width}.webp")
+}
 
 /// Make the missing WebP variants of the image of a story (media/webp/{news_id}-{width}.webp)
 ///
 /// Images are never upscaled: when the original is not wider than a variant, the variant is a hard
-/// link to the previous one.
+/// link to the previous one. If making a variant fails, it is left missing, and pages fall back to
+/// the original (see Story::has_image_variants).
 pub async fn make_image_variants(news_id: &str) {
     let original = format!("media/jpg/{news_id}.jpg");
     let output = Command::new("identify")
@@ -260,7 +265,7 @@ pub async fn make_image_variants(news_id: &str) {
         .expect("failed to create media/webp");
     let mut full_resolution_variant = None;
     for width in IMAGE_VARIANT_WIDTHS {
-        let variant = format!("media/webp/{news_id}-{width}.webp");
+        let variant = image_variant_path(news_id, width);
         let exists = tokio::fs::try_exists(&variant)
             .await
             .expect("failed to check image variant");
@@ -282,6 +287,8 @@ pub async fn make_image_variants(news_id: &str) {
                     .expect("failed to call convert");
                 if !output.status.success() {
                     tracing::warn!("failed to make image variant {variant}: {output:?}");
+                    // do not leave a partial file
+                    let _ = tokio::fs::remove_file(&variant).await;
                     return;
                 }
             }
