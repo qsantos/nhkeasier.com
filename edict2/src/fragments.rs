@@ -5,7 +5,9 @@ use regex::Regex;
 static FRAGMENT_PATTERN: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(concat!(
         "[",
-        "々",                // IDEOGRAPHIC ITERATION MARK (U+3005)
+        // NOTE: keep in sync with iter_subfragments() in scripts.js
+        "\u{25cb}",          // WHITE CIRCLE (○)
+        "\u{3004}-\u{303f}", // CJK Symbols and Punctuation (々, 〆, 〇, 〜, etc.)
         "\u{3040}-\u{30ff}", // Hiragana, Katakana
         "\u{3400}-\u{4dbf}", // CJK Unified Ideographs Extension A
         "\u{4e00}-\u{9fff}", // CJK Unified Ideographs

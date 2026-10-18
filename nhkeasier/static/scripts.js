@@ -366,6 +366,7 @@ function get_text_at_point(x, y) {
     return [text, range, target];
 }
 
+// NOTE: keep in sync with FRAGMENT_PATTERN in edict2/src/fragments.rs
 function iter_subfragments(text, callback) {
     const re = /^[\u25cb\u3004-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]+/g;
     const match = re.exec(text);
