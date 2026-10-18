@@ -220,54 +220,20 @@ fn split_semicolon_space(s: &str) -> impl Iterator<Item = &str> {
     })
 }
 
-/// Split the tags at the start of a gloss: an optional part-of-speech (one or two characters), an
-/// optional meaning number, and any other tags; return whether there was a meaning number (which
-/// starts a new meaning) and the rest of the gloss
-///
-/// This is equivalent to /^(?:\([^0-9]\S?\) )?(?:\(([0-9]+)\) )?(?:\(.*?\) )*(.*)/, which the
-/// client used, but much faster.
+/// Split the tags at the start of a gloss (part-of-speech, field, meaning number, etc.); return
+/// whether one of them is a meaning number (which starts a new meaning) and the rest of the gloss;
+/// for example: (v5k-s,vi) (2) to leave → (true, "to leave")
 fn split_gloss_tags(gloss: &str) -> (bool, &str) {
     let mut rest = gloss;
-
-    // optional part-of-speech
-    if let Some(after) = rest.strip_prefix('(') {
-        let mut chars = after.chars();
-        if let Some(c1) = chars.next()
-            && !c1.is_ascii_digit()
-        {
-            let after_c1 = chars.as_str();
-            let mut chars = after_c1.chars();
-            if let Some(c2) = chars.next()
-                && !c2.is_whitespace()
-                && let Some(after_tag) = chars.as_str().strip_prefix(") ")
-            {
-                rest = after_tag;
-            } else if let Some(after_tag) = after_c1.strip_prefix(") ") {
-                rest = after_tag;
-            }
-        }
-    }
-
-    // optional meaning number
     let mut has_number = false;
-    if let Some(after) = rest.strip_prefix('(') {
-        let digits = after.bytes().take_while(u8::is_ascii_digit).count();
-        if digits != 0
-            && let Some(after_tag) = after[digits..].strip_prefix(") ")
-        {
-            rest = after_tag;
-            has_number = true;
-        }
-    }
-
-    // other tags
     while rest.starts_with('(') {
         let Some(i) = rest[1..].find(") ") else {
             break;
         };
+        let tag = &rest[1..1 + i];
+        has_number |= !tag.is_empty() && tag.bytes().all(|b| b.is_ascii_digit());
         rest = &rest[1 + i + ") ".len()..];
     }
-
     (has_number, rest)
 }
 
