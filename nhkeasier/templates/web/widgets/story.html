@@ -13,7 +13,7 @@
 <picture>
 {%- if story.has_image_variants() %}
 <source type="image/webp" sizes="(max-width: 660px) calc(100vw - 20px), 640px"
-        srcset="/media/webp/{{ story.news_id|safe }}-640.webp 640w, /media/webp/{{ story.news_id|safe }}-1280.webp 1280w">
+        srcset="/media/{{ story.image_variant(640)|safe }} 640w, /media/{{ story.image_variant(1280)|safe }} 1280w">
 {%- endif %}
 <img src="/media/{{ image|safe }}" alt="Story illustration" width="640" height="360" loading="lazy">
 </picture>

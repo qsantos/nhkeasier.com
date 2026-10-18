@@ -44,13 +44,13 @@ async fn main() -> Result<(), edict2::Error> {
 
     nhkeasier::init_logging();
 
-    if args.make_image_variants {
-        nhkeasier::make_missing_image_variants().await;
-        return Ok(());
-    }
-
     tracing::info!("Connecting to database");
     let pool = nhkeasier::connect_to_database().await;
+
+    if args.make_image_variants {
+        nhkeasier::make_missing_image_variants(&pool).await;
+        return Ok(());
+    }
 
     if !nhkeasier::DEBUG {
         tokio::spawn(update_job(pool.clone()));

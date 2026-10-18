@@ -22,12 +22,17 @@ pub struct Story<'a> {
 }
 
 impl Story<'_> {
+    /// The path of a WebP variant of the image, relative to media/ (see update::image_variant)
+    pub fn image_variant(&self, width: u32) -> String {
+        crate::update::image_variant(self.image.unwrap_or_default(), width)
+    }
+
     /// Whether the WebP variants of the image exist; otherwise, browsers would not fall back to
     /// the original image
     pub fn has_image_variants(&self) -> bool {
-        crate::update::IMAGE_VARIANT_WIDTHS.iter().all(|&width| {
-            Path::new(&crate::update::image_variant_path(self.news_id, width)).exists()
-        })
+        crate::update::IMAGE_VARIANT_WIDTHS
+            .iter()
+            .all(|&width| Path::new(&format!("media/{}", self.image_variant(width))).exists())
     }
 }
 

@@ -219,7 +219,7 @@ async fn fetch_image_of_story(
     if !output.status.success() {
         panic!("failed to make image progressive: {output:?}");
     }
-    make_image_variants(story.news_id).await;
+    make_image_variants(&filename).await;
     tracing::debug!("saving image to database");
     sqlx::query!(
         "UPDATE nhkeasier_story SET image = $1 WHERE id = $2",
@@ -236,17 +236,24 @@ async fn fetch_image_of_story(
 /// Widths of the WebP variants of story images, as referenced in widgets/story.html
 pub(crate) const IMAGE_VARIANT_WIDTHS: [u32; 2] = [640, 1280];
 
-pub(crate) fn image_variant_path(news_id: &str, width: u32) -> String {
-    format!("media/webp/{news_id}-{width}.webp")
+/// The path of a WebP variant of a story image, relative to media/; for example:
+/// jpg/k10011826461000_fGr0GsM.jpg → webp/k10011826461000_fGr0GsM-640.webp
+pub(crate) fn image_variant(image: &str, width: u32) -> String {
+    let stem = std::path::Path::new(image)
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or(image);
+    format!("webp/{stem}-{width}.webp")
 }
 
-/// Make the missing WebP variants of the image of a story (media/webp/{news_id}-{width}.webp)
+/// Make the missing WebP variants of the image of a story (see image_variant), given as stored in
+/// the database (e.g. jpg/{news_id}.jpg)
 ///
 /// Images are never upscaled: when the original is not wider than a variant, the variant is a hard
 /// link to the previous one. If making a variant fails, it is left missing, and pages fall back to
 /// the original (see Story::has_image_variants).
-pub async fn make_image_variants(news_id: &str) {
-    let original = format!("media/jpg/{news_id}.jpg");
+pub async fn make_image_variants(image: &str) {
+    let original = format!("media/{image}");
     let output = Command::new("identify")
         .args(["-format", "%w", &original])
         .output()
@@ -265,7 +272,7 @@ pub async fn make_image_variants(news_id: &str) {
         .expect("failed to create media/webp");
     let mut full_resolution_variant = None;
     for width in IMAGE_VARIANT_WIDTHS {
-        let variant = image_variant_path(news_id, width);
+        let variant = format!("media/{}", image_variant(image, width));
         let exists = tokio::fs::try_exists(&variant)
             .await
             .expect("failed to check image variant");
@@ -299,22 +306,21 @@ pub async fn make_image_variants(news_id: &str) {
     }
 }
 
-/// Make the missing WebP variants of all the images in media/jpg
-pub async fn make_missing_image_variants() {
-    let mut news_ids: Vec<String> = std::fs::read_dir("media/jpg")
-        .expect("failed to list media/jpg")
-        .map(|entry| entry.expect("failed to list media/jpg").path())
-        .filter(|path| path.extension().is_some_and(|ext| ext == "jpg"))
-        .filter_map(|path| Some(path.file_stem()?.to_str()?.to_string()))
-        .collect();
-    news_ids.sort();
-    for (i, news_id) in news_ids.iter().enumerate() {
+/// Make the missing WebP variants of the images of all the stories
+pub async fn make_missing_image_variants(pool: &Pool<Sqlite>) {
+    let images = sqlx::query_scalar!(
+        r#"SELECT DISTINCT image AS "image!" FROM nhkeasier_story WHERE image != '' ORDER BY image"#
+    )
+    .fetch_all(pool)
+    .await
+    .expect("failed to query database for images");
+    for (i, image) in images.iter().enumerate() {
         if i % 100 == 0 {
-            tracing::info!("making image variants: {i}/{}", news_ids.len());
+            tracing::info!("making image variants: {i}/{}", images.len());
         }
-        make_image_variants(news_id).await;
+        make_image_variants(image).await;
     }
-    tracing::info!("made image variants of {} images", news_ids.len());
+    tracing::info!("made image variants of {} images", images.len());
 }
 
 async fn get_voice_token(client: &Client) -> String {
