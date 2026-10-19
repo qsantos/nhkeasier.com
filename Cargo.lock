@@ -611,6 +611,7 @@ name = "edict2"
 version = "0.1.0"
 dependencies = [
  "gxhash",
+ "hashbrown 0.15.2",
  "ouroboros",
  "regex",
  "tracing",

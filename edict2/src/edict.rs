@@ -1,4 +1,4 @@
-use gxhash::HashMap;
+use hashbrown::HashTable;
 
 use crate::Error;
 
@@ -11,14 +11,33 @@ struct EdictEntry {
     type_: u8,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+/// A key of the dictionary, as a range of the data, and the range of its entries in Edict::entries;
+/// this is more compact than a &str and a range, to save memory
+#[derive(Clone, Copy, Debug)]
+struct Key {
+    offset: u32,
+    len: u8,
+    entries_start: u32,
+    entries_len: u16,
+}
+
+#[derive(Clone, Debug)]
 pub struct Edict<'a> {
     data: &'a str,
     // most keys have a single entry, so store all the entries in a single vector, rather than one
     // allocation per key, to save memory
     entries: Vec<EdictEntry>,
-    // for each key, the range of its entries in entries, as (start, len)
-    keys: HashMap<&'a str, (u32, u32)>,
+    keys: HashTable<Key>,
+}
+
+fn hash_key(key: &str) -> u64 {
+    gxhash::gxhash64(key.as_bytes(), 0)
+}
+
+/// The offset of a slice of data in data
+fn offset_in(data: &str, slice: &str) -> u32 {
+    u32::try_from(slice.as_ptr() as usize - data.as_ptr() as usize)
+        .expect("dictionary should be smaller than 4 GiB")
 }
 
 impl<'a> Edict<'a> {
@@ -55,8 +74,7 @@ impl<'a> Edict<'a> {
             }
 
             let entry = EdictEntry {
-                offset: u32::try_from(line.as_ptr() as usize - data.as_ptr() as usize)
-                    .expect("dictionary should be smaller than 4 GiB"),
+                offset: offset_in(data, line),
                 len: u16::try_from(line.len()).map_err(|_| Error::ParseError {
                     lineno,
                     expected: "line shorter than 64 KiB",
@@ -86,12 +104,24 @@ impl<'a> Edict<'a> {
         // group the entries by key, keeping the order of the lines
         pairs.sort_by_key(|&(key, _)| key);
         let mut entries = Vec::with_capacity(pairs.len());
-        let mut keys = HashMap::default();
-        keys.reserve(pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2).count());
+        let mut keys =
+            HashTable::with_capacity(pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2).count());
+        let key_str = |key: &Key| {
+            let offset = key.offset as usize;
+            &data[offset..offset + key.len as usize]
+        };
         for chunk in pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2) {
-            let start = entries.len() as u32;
+            let key = chunk[0].0;
+            let entries_start = entries.len() as u32;
             entries.extend(chunk.iter().map(|&(_, entry)| entry));
-            keys.insert(chunk[0].0, (start, chunk.len() as u32));
+            let key = Key {
+                offset: offset_in(data, key),
+                len: u8::try_from(key.len()).expect("keys should be shorter than 256 bytes"),
+                entries_start,
+                entries_len: u16::try_from(chunk.len())
+                    .expect("keys should have fewer than 65536 entries"),
+            };
+            keys.insert_unique(hash_key(key_str(&key)), key, |key| hash_key(key_str(key)));
         }
         Ok(Edict {
             data,
@@ -105,17 +135,22 @@ impl<'a> Edict<'a> {
         &self,
         word: &str,
     ) -> Option<(&'a str, impl Iterator<Item = (&'a str, u32)> + '_)> {
-        let (key, &(start, len)) = self.keys.get_key_value(word)?;
-        let start = start as usize;
         let data = self.data;
-        let entries = self.entries[start..start + len as usize]
+        let key = self.keys.find(hash_key(word), |key| {
+            let offset = key.offset as usize;
+            &data[offset..offset + key.len as usize] == word
+        })?;
+        let offset = key.offset as usize;
+        let key_str = &data[offset..offset + key.len as usize];
+        let start = key.entries_start as usize;
+        let entries = self.entries[start..start + key.entries_len as usize]
             .iter()
             .map(move |entry| {
                 let offset = entry.offset as usize;
                 let line = &data[offset..offset + entry.len as usize];
                 (line, u32::from(entry.type_))
             });
-        Some((*key, entries))
+        Some((key_str, entries))
     }
 }
 
