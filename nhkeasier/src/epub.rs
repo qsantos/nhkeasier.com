@@ -195,8 +195,9 @@ async fn test() {
         .map(|row| Story::from_row(row).expect("failed to convert row into Story"))
         .collect();
 
-    //let mut buf = Vec::new();
-    //let f = std::io::Cursor::new(&mut buf);
-    let f = std::io::BufWriter::new(std::fs::File::create("a.epub").unwrap());
+    let mut buf = Vec::new();
+    let f = std::io::Cursor::new(&mut buf);
     make_epub(&stories, "NHK Easier latest stories", f, false, true, true).await;
+    // the mimetype must be the first file, not compressed
+    assert_eq!(&buf[30..58], b"mimetypeapplication/epub+zip");
 }
