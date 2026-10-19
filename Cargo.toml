@@ -2,11 +2,19 @@
 resolver = "2"
 members = [
     "edict2",
+    "edict2-index",
     "nhkeasier",
 ]
 
 [profile.release]
 lto = true
+
+# the build script of edict2 indexes the dictionaries, which is slow without optimizations
+[profile.dev.build-override]
+opt-level = 3
+
+[profile.release.build-override]
+opt-level = 3
 
 [profile.profiling]
 inherits = "release"

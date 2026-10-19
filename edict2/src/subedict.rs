@@ -2,25 +2,30 @@ use std::include_str;
 use std::sync::LazyLock;
 use std::time::Instant;
 
+use edict2_index::{Entry, FLAG_KANJI_WORD, Index, could_be_name};
 use gxhash::HashSet;
-use ouroboros::self_referencing;
 use regex::Regex;
 
-use crate::{Deinflector, Edict, Error, iter_fragments};
+use crate::{Deinflector, Error, iter_fragments};
 
 static KATAKANA_RUN_PATTERN: LazyLock<Regex> =
     LazyLock::new(|| Regex::new("[ァ-ヺー]+").expect("invalid KATAKANA_RUN_PATTERN regex"));
 
-#[self_referencing]
+/// The index of a dictionary in data/, built by build.rs
+macro_rules! index {
+    ($name:literal) => {
+        Index {
+            records: include_str!(concat!(env!("OUT_DIR"), "/", $name, ".records")),
+            entries: include_bytes!(concat!(env!("OUT_DIR"), "/", $name, ".entries")),
+            slots: include_bytes!(concat!(env!("OUT_DIR"), "/", $name, ".slots")),
+            tags: include_bytes!(concat!(env!("OUT_DIR"), "/", $name, ".tags")),
+        }
+    };
+}
+
 pub struct SubEdictCreator {
-    edict2_data: &'static str,
-    deinflector_data: &'static str,
-    #[borrows(edict2_data)]
-    #[not_covariant]
-    edict2: Edict<'this>,
-    #[borrows(deinflector_data)]
-    #[not_covariant]
-    deinflector: Deinflector<'this>,
+    edict2: Index<'static>,
+    deinflector: Deinflector<'static>,
 }
 
 /// Deinflection rules used by SubEdictCreator, to be served to the client so that both agree
@@ -28,60 +33,54 @@ pub const DEINFLECT_DATA: &str = include_str!("../data/deinflect");
 
 impl SubEdictCreator {
     pub fn from_files() -> Result<Self, Error> {
-        SubEdictCreator::try_new(
-            include_str!("../data/edict2"),
-            DEINFLECT_DATA,
-            |data| Edict::parse(data),
-            |data| Deinflector::parse(data),
-        )
+        Ok(SubEdictCreator {
+            edict2: index!("edict2"),
+            deinflector: Deinflector::parse(DEINFLECT_DATA)?,
+        })
     }
 
     pub fn from(&self, content: &str) -> Vec<String> {
-        self.with(|fields| {
-            let start = Instant::now();
-            let fragments: HashSet<&str> = iter_fragments(content).collect();
+        let start = Instant::now();
+        let fragments: HashSet<&str> = iter_fragments(content).collect();
 
-            let mut candidates = Vec::new();
-            let mut buffer = Vec::new();
-            for fragment in fragments {
-                candidates.extend(fields.deinflector.deinflect(fragment, &mut buffer));
-            }
+        let mut candidates = Vec::new();
+        let mut buffer = Vec::new();
+        for fragment in fragments {
+            candidates.extend(self.deinflector.deinflect(fragment, &mut buffer));
+        }
 
-            // (line, key) pairs, to know through which keys each line was matched
-            let mut matches = Vec::new();
-            for candidate in candidates {
-                if let Some((key, entries)) = fields.edict2.lookup(&candidate.word as &str) {
-                    for (line, type_) in entries {
-                        if type_ & candidate.type_ != 0 {
-                            matches.push((line, key, type_));
-                        }
+        // (entry, key) pairs, to know through which keys each entry was matched
+        let mut matches = Vec::new();
+        for candidate in candidates {
+            if let Some((key, entries)) = self.edict2.lookup(&candidate.word) {
+                for entry in entries {
+                    if u32::from(entry.type_) & candidate.type_ != 0 {
+                        matches.push((entry, key));
                     }
                 }
             }
+        }
 
-            let lines = format_lines(matches, is_lone_kana_of_kanji_word);
-            tracing::debug!(
-                "sub-edict with {} entries generated in {:?}",
-                lines.len(),
-                start.elapsed()
-            );
-            lines
-        })
+        let lines = format_entries(matches, is_lone_kana_of_kanji_word);
+        tracing::debug!(
+            "sub-edict with {} entries generated in {:?}",
+            lines.len(),
+            start.elapsed()
+        );
+        lines
     }
-}
 
-impl SubEdictCreator {
     /// Whether the word is a key of EDICT (without deinflection)
     pub fn is_word(&self, word: &str) -> bool {
-        self.with_edict2(|edict2| edict2.lookup(word).is_some())
+        self.edict2.lookup(word).is_some()
     }
 }
 
 /// Whether a string from the text looks like a name, as opposed to a fragment of a word
 ///
-/// Single characters and strings with hiragana mostly match given names by their readings (e.g.
-/// のあ for 乃亜, 乃愛, etc.), and katakana names must not be part of a longer katakana word
-/// (e.g. ツカ in カムチャツカ).
+/// Single characters and strings with hiragana mostly match given names by their readings (see
+/// could_be_name), and katakana names must not be part of a longer katakana word (e.g. ツカ in
+/// カムチャツカ).
 fn is_plausible_name(fragment: &str, katakana_runs: &HashSet<&str>) -> bool {
     if !could_be_name(fragment) {
         return false;
@@ -90,96 +89,73 @@ fn is_plausible_name(fragment: &str, katakana_runs: &HashSet<&str>) -> bool {
     !is_katakana || katakana_runs.contains(fragment)
 }
 
-/// The part of is_plausible_name that does not depend on the text: at least two characters, and
-/// no hiragana
-fn could_be_name(fragment: &str) -> bool {
-    let mut chars = fragment.chars();
-    if chars.next().is_none() || chars.next().is_none() {
-        return false;
-    }
-    !fragment
-        .chars()
-        .any(|c| matches!(c, '\u{3040}'..='\u{309f}'))
-}
-
 /// Whether a single kana matched the reading of a word usually written in kanji; for example, し
 /// for 氏 [し]; in the text, such a kana is almost always part of a longer word, or grammar
-fn is_lone_kana_of_kanji_word(line: &str, key: &str) -> bool {
+fn is_lone_kana_of_kanji_word(entry: &Entry, key: &str) -> bool {
     let mut chars = key.chars();
     let (Some(c), None) = (chars.next(), chars.next()) else {
         return false;
     };
     let is_kana = matches!(c, '\u{3040}'..='\u{30ff}');
-    is_kana && line.contains(" [") && !line.contains("(uk)")
+    is_kana && entry.flags & FLAG_KANJI_WORD != 0
 }
 
-/// Group the (line, key, type) matches by line, and format the lines for the client (see
-/// format_line)
+/// Group the (entry, key) matches by entry, and format the entries for the client (see
+/// format_entry)
 ///
-/// Lines whose matches are all unlikely are dropped.
-fn format_lines<'a>(
-    mut matches: Vec<(&'a str, &'a str, u32)>,
-    is_unlikely: impl Fn(&str, &str) -> bool,
+/// Entries whose matches are all unlikely are dropped.
+fn format_entries<'a>(
+    mut matches: Vec<(Entry<'a>, &'a str)>,
+    is_unlikely: impl Fn(&Entry, &str) -> bool,
 ) -> Vec<String> {
     matches.sort_unstable();
     matches.dedup();
     let mut keys = Vec::new();
     matches
-        .chunk_by(|(line1, _, _), (line2, _, _)| line1 == line2)
-        .filter(|chunk| !chunk.iter().all(|(line, key, _)| is_unlikely(line, key)))
+        .chunk_by(|(entry1, _), (entry2, _)| entry1 == entry2)
+        .filter(|chunk| !chunk.iter().all(|(entry, key)| is_unlikely(entry, key)))
         .map(|chunk| {
-            let (line, _, type_) = chunk[0];
             keys.clear();
-            keys.extend(chunk.iter().map(|(_, key, _)| *key));
-            format_line(line, &keys, type_)
+            keys.extend(chunk.iter().map(|(_, key)| *key));
+            format_entry(chunk[0].0.record, &keys)
         })
         .collect()
 }
 
-/// Format a line of EDICT for the client, as four fields separated by tabs: the writings, the
-/// readings, the type (without bit 7, empty if zero), and the meanings, as displayed; for example:
-/// 行く(P);往く(rK) [いく(P);ゆく(P)] /(v5k-s,vi) (1) to go/to move/(v5k-s,vi) (2) to leave/…
-/// → 行く\tいく;ゆく\t66\tto go; to move/to leave/…
+/// Format an entry for the client, as four fields separated by tabs: the writings, the readings,
+/// the type, and the meanings (see edict2_index::build_index); for example:
+/// 行く;往く\tいく;ゆく\t66\tto go; to move/to leave → 行く\tいく;ゆく\t66\tto go; to move/to leave
 ///
 /// Only the headwords that the client can display are kept: when hovering a writing, the client
 /// displays it with all the readings; when hovering a reading, it displays all the writings with
 /// it; so other headwords are never displayed.
-fn format_line(line: &str, keys: &[&str], type_: u32) -> String {
-    let (headwords, glosses) = line
-        .split_once(" /")
-        .expect("Edict::parse should have checked for \" /\"");
-    let mut ret = String::with_capacity(line.len());
-    if let Some((writings, readings)) = headwords.split_once(" [") {
-        let readings = readings.trim_end_matches(']');
-        let writing_matched = iter_forms(writings).any(|form| keys.contains(&form));
-        let reading_matched = iter_forms(readings).any(|form| keys.contains(&form));
+fn format_entry(record: &str, keys: &[&str]) -> String {
+    let mut fields = record.splitn(3, '\t');
+    let (Some(writings), Some(readings), Some(rest)) =
+        (fields.next(), fields.next(), fields.next())
+    else {
+        panic!("invalid record: {record:?}");
+    };
+    let mut ret = String::with_capacity(record.len());
+    if writings.is_empty() {
+        ret.push('\t');
+        push_forms(&mut ret, readings, keys, false);
+    } else {
+        let writing_matched = writings.split(';').any(|form| keys.contains(&form));
+        let reading_matched = readings.split(';').any(|form| keys.contains(&form));
         push_forms(&mut ret, writings, keys, reading_matched);
         ret.push('\t');
         push_forms(&mut ret, readings, keys, writing_matched);
-    } else {
-        // only readings
-        ret.push('\t');
-        push_forms(&mut ret, headwords, keys, false);
     }
     ret.push('\t');
-    let type_ = type_ & !(1 << 7);
-    if type_ != 0 {
-        ret.push_str(&type_.to_string());
-    }
-    ret.push('\t');
-    push_meanings(&mut ret, glosses.strip_suffix('/').unwrap_or(glosses));
+    ret.push_str(rest);
     ret
 }
 
-/// Iterate over the forms of a list of headwords, without their markers (like Edict::parse)
-fn iter_forms(headwords: &str) -> impl Iterator<Item = &str> {
-    headwords
+fn push_forms(ret: &mut String, forms: &str, keys: &[&str], keep_all: bool) {
+    let forms = forms
         .split(';')
-        .map(|form| form.split_once('(').map_or(form, |(form, _)| form))
-}
-
-fn push_forms(ret: &mut String, headwords: &str, keys: &[&str], keep_all: bool) {
-    let forms = iter_forms(headwords).filter(|form| keep_all || keys.contains(form));
+        .filter(|form| keep_all || keys.contains(form));
     for (i, form) in forms.enumerate() {
         if i != 0 {
             ret.push(';');
@@ -188,73 +164,14 @@ fn push_forms(ret: &mut String, headwords: &str, keys: &[&str], keep_all: bool) 
     }
 }
 
-/// Group glosses into meanings separated by '/', skipping markers and the tags of each gloss; for
-/// example: (n) (1) dot/spot/(n) (2) mark/(P)/EntL1234X → dot; spot/mark
-fn push_meanings(ret: &mut String, glosses: &str) {
-    let mut meaning_is_empty = true;
-    // NOTE: the client used to replace '/' with "; ", then split on "; "; this gives the same result
-    for gloss in glosses.split('/').flat_map(split_semicolon_space) {
-        if gloss == "(P)" || gloss.starts_with("EntL") {
-            continue;
-        }
-        let (starts_meaning, gloss) = split_gloss_tags(gloss);
-        if !meaning_is_empty {
-            ret.push_str(if starts_meaning { "/" } else { "; " });
-        }
-        ret.push_str(gloss);
-        meaning_is_empty = false;
-    }
-}
-
-/// Same as s.split("; "), but faster for short strings
-fn split_semicolon_space(s: &str) -> impl Iterator<Item = &str> {
-    let mut rest = Some(s);
-    std::iter::from_fn(move || {
-        let s = rest?;
-        let mut start = 0;
-        while let Some(i) = s[start..].find(';') {
-            let i = start + i;
-            if s[i + 1..].starts_with(' ') {
-                rest = Some(&s[i + 2..]);
-                return Some(&s[..i]);
-            }
-            start = i + 1;
-        }
-        rest = None;
-        Some(s)
-    })
-}
-
-/// Split the tags at the start of a gloss (part-of-speech, field, meaning number, etc.); return
-/// whether one of them is a meaning number (which starts a new meaning) and the rest of the gloss;
-/// for example: (v5k-s,vi) (2) to leave → (true, "to leave")
-fn split_gloss_tags(gloss: &str) -> (bool, &str) {
-    let mut rest = gloss;
-    let mut has_number = false;
-    while rest.starts_with('(') {
-        let Some(i) = rest[1..].find(") ") else {
-            break;
-        };
-        let tag = &rest[1..1 + i];
-        has_number |= !tag.is_empty() && tag.bytes().all(|b| b.is_ascii_digit());
-        rest = &rest[1 + i + ") ".len()..];
-    }
-    (has_number, rest)
-}
-
-#[self_referencing]
 pub struct SubEnamdictCreator {
-    enamdict_data: &'static str,
-    #[borrows(enamdict_data)]
-    #[not_covariant]
-    enamdict: Edict<'this>,
+    enamdict: Index<'static>,
 }
 
 impl SubEnamdictCreator {
     pub fn from_files() -> Result<Self, Error> {
-        // only index the names that can be looked up, to save memory
-        SubEnamdictCreator::try_new(include_str!("../data/enamdict"), |data| {
-            Edict::parse_with_key_filter(data, could_be_name)
+        Ok(SubEnamdictCreator {
+            enamdict: index!("enamdict"),
         })
     }
 
@@ -262,35 +179,31 @@ impl SubEnamdictCreator {
     /// much more likely to be meant as words (e.g. 森 is “forest” more often than the surname),
     /// and that look like names (see is_plausible_name)
     pub fn from(&self, content: &str, edict: &SubEdictCreator) -> Vec<String> {
-        self.with(|fields| {
-            let start = Instant::now();
-            let fragments: HashSet<&str> = iter_fragments(content).collect();
-            let katakana_runs: HashSet<&str> = KATAKANA_RUN_PATTERN
-                .find_iter(content)
-                .map(|m| m.as_str())
-                .collect();
+        let start = Instant::now();
+        let fragments: HashSet<&str> = iter_fragments(content).collect();
+        let katakana_runs: HashSet<&str> = KATAKANA_RUN_PATTERN
+            .find_iter(content)
+            .map(|m| m.as_str())
+            .collect();
 
-            // (line, key) pairs, to know through which keys each line was matched
-            let mut matches = Vec::new();
-            for fragment in fragments {
-                if !is_plausible_name(fragment, &katakana_runs) || edict.is_word(fragment) {
-                    continue;
-                }
-                if let Some((key, entries)) = fields.enamdict.lookup(fragment as &str) {
-                    for (line, _) in entries {
-                        matches.push((line, key, 0));
-                    }
-                }
+        // (entry, key) pairs, to know through which keys each entry was matched
+        let mut matches = Vec::new();
+        for fragment in fragments {
+            if !is_plausible_name(fragment, &katakana_runs) || edict.is_word(fragment) {
+                continue;
             }
+            if let Some((key, entries)) = self.enamdict.lookup(fragment) {
+                matches.extend(entries.map(|entry| (entry, key)));
+            }
+        }
 
-            let lines = format_lines(matches, |_, _| false);
-            tracing::debug!(
-                "sub-enamdict with {} entries generated in {:?}",
-                lines.len(),
-                start.elapsed()
-            );
-            lines
-        })
+        let lines = format_entries(matches, |_, _| false);
+        tracing::debug!(
+            "sub-enamdict with {} entries generated in {:?}",
+            lines.len(),
+            start.elapsed()
+        );
+        lines
     }
 }
 
@@ -299,77 +212,36 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_split_gloss_tags() {
-        assert_eq!(split_gloss_tags("dot"), (false, "dot"));
-        assert_eq!(split_gloss_tags("(n) dot"), (false, "dot"));
-        assert_eq!(split_gloss_tags("(n) (1) (uk) tooth"), (true, "tooth"));
-        assert_eq!(
-            split_gloss_tags("(v5k-s,vi) (2) to leave"),
-            (true, "to leave")
-        );
-        assert_eq!(split_gloss_tags("(See 来る・1) to go"), (false, "to go"));
-        assert_eq!(split_gloss_tags("(unclosed tag"), (false, "(unclosed tag"));
-        assert_eq!(
-            split_gloss_tags("phosphorus (P)"),
-            (false, "phosphorus (P)")
-        );
-    }
-
-    #[test]
-    fn test_split_semicolon_space() {
-        for s in ["", "a", "a; b", "a;b; c", "a; ", "; a", ";", "a;;  b"] {
-            let expected: Vec<&str> = s.split("; ").collect();
-            assert_eq!(
-                split_semicolon_space(s).collect::<Vec<_>>(),
-                expected,
-                "{s:?}"
-            );
-        }
-    }
-
-    #[test]
-    fn test_format_line() {
-        let line = "行く(P);往く(rK) [いく(P);ゆく(P)] /(v5k-s,vi) (1) to go/to move/(v5k-s,vi) (2) to leave/(P)/EntL1578850X/";
-        let type_ = 1 << 7 | 1 << 6 | 1 << 1;
+    fn test_format_entry() {
+        let record = "行く;往く\tいく;ゆく\t66\tto go; to move/to leave";
         // matched writing: all the readings
         assert_eq!(
-            format_line(line, &["行く"], type_),
+            format_entry(record, &["行く"]),
             "行く\tいく;ゆく\t66\tto go; to move/to leave"
         );
         // matched reading: all the writings
         assert_eq!(
-            format_line(line, &["ゆく"], type_),
+            format_entry(record, &["ゆく"]),
             "行く;往く\tゆく\t66\tto go; to move/to leave"
         );
         // only readings
         assert_eq!(
-            format_line("あの /(adj-pn) that/EntL1/", &["あの"], 1 << 7),
+            format_entry("\tあの;あれ\t\tthat", &["あの"]),
             "\tあの\t\tthat"
-        );
-        // (P) in a gloss is not a marker
-        assert_eq!(
-            format_line(
-                "燐 [りん;リン] /(n) (uk) phosphorus (P)/EntL1555530X/",
-                &["燐"],
-                1 << 7
-            ),
-            "燐\tりん;リン\t\tphosphorus (P)"
         );
     }
 
     #[test]
     fn test_is_lone_kana_of_kanji_word() {
-        assert!(is_lone_kana_of_kanji_word("氏 [し] /(n) Mr/", "し"));
-        assert!(!is_lone_kana_of_kanji_word("氏 [し] /(n) Mr/", "氏"));
-        assert!(!is_lone_kana_of_kanji_word(
-            "為る [する] /(vs-i) (uk) to do/",
-            "す"
-        ));
-        assert!(!is_lone_kana_of_kanji_word("し /(prt) and/", "し"));
-        assert!(!is_lone_kana_of_kanji_word(
-            "島 [しま] /(n) island/",
-            "しま"
-        ));
+        let entry = |flags| Entry {
+            record: "",
+            type_: 1 << 7,
+            flags,
+        };
+        assert!(is_lone_kana_of_kanji_word(&entry(FLAG_KANJI_WORD), "し"));
+        assert!(!is_lone_kana_of_kanji_word(&entry(FLAG_KANJI_WORD), "氏"));
+        assert!(!is_lone_kana_of_kanji_word(&entry(FLAG_KANJI_WORD), "しま"));
+        assert!(!is_lone_kana_of_kanji_word(&entry(0), "し"));
     }
 
     #[test]
