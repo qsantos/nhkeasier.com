@@ -23,7 +23,6 @@
 <link rel="stylesheet" href="/static/bootstrap-5.3.3.trimmed.min.css">
 <link rel="stylesheet" href="/static/style.css?{{ crate::router::STATIC_VERSIONS.style }}">
 <link rel="alternate" href="/feed/" title="NHK Easier Stories" type="application/rss+xml">
-<script async src="/static/bootstrap-5.3.3.min.js"></script>
 </head>
 <body>
 
@@ -120,6 +119,46 @@ Something went terribly wrong, I guess.
 {%- endblock %}
 </main>
 <script>
+// open and close the menu on narrow screens, like Bootstrap's collapse (without loading its script)
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function(button) {
+    const target = document.querySelector(button.getAttribute('data-bs-target'));
+    function afterTransition(callback) {
+        const style = getComputedStyle(target);
+        const duration = parseFloat(style.transitionDuration) + parseFloat(style.transitionDelay);
+        setTimeout(callback, duration * 1000 + 5);
+    }
+    button.addEventListener('click', function() {
+        if (target.classList.contains('collapsing')) {
+            return;
+        }
+        if (target.classList.contains('show')) {
+            target.style.height = target.getBoundingClientRect().height + 'px';
+            target.offsetHeight;  // force a reflow, so that the height transition starts from there
+            target.classList.add('collapsing');
+            target.classList.remove('collapse', 'show');
+            button.classList.add('collapsed');
+            button.setAttribute('aria-expanded', 'false');
+            target.style.height = '';
+            afterTransition(function() {
+                target.classList.remove('collapsing');
+                target.classList.add('collapse');
+            });
+        } else {
+            target.classList.remove('collapse');
+            target.classList.add('collapsing');
+            target.style.height = 0;
+            button.classList.remove('collapsed');
+            button.setAttribute('aria-expanded', 'true');
+            afterTransition(function() {
+                target.classList.remove('collapsing');
+                target.classList.add('collapse', 'show');
+                target.style.height = '';
+            });
+            target.style.height = target.scrollHeight + 'px';
+        }
+    });
+});
+
 document.addEventListener('keydown', function(event) {
     const targetTagName = event.target.tagName;
     if (targetTagName == 'INPUT' || targetTagName == 'TEXTAREA') {
