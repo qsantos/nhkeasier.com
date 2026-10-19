@@ -519,11 +519,13 @@ async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoR
             .fetch_optional(&state.pool)
             .await
             .expect("failed to query database for specific story");
-    if let Some(id) = maybe_id {
+    let redirect = if let Some(id) = maybe_id {
         Redirect::to(&format!("/story/{id}/"))
     } else {
         Redirect::to("/")
-    }
+    };
+    // the redirect is different every time, so browsers and caches must not store it
+    ([(header::CACHE_CONTROL, "no-store")], redirect)
 }
 
 async fn deinflect() -> impl IntoResponse {
