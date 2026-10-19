@@ -36,7 +36,13 @@ pub struct StaticVersions {
 }
 
 pub static STATIC_VERSIONS: LazyLock<StaticVersions> = LazyLock::new(|| {
-    let read = |path| std::fs::read(path).expect("failed to read static file");
+    // NOTE: do not panic, since error pages need this too
+    let read = |path| {
+        std::fs::read(path).unwrap_or_else(|e| {
+            tracing::warn!("failed to read static file {path}: {e}");
+            Vec::new()
+        })
+    };
     StaticVersions {
         scripts: hash_contents(&[
             &read("nhkeasier/static/scripts.js"),
@@ -678,6 +684,13 @@ mod tests {
             voice: None,
             webpage: None,
         }
+    }
+
+    #[test]
+    fn test_handle_panic_is_not_cached() {
+        let response = handle_panic(Box::new(()));
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+        assert_eq!(response.headers()[header::CACHE_CONTROL], "no-store");
     }
 
     #[test]
