@@ -125,7 +125,8 @@ pub async fn make_epub<W: Write + Seek>(
     let now = Utc::now();
     let mut zip = ZipWriter::new(output);
 
-    zip_bytes(&mut zip, "mimetype", b"application/epub+zip");
+    // NOTE: the EPUB specification requires mimetype to be the first file, and not compressed
+    zip_bytes_store(&mut zip, "mimetype", b"application/epub+zip");
     zip_copy!(&mut zip, "META-INF/container.xml");
     zip_copy!(&mut zip, "META-INF/com.apple.ibooks.display-options.xml");
     let template = ContentOpfTemplate {
