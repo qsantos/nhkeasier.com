@@ -83,18 +83,23 @@ impl SubEdictCreator {
 /// のあ for 乃亜, 乃愛, etc.), and katakana names must not be part of a longer katakana word
 /// (e.g. ツカ in カムチャツカ).
 fn is_plausible_name(fragment: &str, katakana_runs: &HashSet<&str>) -> bool {
-    let mut chars = fragment.chars();
-    if chars.next().is_none() || chars.next().is_none() {
-        return false;
-    }
-    if fragment
-        .chars()
-        .any(|c| matches!(c, '\u{3040}'..='\u{309f}'))
-    {
+    if !could_be_name(fragment) {
         return false;
     }
     let is_katakana = fragment.chars().all(|c| matches!(c, 'ァ'..='ヺ' | 'ー'));
     !is_katakana || katakana_runs.contains(fragment)
+}
+
+/// The part of is_plausible_name that does not depend on the text: at least two characters, and
+/// no hiragana
+fn could_be_name(fragment: &str) -> bool {
+    let mut chars = fragment.chars();
+    if chars.next().is_none() || chars.next().is_none() {
+        return false;
+    }
+    !fragment
+        .chars()
+        .any(|c| matches!(c, '\u{3040}'..='\u{309f}'))
 }
 
 /// Whether a single kana matched the reading of a word usually written in kanji; for example, し
@@ -247,7 +252,10 @@ pub struct SubEnamdictCreator {
 
 impl SubEnamdictCreator {
     pub fn from_files() -> Result<Self, Error> {
-        SubEnamdictCreator::try_new(include_str!("../data/enamdict"), |data| Edict::parse(data))
+        // only index the names that can be looked up, to save memory
+        SubEnamdictCreator::try_new(include_str!("../data/enamdict"), |data| {
+            Edict::parse_with_key_filter(data, could_be_name)
+        })
     }
 
     /// Names are only looked up for strings that are not also words in EDICT, since those are

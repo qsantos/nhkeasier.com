@@ -17,6 +17,14 @@ pub struct Edict<'a> {
 
 impl<'a> Edict<'a> {
     pub fn parse(data: &'a str) -> Result<Self, Error> {
+        Self::parse_with_key_filter(data, |_| true)
+    }
+
+    /// Only index the entries at the keys for which keep_key returns true
+    pub fn parse_with_key_filter(
+        data: &'a str,
+        keep_key: impl Fn(&str) -> bool,
+    ) -> Result<Self, Error> {
         let mut entries = HashMap::default();
         // NOTE: skip(1) for header on first line
         for (lineno, line) in data.lines().enumerate().skip(1) {
@@ -45,8 +53,8 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: "] /",
                 })?;
-                insert_line_at_keys(&mut entries, writings.split(';'), line, type_);
-                insert_line_at_keys(&mut entries, readings.split(';'), line, type_);
+                insert_line_at_keys(&mut entries, &keep_key, writings.split(';'), line, type_);
+                insert_line_at_keys(&mut entries, &keep_key, readings.split(';'), line, type_);
             } else {
                 // only writings; for example:
                 // あやかし /(n) (1) ghost that appears at sea during a shipwreck/(2) something strange or suspicious/(3) idiot/fool/(4) noh mask for roles involving dead or ghost characters/EntL2143630X/
@@ -54,7 +62,7 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: " ",
                 })?;
-                insert_line_at_keys(&mut entries, writings.split(';'), line, type_);
+                insert_line_at_keys(&mut entries, &keep_key, writings.split(';'), line, type_);
             };
         }
         let entries = entries
@@ -98,6 +106,7 @@ fn type_from_glosses(glosses: &str) -> u32 {
 #[inline]
 fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
     entries: &mut HashMap<&'a str, Vec<EdictEntry<'a>>>,
+    keep_key: &impl Fn(&str) -> bool,
     keys: I,
     line: &'a str,
     type_: u32,
@@ -106,6 +115,9 @@ fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
         // strip common marker; for example “(P)”:
         // あの人(P);彼の人 [あのひと] /(pn) (1) (sometimes of one's spouse or partner) he/she/that person/(2) (arch) you/(P)/EntL1000440X/
         let key = key.split_once('(').map(|(key, _)| key).unwrap_or(key);
+        if !keep_key(key) {
+            continue;
+        }
         let entry = EdictEntry { line, type_ };
         match entries.entry(key) {
             Entry::Occupied(mut e) => e.get_mut().push(entry),
