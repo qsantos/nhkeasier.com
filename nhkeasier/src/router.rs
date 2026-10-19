@@ -20,6 +20,7 @@ use serde::Deserialize;
 use sqlx::{FromRow, sqlite::SqliteRow};
 use tower_http::catch_panic::CatchPanicLayer;
 use tower_http::services::{ServeDir, ServeFile};
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::trace::TraceLayer;
 
 use edict2::{DEINFLECT_DATA, SubEdictCreator, SubEnamdictCreator};
@@ -164,6 +165,8 @@ async fn handle_not_found() -> (StatusCode, Html<String>) {
 fn handle_panic(_err: Box<dyn Any + Send + 'static>) -> Response<Body> {
     (
         StatusCode::INTERNAL_SERVER_ERROR,
+        // do not let browsers or caches keep the error
+        [(header::CACHE_CONTROL, "no-store")],
         simple_message(
             "Server Error",
             "Sorry, something went very wrong on the server and we were not \
@@ -619,6 +622,13 @@ pub struct State {
 pub fn router(state: State) -> Router {
     let middleware = tower::ServiceBuilder::new().layer(CatchPanicLayer::custom(handle_panic));
 
+    // pages can change (e.g. new stories), but serving them for a few minutes is fine, and lets
+    // browsers and Apache (mod_cache) keep them; responses can override this
+    let cache_control = SetResponseHeaderLayer::if_not_present(
+        header::CACHE_CONTROL,
+        header::HeaderValue::from_static("public, max-age=300"),
+    );
+
     let tracing = TraceLayer::new_for_http()
         .make_span_with(tower_http::trace::DefaultMakeSpan::new().level(tracing::Level::INFO))
         .on_response(tower_http::trace::DefaultOnResponse::new().level(tracing::Level::INFO));
@@ -646,6 +656,7 @@ pub fn router(state: State) -> Router {
         .nest_service("/static", ServeDir::new("nhkeasier/static"))
         .fallback(handle_not_found)
         .layer(middleware)
+        .layer(cache_control)
         .layer(tracing)
         .with_state(Arc::new(state))
 }
