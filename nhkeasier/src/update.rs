@@ -236,22 +236,35 @@ async fn fetch_image_of_story(
 /// Widths of the WebP variants of story images, as referenced in widgets/story.html
 pub(crate) const IMAGE_VARIANT_WIDTHS: [u32; 2] = [640, 1280];
 
+/// Width of the JPEG variant of story images used in EPUBs, where WebP is not widely supported
+const EPUB_IMAGE_WIDTH: u32 = 640;
+
+fn image_stem(image: &str) -> &str {
+    std::path::Path::new(image)
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .unwrap_or(image)
+}
+
 /// The path of a WebP variant of a story image, relative to media/; for example:
 /// jpg/k10011826461000_fGr0GsM.jpg → webp/k10011826461000_fGr0GsM-640.webp
 pub(crate) fn image_variant(image: &str, width: u32) -> String {
-    let stem = std::path::Path::new(image)
-        .file_stem()
-        .and_then(|stem| stem.to_str())
-        .unwrap_or(image);
-    format!("webp/{stem}-{width}.webp")
+    format!("webp/{}-{width}.webp", image_stem(image))
 }
 
-/// Make the missing WebP variants of the image of a story (see image_variant), given as stored in
-/// the database (e.g. jpg/{news_id}.jpg)
+/// The path of the JPEG variant of a story image used in EPUBs, relative to media/; for example:
+/// jpg/k10011826461000_fGr0GsM.jpg → epub/k10011826461000_fGr0GsM.jpg
+pub(crate) fn epub_image(image: &str) -> String {
+    format!("epub/{}.jpg", image_stem(image))
+}
+
+/// Make the missing variants of the image of a story, given as stored in the database (e.g.
+/// jpg/{news_id}.jpg): WebP variants for pages (see image_variant), and a JPEG variant for EPUBs
+/// (see epub_image)
 ///
 /// Images are never upscaled: when the original is not wider than a variant, the variant is a hard
-/// link to the previous one. If making a variant fails, it is left missing, and pages fall back to
-/// the original (see Story::has_image_variants).
+/// link to the previous one (or to the original). If making a variant fails, it is left missing,
+/// and pages and EPUBs fall back to the original (see Story::has_image_variants).
 pub async fn make_image_variants(image: &str) {
     let original = format!("media/{image}");
     let output = Command::new("identify")
@@ -304,9 +317,49 @@ pub async fn make_image_variants(image: &str) {
             full_resolution_variant = Some(variant);
         }
     }
+
+    let variant = format!("media/{}", epub_image(image));
+    let exists = tokio::fs::try_exists(&variant)
+        .await
+        .expect("failed to check image variant");
+    if exists {
+        return;
+    }
+    tokio::fs::create_dir_all("media/epub")
+        .await
+        .expect("failed to create media/epub");
+    if original_width <= EPUB_IMAGE_WIDTH {
+        tracing::debug!("linking {variant} to {original}");
+        tokio::fs::hard_link(&original, &variant)
+            .await
+            .expect("failed to link image variant");
+    } else {
+        tracing::debug!("making image variant {variant}");
+        let resize = format!("{EPUB_IMAGE_WIDTH}x>");
+        let output = Command::new("convert")
+            .args([
+                &original,
+                "-resize",
+                &resize,
+                "-strip",
+                "-interlace",
+                "plane",
+                "-quality",
+                "80",
+                &variant,
+            ])
+            .output()
+            .await
+            .expect("failed to call convert");
+        if !output.status.success() {
+            tracing::warn!("failed to make image variant {variant}: {output:?}");
+            // do not leave a partial file
+            let _ = tokio::fs::remove_file(&variant).await;
+        }
+    }
 }
 
-/// Make the missing WebP variants of the images of all the stories
+/// Make the missing variants of the images of all the stories (see make_image_variants)
 pub async fn make_missing_image_variants(pool: &Pool<Sqlite>) {
     let images = sqlx::query_scalar!(
         r#"SELECT DISTINCT image AS "image!" FROM nhkeasier_story WHERE image != '' ORDER BY image"#

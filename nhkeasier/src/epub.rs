@@ -169,9 +169,14 @@ pub async fn make_epub<W: Write + Seek>(
             if image.is_empty() {
                 continue;
             }
-            let data = tokio::fs::read(format!("media/{image}"))
-                .await
-                .expect("failed to read image");
+            // prefer the smaller variant, if it was made
+            let variant = format!("media/{}", crate::update::epub_image(image));
+            let data = match tokio::fs::read(&variant).await {
+                Ok(data) => data,
+                Err(_) => tokio::fs::read(format!("media/{image}"))
+                    .await
+                    .expect("failed to read image"),
+            };
             let filename = format!("EPUB/images/{}.jpg", story.news_id);
             zip_bytes_store(&mut zip, &filename, &data);
         }

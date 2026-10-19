@@ -28,7 +28,7 @@ async fn update_job(pool: Pool<Sqlite>) {
 struct Args {
     #[arg(short, long, default_value = "127.0.0.1:3000")]
     listen_addr: SocketAddr,
-    /// Make the missing WebP variants of story images, then exit
+    /// Make the missing variants of story images (WebP for pages, JPEG for EPUBs), then exit
     #[arg(long)]
     make_image_variants: bool,
 }
