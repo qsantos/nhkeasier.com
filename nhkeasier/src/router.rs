@@ -380,17 +380,7 @@ async fn archive(
         .find(|story| story.image.is_some())
         .unwrap_or_else(|| stories.first().expect("day stories should not be empty"));
 
-    let titles = stories
-        .iter()
-        .map(|story| story.title)
-        .collect::<Vec<_>>()
-        .join("\n");
-    let contents = stories
-        .iter()
-        .flat_map(|story| story.content)
-        .collect::<Vec<_>>()
-        .join("\n");
-    let content = titles + "\n" + &contents;
+    let content = hoverable_text(&stories);
 
     let edict = state.sub_edict_creator.from(&content);
     let start = Instant::now();
@@ -473,11 +463,7 @@ async fn story(
     .await
     .expect("failed to query database for next story");
 
-    // the title is displayed and hoverable too
-    let content = match story.content {
-        Some(content) => format!("{}\n{}", story.title, content),
-        None => story.title.to_string(),
-    };
+    let content = hoverable_text(std::slice::from_ref(&story));
 
     let edict = state.sub_edict_creator.from(&content);
     let start = Instant::now();
@@ -511,6 +497,21 @@ async fn story(
     tracing::debug!("template story.html rendered in {:?}", start.elapsed());
 
     (StatusCode::OK, Html(html))
+}
+
+/// The text of the stories that can be hovered, to build their sub-dictionaries; the titles are
+/// displayed and hoverable too
+fn hoverable_text(stories: &[Story]) -> String {
+    let mut text = String::new();
+    for story in stories {
+        text.push_str(story.title);
+        text.push('\n');
+        if let Some(content) = story.content {
+            text.push_str(content);
+            text.push('\n');
+        }
+    }
+    text
 }
 
 async fn random(extract::State(state): extract::State<Arc<State>>) -> impl IntoResponse {
@@ -647,4 +648,35 @@ pub fn router(state: State) -> Router {
         .layer(middleware)
         .layer(tracing)
         .with_state(Arc::new(state))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn story<'a>(title: &'a str, content: Option<&'a str>) -> Story<'a> {
+        Story {
+            id: 0,
+            news_id: "",
+            published: NaiveDateTime::default(),
+            title_with_ruby: title,
+            title,
+            content_with_ruby: content,
+            content,
+            image: None,
+            voice: None,
+            webpage: None,
+        }
+    }
+
+    #[test]
+    fn test_hoverable_text() {
+        let stories = [story("題名", Some("本文")), story("見出し", None)];
+        let text = hoverable_text(&stories);
+        for part in ["題名", "本文", "見出し"] {
+            assert!(text.contains(part), "{part}");
+        }
+        // parts are separated, so that no fragment spans two of them
+        assert!(!text.contains("題名本文"));
+    }
 }
