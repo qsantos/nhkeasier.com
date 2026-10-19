@@ -638,7 +638,7 @@ pub fn router(state: State) -> Router {
             "/favicon.ico",
             ServeFile::new("nhkeasier/static/favicon.ico"),
         )
-        .route("/static/deinflect.dat", get(deinflect))
+        .route("/deinflect.dat", get(deinflect))
         .nest_service("/media", ServeDir::new("media"))
         .nest_service("/static", ServeDir::new("nhkeasier/static"))
         .fallback(handle_not_found)
