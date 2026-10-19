@@ -19,7 +19,8 @@
     <meta name="twitter:card" content="summary_large_image" />
 {%- endif %}
 <link rel="icon" href="/static/favicon.png">
-<link rel="stylesheet" href="/static/bootstrap-5.3.3.min.css">
+{#- only the parts of Bootstrap used by the templates; see trim-bootstrap #}
+<link rel="stylesheet" href="/static/bootstrap-5.3.3.trimmed.min.css">
 <link rel="stylesheet" href="/static/style.css?{{ crate::router::STATIC_VERSIONS.style }}">
 <link rel="alternate" href="/feed/" title="NHK Easier Stories" type="application/rss+xml">
 <script async src="/static/bootstrap-5.3.3.min.js"></script>

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Remove the rules of Bootstrap's stylesheet that the templates do not use; run again whenever the
+# templates or scripts.js start using other Bootstrap classes
+set -Eeuo pipefail
+cd "$(dirname "$0")"
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+cat > "$tmp/purgecss.config.cjs" <<CONFIG
+module.exports = {
+  content: ['nhkeasier/templates/web/**/*.html', 'nhkeasier/static/scripts.js'],
+  css: ['nhkeasier/static/bootstrap-5.3.3.min.css'],
+  // classes added at runtime by Bootstrap's collapse (navbar menu on narrow screens), and elements
+  // added implicitly by the browser (tables in widgets/story.html have no tbody nor tr)
+  safelist: ['show', 'collapsing', 'collapsed', 'tbody', 'tr'],
+  output: '$tmp',
+};
+CONFIG
+npx --yes purgecss@6.0.0 --config "$tmp/purgecss.config.cjs"
+mv "$tmp/bootstrap-5.3.3.min.css" nhkeasier/static/bootstrap-5.3.3.trimmed.min.css
