@@ -23,6 +23,10 @@ macro_rules! index {
     };
 }
 
+// NOTE: statics, rather than constants, so that the data is not duplicated where it is used
+static EDICT2_INDEX: Index<'static> = index!("edict2");
+static ENAMDICT_INDEX: Index<'static> = index!("enamdict");
+
 pub struct SubEdictCreator {
     edict2: Index<'static>,
     deinflector: Deinflector<'static>,
@@ -34,7 +38,7 @@ pub const DEINFLECT_DATA: &str = include_str!("../data/deinflect");
 impl SubEdictCreator {
     pub fn from_files() -> Result<Self, Error> {
         Ok(SubEdictCreator {
-            edict2: index!("edict2"),
+            edict2: EDICT2_INDEX,
             deinflector: Deinflector::parse(DEINFLECT_DATA)?,
         })
     }
@@ -171,7 +175,7 @@ pub struct SubEnamdictCreator {
 impl SubEnamdictCreator {
     pub fn from_files() -> Result<Self, Error> {
         Ok(SubEnamdictCreator {
-            enamdict: index!("enamdict"),
+            enamdict: ENAMDICT_INDEX,
         })
     }
 
