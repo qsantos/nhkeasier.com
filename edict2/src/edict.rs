@@ -1,5 +1,3 @@
-use std::collections::hash_map::Entry;
-
 use gxhash::HashMap;
 
 use crate::Error;
@@ -12,7 +10,11 @@ pub struct EdictEntry<'a> {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Edict<'a> {
-    entries: HashMap<&'a str, Box<[EdictEntry<'a>]>>,
+    // most keys have a single entry, so store all the entries in a single vector, rather than one
+    // allocation per key, to save memory
+    entries: Vec<EdictEntry<'a>>,
+    // for each key, the range of its entries in entries, as (start, len)
+    keys: HashMap<&'a str, (u32, u32)>,
 }
 
 impl<'a> Edict<'a> {
@@ -25,7 +27,9 @@ impl<'a> Edict<'a> {
         data: &'a str,
         keep_key: impl Fn(&str) -> bool,
     ) -> Result<Self, Error> {
-        let mut entries = HashMap::default();
+        // (key, entry) pairs; using a single vector rather than a vector per key avoids many small
+        // allocations, whose memory would not be returned to the system after parsing
+        let mut pairs = Vec::new();
         // NOTE: skip(1) for header on first line
         for (lineno, line) in data.lines().enumerate().skip(1) {
             let lineno = lineno + 1;
@@ -53,8 +57,8 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: "] /",
                 })?;
-                insert_line_at_keys(&mut entries, &keep_key, writings.split(';'), line, type_);
-                insert_line_at_keys(&mut entries, &keep_key, readings.split(';'), line, type_);
+                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), line, type_);
+                insert_line_at_keys(&mut pairs, &keep_key, readings.split(';'), line, type_);
             } else {
                 // only writings; for example:
                 // あやかし /(n) (1) ghost that appears at sea during a shipwreck/(2) something strange or suspicious/(3) idiot/fool/(4) noh mask for roles involving dead or ghost characters/EntL2143630X/
@@ -62,21 +66,28 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: " ",
                 })?;
-                insert_line_at_keys(&mut entries, &keep_key, writings.split(';'), line, type_);
+                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), line, type_);
             };
         }
-        let entries = entries
-            .into_iter()
-            .map(|(key, entries)| (key, entries.into_boxed_slice()))
-            .collect();
-        Ok(Edict { entries })
+        // group the entries by key, keeping the order of the lines
+        pairs.sort_by_key(|&(key, _)| key);
+        let mut entries = Vec::with_capacity(pairs.len());
+        let mut keys = HashMap::default();
+        keys.reserve(pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2).count());
+        for chunk in pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2) {
+            let start = entries.len() as u32;
+            entries.extend(chunk.iter().map(|(_, entry)| entry.clone()));
+            keys.insert(chunk[0].0, (start, chunk.len() as u32));
+        }
+        Ok(Edict { entries, keys })
     }
 
     /// Return the entries for the given word, along with the matching key in the dictionary
     pub fn lookup(&self, word: &str) -> Option<(&'a str, &[EdictEntry<'a>])> {
-        self.entries
-            .get_key_value(word)
-            .map(|(key, entries)| (*key, entries.as_ref()))
+        self.keys.get_key_value(word).map(|(key, &(start, len))| {
+            let start = start as usize;
+            (*key, &self.entries[start..start + len as usize])
+        })
     }
 }
 
@@ -105,7 +116,7 @@ fn type_from_glosses(glosses: &str) -> u32 {
 
 #[inline]
 fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
-    entries: &mut HashMap<&'a str, Vec<EdictEntry<'a>>>,
+    pairs: &mut Vec<(&'a str, EdictEntry<'a>)>,
     keep_key: &impl Fn(&str) -> bool,
     keys: I,
     line: &'a str,
@@ -118,10 +129,6 @@ fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
         if !keep_key(key) {
             continue;
         }
-        let entry = EdictEntry { line, type_ };
-        match entries.entry(key) {
-            Entry::Occupied(mut e) => e.get_mut().push(entry),
-            Entry::Vacant(e) => drop(e.insert(vec![entry])),
-        }
+        pairs.push((key, EdictEntry { line, type_ }));
     }
 }
