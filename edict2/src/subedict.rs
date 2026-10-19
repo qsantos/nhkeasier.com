@@ -51,9 +51,9 @@ impl SubEdictCreator {
             let mut matches = Vec::new();
             for candidate in candidates {
                 if let Some((key, entries)) = fields.edict2.lookup(&candidate.word as &str) {
-                    for entry in entries {
-                        if entry.type_ & candidate.type_ != 0 {
-                            matches.push((entry.line, key, entry.type_));
+                    for (line, type_) in entries {
+                        if type_ & candidate.type_ != 0 {
+                            matches.push((line, key, type_));
                         }
                     }
                 }
@@ -277,8 +277,8 @@ impl SubEnamdictCreator {
                     continue;
                 }
                 if let Some((key, entries)) = fields.enamdict.lookup(fragment as &str) {
-                    for entry in entries.iter() {
-                        matches.push((entry.line, key, 0));
+                    for (line, _) in entries {
+                        matches.push((line, key, 0));
                     }
                 }
             }

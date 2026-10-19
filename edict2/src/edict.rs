@@ -2,17 +2,21 @@ use gxhash::HashMap;
 
 use crate::Error;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
-pub struct EdictEntry<'a> {
-    pub line: &'a str,
-    pub type_: u32,
+/// A line of the dictionary, as a range of the data, and the type of the word (see
+/// type_from_glosses); this is more compact than a &str, to save memory
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+struct EdictEntry {
+    offset: u32,
+    len: u16,
+    type_: u8,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Edict<'a> {
+    data: &'a str,
     // most keys have a single entry, so store all the entries in a single vector, rather than one
     // allocation per key, to save memory
-    entries: Vec<EdictEntry<'a>>,
+    entries: Vec<EdictEntry>,
     // for each key, the range of its entries in entries, as (start, len)
     keys: HashMap<&'a str, (u32, u32)>,
 }
@@ -39,7 +43,7 @@ impl<'a> Edict<'a> {
             })?;
             // each sense may start with its own part-of-speech tags; for example:
             // たい /(aux-adj) (1) want to ... do something/…/(suf,adj-i) (3) very .../(P)/EntL2017560X/
-            let mut type_ = 1 << 7;
+            let mut type_: u8 = 1 << 7;
             for sense in meanings.split('/') {
                 if let Some(rest) = sense.strip_prefix('(') {
                     let (glosses, _) = rest.split_once(')').ok_or(Error::ParseError {
@@ -50,6 +54,16 @@ impl<'a> Edict<'a> {
                 }
             }
 
+            let entry = EdictEntry {
+                offset: u32::try_from(line.as_ptr() as usize - data.as_ptr() as usize)
+                    .expect("dictionary should be smaller than 4 GiB"),
+                len: u16::try_from(line.len()).map_err(|_| Error::ParseError {
+                    lineno,
+                    expected: "line shorter than 64 KiB",
+                })?,
+                type_,
+            };
+
             if let Some((writings, rest)) = line.split_once(" [") {
                 // both writings, and readings (within brackets); for example:
                 // 日本 [にほん(P);にっぽん] /(n) Japan/(P)/EntL1582710X/
@@ -57,8 +71,8 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: "] /",
                 })?;
-                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), line, type_);
-                insert_line_at_keys(&mut pairs, &keep_key, readings.split(';'), line, type_);
+                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), entry);
+                insert_line_at_keys(&mut pairs, &keep_key, readings.split(';'), entry);
             } else {
                 // only writings; for example:
                 // あやかし /(n) (1) ghost that appears at sea during a shipwreck/(2) something strange or suspicious/(3) idiot/fool/(4) noh mask for roles involving dead or ghost characters/EntL2143630X/
@@ -66,7 +80,7 @@ impl<'a> Edict<'a> {
                     lineno,
                     expected: " ",
                 })?;
-                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), line, type_);
+                insert_line_at_keys(&mut pairs, &keep_key, writings.split(';'), entry);
             };
         }
         // group the entries by key, keeping the order of the lines
@@ -76,22 +90,36 @@ impl<'a> Edict<'a> {
         keys.reserve(pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2).count());
         for chunk in pairs.chunk_by(|(key1, _), (key2, _)| key1 == key2) {
             let start = entries.len() as u32;
-            entries.extend(chunk.iter().map(|(_, entry)| entry.clone()));
+            entries.extend(chunk.iter().map(|&(_, entry)| entry));
             keys.insert(chunk[0].0, (start, chunk.len() as u32));
         }
-        Ok(Edict { entries, keys })
+        Ok(Edict {
+            data,
+            entries,
+            keys,
+        })
     }
 
     /// Return the entries for the given word, along with the matching key in the dictionary
-    pub fn lookup(&self, word: &str) -> Option<(&'a str, &[EdictEntry<'a>])> {
-        self.keys.get_key_value(word).map(|(key, &(start, len))| {
-            let start = start as usize;
-            (*key, &self.entries[start..start + len as usize])
-        })
+    pub fn lookup(
+        &self,
+        word: &str,
+    ) -> Option<(&'a str, impl Iterator<Item = (&'a str, u32)> + '_)> {
+        let (key, &(start, len)) = self.keys.get_key_value(word)?;
+        let start = start as usize;
+        let data = self.data;
+        let entries = self.entries[start..start + len as usize]
+            .iter()
+            .map(move |entry| {
+                let offset = entry.offset as usize;
+                let line = &data[offset..offset + entry.len as usize];
+                (line, u32::from(entry.type_))
+            });
+        Some((*key, entries))
     }
 }
 
-fn type_from_glosses(glosses: &str) -> u32 {
+fn type_from_glosses(glosses: &str) -> u8 {
     // the false positive are few enough that we just look in the line, without word boundaries
     let mut type_ = 1 << 7;
     for gloss in glosses.split(',') {
@@ -116,11 +144,10 @@ fn type_from_glosses(glosses: &str) -> u32 {
 
 #[inline]
 fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
-    pairs: &mut Vec<(&'a str, EdictEntry<'a>)>,
+    pairs: &mut Vec<(&'a str, EdictEntry)>,
     keep_key: &impl Fn(&str) -> bool,
     keys: I,
-    line: &'a str,
-    type_: u32,
+    entry: EdictEntry,
 ) {
     for key in keys {
         // strip common marker; for example “(P)”:
@@ -129,6 +156,6 @@ fn insert_line_at_keys<'a, I: Iterator<Item = &'a str>>(
         if !keep_key(key) {
             continue;
         }
-        pairs.push((key, EdictEntry { line, type_ }));
+        pairs.push((key, entry));
     }
 }
